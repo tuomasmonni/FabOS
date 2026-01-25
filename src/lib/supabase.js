@@ -190,9 +190,9 @@ export async function getVersion(versionId) {
   return data;
 }
 
-// Luo uusi versio
+// Luo uusi versio - käytetään suoraa REST API kutsua välttääksemme SDK:n AbortError ongelmat
 export async function createVersion(versionData) {
-  if (!supabaseData) {
+  if (!supabaseUrl || !supabaseAnonKey) {
     const newVersion = {
       id: `demo-new-${Date.now()}`,
       ...versionData,
@@ -206,20 +206,28 @@ export async function createVersion(versionData) {
     return newVersion;
   }
 
-  // Käytetään supabaseData-clientia joka ei tee auth session -tarkistuksia
-  // Tämä estää AbortError:it jotka tulevat auth-systeemistä
-  const { data, error } = await supabaseData
-    .from('versions')
-    .insert(versionData)
-    .select()
-    .single();
+  // Käytetään suoraa fetch-kutsua REST API:in ohittaen Supabase SDK:n
+  // SDK:n AbortController aiheuttaa ongelmia auth-systeemissä
+  const response = await fetch(`${supabaseUrl}/rest/v1/versions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseAnonKey,
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(versionData)
+  });
 
-  if (error) {
-    console.error('Version creation database error:', error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Version creation REST error:', response.status, errorData);
+    throw new Error(errorData.message || `HTTP ${response.status}`);
   }
 
-  return data;
+  const data = await response.json();
+  // REST API palauttaa arrayn kun käytetään Prefer: return=representation
+  return Array.isArray(data) ? data[0] : data;
 }
 
 // Äänestä versiota
