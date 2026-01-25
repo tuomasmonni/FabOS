@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout 3 tail:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(vercel:*)",
+      "Bash(npx vercel --prod)",
+      "Bash(npx vercel:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(npm run votes-server:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(curl:*)",
+      "Bash(echo \"# Supabase \\(optional - demo mode works without these\\)\nVITE_SUPABASE_URL=https://your-project.supabase.co\nVITE_SUPABASE_ANON_KEY=your-anon-key\n\n# Anthropic API \\(required for AI assistant\\)\nANTHROPIC_API_KEY=your-api-key\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nImprove text contrast in PipeBendingApp\n\n- Change text-slate-400/500 to text-slate-300/400 for better visibility\n- Affects labels: Ulkohalkaisija, Seinämä, Materiaali, Kulma, etc.\n- Improves contrast on dark backgrounds \\(bg-slate-800/900\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git init:*)"
+    ]
+  }
+}
