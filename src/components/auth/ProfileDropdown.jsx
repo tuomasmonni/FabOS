@@ -9,7 +9,14 @@ export default function ProfileDropdown() {
   const { user, profile, signOut, openLoginModal, isAuthenticated, isDemo } = useAuth();
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
   const dropdownRef = useRef(null);
+
+  // Näytä ilmoitus
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const isLegacy = theme === THEMES.LEGACY;
 
@@ -120,8 +127,7 @@ export default function ProfileDropdown() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigoi profiilisivulle
-                console.log('Profiili clicked');
+                showNotification('Profiilisivu tulossa pian!', 'info');
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >
@@ -134,8 +140,7 @@ export default function ProfileDropdown() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigoi omiin versioihin
-                console.log('Omat versiot clicked');
+                showNotification('Omat versiot -sivu tulossa pian!', 'info');
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >
@@ -148,8 +153,7 @@ export default function ProfileDropdown() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigoi luonnoksiin
-                console.log('Luonnokset clicked');
+                showNotification('Luonnokset-sivu tulossa pian!', 'info');
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >
@@ -163,9 +167,10 @@ export default function ProfileDropdown() {
           {/* Kirjaudu ulos */}
           <div className={`py-1 border-t ${styles.divider}`}>
             <button
-              onClick={() => {
+              onClick={async () => {
                 setIsOpen(false);
-                signOut();
+                await signOut();
+                showNotification('Kirjauduttu ulos', 'success');
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >
@@ -175,6 +180,26 @@ export default function ProfileDropdown() {
               Kirjaudu ulos
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Ilmoitus-toast */}
+      {notification && (
+        <div className={`fixed bottom-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-up ${
+          notification.type === 'success'
+            ? isLegacy ? 'bg-emerald-500/90 text-white' : 'bg-green-500 text-white'
+            : isLegacy ? 'bg-slate-700 text-white' : 'bg-gray-800 text-white'
+        }`}>
+          {notification.type === 'success' ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          <span className="text-sm font-medium">{notification.message}</span>
         </div>
       )}
     </div>
