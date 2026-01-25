@@ -1,0 +1,48 @@
+{
+  "owner": {
+    "values": {
+      "right": 55,
+      "wrong": 32
+    },
+    "speed": {
+      "tortoise": 28,
+      "rocket": 51
+    },
+    "vibe": {
+      "serious": 38,
+      "chaotic": 41
+    }
+  },
+  "staff": {
+    "remote": {
+      "full-remote": 67,
+      "hybrid": 43
+    },
+    "profit-sharing": {
+      "equal-share": 52,
+      "performance": 38
+    },
+    "workweek": {
+      "four-days": 71,
+      "flexible": 29
+    }
+  },
+  "customer": {
+    "project-manager": {
+      "fire": 89,
+      "keep": 34
+    },
+    "bureaucracy": {
+      "more": 12,
+      "less": 78
+    },
+    "delivery": {
+      "honest": 65,
+      "optimistic": 45
+    },
+    "support": {
+      "ai": 52,
+      "human": 48
+    }
+  }
+}
