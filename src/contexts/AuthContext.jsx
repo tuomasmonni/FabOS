@@ -107,6 +107,45 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Sähköposti + salasana -kirjautuminen
+  const signInWithPassword = async (email, password) => {
+    if (!supabase) {
+      return { error: { message: 'Supabase ei ole konfiguroitu. Sovellus toimii demo-tilassa.' } };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      return { data, error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  // Rekisteröidy sähköpostilla ja salasanalla
+  const signUp = async (email, password) => {
+    if (!supabase) {
+      return { error: { message: 'Supabase ei ole konfiguroitu. Sovellus toimii demo-tilassa.' } };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+
+      return { data, error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   // Kirjaudu ulos
   const signOut = async () => {
     if (!supabase) return;
@@ -223,6 +262,8 @@ export function AuthProvider({ children }) {
 
     // Auth-funktiot
     signInWithMagicLink,
+    signInWithPassword,
+    signUp,
     signOut,
 
     // Profiili-funktiot

@@ -19,7 +19,14 @@
       "Bash(echo \"# Supabase \\(optional - demo mode works without these\\)\nVITE_SUPABASE_URL=https://your-project.supabase.co\nVITE_SUPABASE_ANON_KEY=your-anon-key\n\n# Anthropic API \\(required for AI assistant\\)\nANTHROPIC_API_KEY=your-api-key\")",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nImprove text contrast in PipeBendingApp\n\n- Change text-slate-400/500 to text-slate-300/400 for better visibility\n- Affects labels: Ulkohalkaisija, Seinämä, Materiaali, Kulma, etc.\n- Improves contrast on dark backgrounds \\(bg-slate-800/900\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(gh auth status:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git remote:*)"
     ]
   }
 }
