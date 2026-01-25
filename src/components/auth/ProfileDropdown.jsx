@@ -169,8 +169,20 @@ export default function ProfileDropdown() {
             <button
               onClick={async () => {
                 setIsOpen(false);
+                // Näytä ilmoitus ensin, sitten kirjaudu ulos
+                // Käytetään globaalia ilmoitusta joka ei katoa komponentin uudelleenrenderöinnissä
+                const toast = document.createElement('div');
+                toast.className = 'fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 bg-green-500 text-white animate-slide-up';
+                toast.innerHTML = `
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-sm font-medium">Kirjauduttu ulos</span>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+
                 await signOut();
-                showNotification('Kirjauduttu ulos', 'success');
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >

@@ -152,11 +152,19 @@ export function AuthProvider({ children }) {
     if (!supabase) return;
 
     try {
-      await supabase.auth.signOut();
+      // Käytetään scope: 'local' välttääksemme AbortError-ongelmia
+      // ja varmistetaan että vain nykyinen selain kirjautuu ulos
+      await supabase.auth.signOut({ scope: 'local' });
       setUser(null);
       setProfile(null);
     } catch (error) {
-      console.error('Sign out error:', error);
+      // Ohitetaan AbortError, joka on yleinen Supabase SDK:n ongelma
+      if (error.name !== 'AbortError') {
+        console.error('Sign out error:', error);
+      }
+      // Varmistetaan silti että tila nollataan
+      setUser(null);
+      setProfile(null);
     }
   };
 
