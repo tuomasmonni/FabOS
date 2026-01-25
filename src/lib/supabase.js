@@ -10,8 +10,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase credentials not found. Running in demo mode.');
 }
 
+// Pää-client auth-toiminnoille
 export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+// Erillinen client tietokanta-operaatioille (ei auth-häiriöitä)
+// Tämä estää auth session checkin AbortError:ien vaikuttamasta data-operaatioihin
+export const supabaseData = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    })
   : null;
 
 // ============================================================================
@@ -141,12 +154,12 @@ export async function getModule(moduleId) {
 
 // Hae moduulin versiot
 export async function getVersions(moduleId, filter = 'all') {
-  if (!supabase) {
+  if (!supabaseData) {
     if (filter === 'all') return demoVersions;
     return demoVersions.filter(v => v.version_type === filter);
   }
 
-  let query = supabase
+  let query = supabaseData
     .from('versions')
     .select('*')
     .eq('module_id', moduleId)
@@ -163,11 +176,11 @@ export async function getVersions(moduleId, filter = 'all') {
 
 // Hae yksittäinen versio
 export async function getVersion(versionId) {
-  if (!supabase) {
+  if (!supabaseData) {
     return demoVersions.find(v => v.id === versionId) || demoVersions[0];
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseData
     .from('versions')
     .select('*')
     .eq('id', versionId)
@@ -179,7 +192,7 @@ export async function getVersion(versionId) {
 
 // Luo uusi versio
 export async function createVersion(versionData) {
-  if (!supabase) {
+  if (!supabaseData) {
     const newVersion = {
       id: `demo-new-${Date.now()}`,
       ...versionData,
@@ -193,45 +206,25 @@ export async function createVersion(versionData) {
     return newVersion;
   }
 
-  // Retry-logiikka AbortError:ien varalta
-  const maxRetries = 3;
-  let lastError = null;
+  // Käytetään supabaseData-clientia joka ei tee auth session -tarkistuksia
+  // Tämä estää AbortError:it jotka tulevat auth-systeemistä
+  const { data, error } = await supabaseData
+    .from('versions')
+    .insert(versionData)
+    .select()
+    .single();
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const { data, error } = await supabase
-        .from('versions')
-        .insert(versionData)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-      return data;
-    } catch (err) {
-      lastError = err;
-      console.warn(`Version creation attempt ${attempt} failed:`, err.message || err);
-
-      // Jos AbortError, yritä uudelleen pienen viiveen jälkeen
-      if (err.name === 'AbortError' && attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
-        continue;
-      }
-
-      // Muut virheet heitetään heti
-      if (err.name !== 'AbortError') {
-        throw err;
-      }
-    }
+  if (error) {
+    console.error('Version creation database error:', error);
+    throw error;
   }
 
-  throw lastError;
+  return data;
 }
 
 // Äänestä versiota
 export async function voteVersion(versionId, voteType, userFingerprint) {
-  if (!supabase) {
+  if (!supabaseData) {
     const version = demoVersions.find(v => v.id === versionId);
     if (version) {
       if (voteType === 'up') version.votes_up++;
@@ -240,7 +233,7 @@ export async function voteVersion(versionId, voteType, userFingerprint) {
     return { success: true };
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseData
     .from('votes')
     .insert({
       version_id: versionId,
@@ -260,24 +253,24 @@ export async function voteVersion(versionId, voteType, userFingerprint) {
 
 // Kasvata katselukertoja
 export async function incrementViewCount(versionId) {
-  if (!supabase) {
+  if (!supabaseData) {
     const version = demoVersions.find(v => v.id === versionId);
     if (version) version.view_count++;
     return;
   }
 
-  await supabase.rpc('increment_view_count', { version_id: versionId });
+  await supabaseData.rpc('increment_view_count', { version_id: versionId });
 }
 
 // Kasvata testikertoja
 export async function incrementTestCount(versionId) {
-  if (!supabase) {
+  if (!supabaseData) {
     const version = demoVersions.find(v => v.id === versionId);
     if (version) version.test_count++;
     return;
   }
 
-  await supabase.rpc('increment_test_count', { version_id: versionId });
+  await supabaseData.rpc('increment_test_count', { version_id: versionId });
 }
 
 // ============================================================================
@@ -286,11 +279,11 @@ export async function incrementTestCount(versionId) {
 
 // Luo uusi keskustelu
 export async function createConversation(moduleId, userFingerprint) {
-  if (!supabase) {
+  if (!supabaseData) {
     return { id: `demo-conv-${Date.now()}`, module_id: moduleId };
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseData
     .from('conversations')
     .insert({
       module_id: moduleId,
@@ -305,11 +298,11 @@ export async function createConversation(moduleId, userFingerprint) {
 
 // Lisää viesti keskusteluun
 export async function addMessage(conversationId, role, content, proposedConfig = null) {
-  if (!supabase) {
+  if (!supabaseData) {
     return { id: `demo-msg-${Date.now()}`, role, content, proposed_config: proposedConfig };
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseData
     .from('messages')
     .insert({
       conversation_id: conversationId,
@@ -326,11 +319,11 @@ export async function addMessage(conversationId, role, content, proposedConfig =
 
 // Hae keskustelun viestit
 export async function getConversationMessages(conversationId) {
-  if (!supabase) {
+  if (!supabaseData) {
     return [];
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseData
     .from('messages')
     .select('*')
     .eq('conversation_id', conversationId)
