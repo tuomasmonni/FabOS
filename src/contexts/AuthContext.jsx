@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showNicknameModal, setShowNicknameModal] = useState(false);
+  const [showProfilePage, setShowProfilePage] = useState(false);
 
   useEffect(() => {
     // Tarkista nykyinen sessio
@@ -243,11 +244,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Modaalien hallinta
+  // Modaalien ja sivujen hallinta
   const openLoginModal = () => setShowLoginModal(true);
   const closeLoginModal = () => setShowLoginModal(false);
   const openNicknameModal = () => setShowNicknameModal(true);
   const closeNicknameModal = () => setShowNicknameModal(false);
+  const openProfilePage = () => setShowProfilePage(true);
+  const closeProfilePage = () => setShowProfilePage(false);
 
   const value = {
     // Tila
@@ -272,13 +275,16 @@ export function AuthProvider({ children }) {
     checkNicknameAvailable,
     refreshProfile: () => user && fetchProfile(user.id),
 
-    // Modaalit
+    // Modaalit ja sivut
     showLoginModal,
     showNicknameModal,
+    showProfilePage,
     openLoginModal,
     closeLoginModal,
     openNicknameModal,
-    closeNicknameModal
+    closeNicknameModal,
+    openProfilePage,
+    closeProfilePage
   };
 
   return (

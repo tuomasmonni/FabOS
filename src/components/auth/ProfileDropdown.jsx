@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, THEMES } from '../../contexts/ThemeContext';
 
 export default function ProfileDropdown() {
-  const { user, profile, signOut, openLoginModal, isAuthenticated, isDemo } = useAuth();
+  const { user, profile, signOut, openLoginModal, openProfilePage, isAuthenticated, isDemo } = useAuth();
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -127,7 +127,7 @@ export default function ProfileDropdown() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                showNotification('Profiilisivu tulossa pian!', 'info');
+                openProfilePage();
               }}
               className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors ${styles.item}`}
             >

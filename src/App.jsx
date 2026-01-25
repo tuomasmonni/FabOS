@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme, THEMES } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
-import { LoginModal, NicknameSetup } from './components/auth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LoginModal, NicknameSetup, ProfilePage } from './components/auth';
 import ThemeSelectorPage from './ThemeSelector';
 import VersionSelector from './VersionSelector';
 import './index.css';
@@ -50,6 +50,7 @@ const InitialLoadingScreen = () => (
 // Main app content that uses theme
 function AppContent() {
   const { theme, isLoading, selectTheme } = useTheme();
+  const { showProfilePage, closeProfilePage } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [showSelector, setShowSelector] = useState(true);
 
@@ -96,6 +97,11 @@ function AppContent() {
 
   const isLegacy = theme === THEMES.LEGACY;
   const LoadingScreen = isLegacy ? LoadingScreenLegacy : LoadingScreenFabOS;
+
+  // Show profile page if requested
+  if (showProfilePage) {
+    return <ProfilePage onClose={closeProfilePage} />;
+  }
 
   // Show version selector
   if (showSelector) {
