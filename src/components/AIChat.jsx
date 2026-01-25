@@ -254,8 +254,7 @@ export default function AIChat({
         version_number: `1.0.0-alpha-${Date.now().toString(36)}`,
         config: pendingVersion.config,
         version_type: 'experimental',
-        author_name: 'Käyttäjä',
-        user_fingerprint: fingerprint
+        creator_fingerprint: fingerprint
       });
 
       // Lisää onnistumisviesti

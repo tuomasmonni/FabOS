@@ -62,10 +62,10 @@ function VersionCard({ version, isFabOS, onSelect, onVote, isSelected }) {
         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
           isFabOS ? 'bg-gray-200 text-gray-600' : 'bg-slate-700 text-slate-300'
         }`}>
-          {version.author_name?.[0]?.toUpperCase() || '?'}
+          {(version.author_name || version.creator_fingerprint)?.[0]?.toUpperCase() || '?'}
         </div>
         <span className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
-          {version.author_name || 'Tuntematon'}
+          {version.author_name || version.creator_fingerprint || 'Tuntematon'}
         </span>
       </div>
 
@@ -161,11 +161,11 @@ function VersionDetail({ version, isFabOS, onTest, onClose }) {
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
             isFabOS ? 'bg-gray-200 text-gray-600' : 'bg-slate-700 text-slate-300'
           }`}>
-            {version.author_name?.[0]?.toUpperCase() || '?'}
+            {(version.author_name || version.creator_fingerprint)?.[0]?.toUpperCase() || '?'}
           </div>
           <div>
             <p className={`text-sm font-medium ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
-              {version.author_name || 'Tuntematon'}
+              {version.author_name || version.creator_fingerprint || 'Tuntematon'}
             </p>
             <p className={`text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
               {new Date(version.created_at).toLocaleDateString('fi-FI', {
