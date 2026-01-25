@@ -1187,6 +1187,35 @@ const PipeBendingApp = ({ onBack }) => {
   const [showAIChat, setShowAIChat] = useState(false);
   const [showVersionGallery, setShowVersionGallery] = useState(false);
   const [currentVersionId, setCurrentVersionId] = useState(null);
+  const [currentVersionName, setCurrentVersionName] = useState('Perusversio');
+
+  // Module configuration from selected version
+  const [moduleConfig, setModuleConfig] = useState({
+    features: {
+      '3dVisualization': true,
+      multipleBends: true,
+      maxBends: 10,
+      exportDXF: false,
+      autoRotate: false
+    },
+    ui: {
+      theme: 'default',
+      showGrid: true,
+      showAxes: true
+    },
+    defaults: {
+      pipeDiameter: 25,
+      wallThickness: 2,
+      material: 'steel'
+    },
+    limits: {
+      minDiameter: 10,
+      maxDiameter: 100,
+      minRadius: 20,
+      maxRadius: 500
+    },
+    materials: ['steel', 'stainless', 'aluminum', 'copper']
+  });
 
   // Lataa parametrit localStoragesta
   const [params, setParams] = useState(() => {
@@ -1202,15 +1231,43 @@ const PipeBendingApp = ({ onBack }) => {
   // Handle version selection from gallery
   const handleVersionSelect = (version) => {
     setCurrentVersionId(version.id);
-    // TODO: Apply version config to params
-    console.log('Selected version:', version);
+    setCurrentVersionName(version.name);
+
+    // Apply version config if available
+    if (version.config) {
+      const config = version.config;
+
+      // Update module configuration
+      setModuleConfig(prev => ({
+        features: { ...prev.features, ...config.features },
+        ui: { ...prev.ui, ...config.ui },
+        defaults: { ...prev.defaults, ...config.defaults },
+        limits: { ...prev.limits, ...config.limits },
+        materials: config.materials || prev.materials
+      }));
+
+      // Apply defaults to selected size if specified
+      if (config.defaults?.pipeDiameter) {
+        const newSize = config.defaults.pipeDiameter;
+        if (params[newSize]) {
+          setSelectedSize(newSize);
+        }
+      }
+
+      console.log('Applied version config:', config);
+    }
+
     setShowVersionGallery(false);
   };
 
   // Handle new version created from AI chat
   const handleVersionCreated = (newVersion) => {
     console.log('New version created:', newVersion);
-    // Optionally open gallery to see the new version
+
+    // Apply the new version's config
+    if (newVersion.config) {
+      handleVersionSelect(newVersion);
+    }
   };
 
   return (
@@ -1258,6 +1315,16 @@ const PipeBendingApp = ({ onBack }) => {
 
           <div className="flex items-center gap-4">
             {/* AI Platform Buttons */}
+            {/* Current version indicator */}
+            <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+              isFabOS
+                ? 'bg-slate-700/50 text-slate-300'
+                : 'bg-slate-800/50 text-slate-400'
+            }`}>
+              <span className="opacity-60">Versio:</span>{' '}
+              <span className="font-semibold">{currentVersionName}</span>
+            </div>
+
             <div className="flex gap-2">
               <button
                 onClick={() => setShowVersionGallery(true)}
@@ -1349,7 +1416,7 @@ const PipeBendingApp = ({ onBack }) => {
           }`}>
             <AIChat
               moduleId="pipe-bending"
-              currentConfig={params}
+              currentConfig={moduleConfig}
               isFabOS={isFabOS}
               onVersionCreated={handleVersionCreated}
               onClose={() => setShowAIChat(false)}
