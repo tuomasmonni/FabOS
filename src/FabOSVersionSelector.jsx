@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import { ProfileDropdown } from './components/auth';
 
 const publicVersions = [
   {
@@ -138,6 +139,7 @@ const FabOSVersionSelector = ({ onSelect }) => {
             {/* Right side */}
             <div className="flex items-center gap-4">
               <ThemeSwitcher variant="dark" />
+              <ProfileDropdown />
             </div>
           </div>
         </div>

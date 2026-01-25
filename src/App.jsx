@@ -1,5 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme, THEMES } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { LoginModal, NicknameSetup } from './components/auth';
 import ThemeSelectorPage from './ThemeSelector';
 import VersionSelector from './VersionSelector';
 import './index.css';
@@ -127,7 +129,12 @@ function AppContent() {
 const App = () => {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+        {/* Auth modaalit - aina renderöitynä */}
+        <LoginModal />
+        <NicknameSetup />
+      </AuthProvider>
     </ThemeProvider>
   );
 };
