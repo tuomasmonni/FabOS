@@ -193,14 +193,40 @@ export async function createVersion(versionData) {
     return newVersion;
   }
 
-  const { data, error } = await supabase
-    .from('versions')
-    .insert(versionData)
-    .select()
-    .single();
+  // Retry-logiikka AbortError:ien varalta
+  const maxRetries = 3;
+  let lastError = null;
 
-  if (error) throw error;
-  return data;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from('versions')
+        .insert(versionData)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+      return data;
+    } catch (err) {
+      lastError = err;
+      console.warn(`Version creation attempt ${attempt} failed:`, err.message || err);
+
+      // Jos AbortError, yritä uudelleen pienen viiveen jälkeen
+      if (err.name === 'AbortError' && attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+        continue;
+      }
+
+      // Muut virheet heitetään heti
+      if (err.name !== 'AbortError') {
+        throw err;
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 // Äänestä versiota
