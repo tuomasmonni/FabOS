@@ -1038,14 +1038,18 @@ export default function StairConfigurator({ onBack }) {
         {/* 3D Näkymä */}
         <div ref={containerRef} className="flex-1 relative">
           {/* Näkymäpainikkeet */}
-          <div className="absolute top-4 right-4 bg-slate-800/90 backdrop-blur p-2 rounded-xl flex flex-col gap-2 z-10 border border-slate-700/50">
-            <div className="text-xs text-slate-500 text-center mb-1">Näkymä</div>
+          <div className={`absolute top-4 right-4 backdrop-blur p-2 rounded-xl flex flex-col gap-2 z-10 border ${
+            isFabOS
+              ? 'bg-white/90 border-gray-200'
+              : 'bg-slate-800/90 border-slate-700/50'
+          }`}>
+            <div className={`text-xs text-center mb-1 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>Näkymä</div>
             <button
               onClick={() => setView('iso')}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 activeView === 'iso'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                  : isFabOS ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
               title="Isometrinen näkymä"
             >
@@ -1055,8 +1059,8 @@ export default function StairConfigurator({ onBack }) {
               onClick={() => setView('front')}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 activeView === 'front'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                  : isFabOS ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
               title="Edestä"
             >
@@ -1066,8 +1070,8 @@ export default function StairConfigurator({ onBack }) {
               onClick={() => setView('right')}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 activeView === 'right'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                  : isFabOS ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
               title="Oikealta"
             >
@@ -1077,8 +1081,8 @@ export default function StairConfigurator({ onBack }) {
               onClick={() => setView('top')}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                 activeView === 'top'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                  : isFabOS ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
               title="Ylhäältä"
             >
@@ -1086,49 +1090,73 @@ export default function StairConfigurator({ onBack }) {
             </button>
           </div>
 
-          <div className="absolute bottom-4 left-4 bg-slate-800/80 backdrop-blur p-2 rounded-lg text-xs text-slate-400 border border-slate-700/50">
+          <div className={`absolute bottom-4 left-4 backdrop-blur p-2 rounded-lg text-xs border ${
+            isFabOS
+              ? 'bg-white/80 border-gray-200 text-gray-500'
+              : 'bg-slate-800/80 border-slate-700/50 text-slate-400'
+          }`}>
             Vasen: Pyöritä | Oikea: Panoroi | Rulla: Zoomaa
           </div>
 
-          <div className="absolute top-4 left-4 bg-slate-800/90 backdrop-blur p-4 rounded-xl text-sm space-y-1 border border-slate-700/50">
-            <div className="text-indigo-400 font-semibold border-b border-slate-700 pb-1 mb-2">Lasketut mitat</div>
-            <div>Kokonaiskorkeus: <span className="text-emerald-400 font-mono">{kokonaisKorkeus} mm</span></div>
-            <div>Kokonaispituus: <span className="text-emerald-400 font-mono">{kokonaisPituus} mm</span></div>
-            <div>Sivupalkin pituus: <span className="text-emerald-400 font-mono">{Math.round(stringerLength)} mm</span></div>
-            <div>Kaltevuus: <span className={`font-mono ${kaltevuus > 45 ? 'text-amber-400' : 'text-emerald-400'}`}>{kaltevuus.toFixed(1)}°</span></div>
+          <div className={`absolute top-4 left-4 backdrop-blur p-4 rounded-xl text-sm space-y-1 border ${
+            isFabOS
+              ? 'bg-white/90 border-gray-200'
+              : 'bg-slate-800/90 border-slate-700/50'
+          }`}>
+            <div className={`font-semibold pb-1 mb-2 border-b ${
+              isFabOS
+                ? 'text-[#FF6B35] border-gray-200'
+                : 'text-indigo-400 border-slate-700'
+            }`}>Lasketut mitat</div>
+            <div className={isFabOS ? 'text-gray-700' : ''}>Kokonaiskorkeus: <span className={`font-mono ${isFabOS ? 'text-[#10B981]' : 'text-emerald-400'}`}>{kokonaisKorkeus} mm</span></div>
+            <div className={isFabOS ? 'text-gray-700' : ''}>Kokonaispituus: <span className={`font-mono ${isFabOS ? 'text-[#10B981]' : 'text-emerald-400'}`}>{kokonaisPituus} mm</span></div>
+            <div className={isFabOS ? 'text-gray-700' : ''}>Sivupalkin pituus: <span className={`font-mono ${isFabOS ? 'text-[#10B981]' : 'text-emerald-400'}`}>{Math.round(stringerLength)} mm</span></div>
+            <div className={isFabOS ? 'text-gray-700' : ''}>Kaltevuus: <span className={`font-mono ${kaltevuus > 45 ? 'text-amber-500' : isFabOS ? 'text-[#10B981]' : 'text-emerald-400'}`}>{kaltevuus.toFixed(1)}°</span></div>
           </div>
         </div>
 
         {/* Parametrit */}
-        <div className="w-80 bg-slate-800/50 p-4 overflow-y-auto border-l border-slate-700/50">
-          <h2 className="text-lg font-semibold text-indigo-400 mb-4 border-b border-slate-700 pb-2">Parametrit</h2>
+        <div className={`w-80 p-4 overflow-y-auto border-l ${
+          isFabOS
+            ? 'bg-white border-gray-200'
+            : 'bg-slate-800/50 border-slate-700/50'
+        }`}>
+          <h2 className={`text-lg font-semibold mb-4 pb-2 border-b ${
+            isFabOS
+              ? 'text-[#FF6B35] border-gray-200'
+              : 'text-indigo-400 border-slate-700'
+          }`}>Parametrit</h2>
 
           {/* Perusparametrit */}
-          <Section title="PORTAAN MITAT">
-            <Slider label="Askelmien määrä" value={params.askelmia} min={3} max={15} step={1} onChange={v => updateParam('askelmia', v)} />
-            <Slider label="Askelnousu" value={params.askelnousu} min={150} max={210} step={5} unit="mm" onChange={v => updateParam('askelnousu', v)} />
-            <Slider label="Askelman leveys" value={params.askelmaLeveys} min={800} max={1400} step={100} unit="mm" onChange={v => updateParam('askelmaLeveys', v)} />
+          <Section title="PORTAAN MITAT" isFabOS={isFabOS}>
+            <Slider label="Askelmien määrä" value={params.askelmia} min={3} max={15} step={1} onChange={v => updateParam('askelmia', v)} isFabOS={isFabOS} />
+            <Slider label="Askelnousu" value={params.askelnousu} min={150} max={210} step={5} unit="mm" onChange={v => updateParam('askelnousu', v)} isFabOS={isFabOS} />
+            <Slider label="Askelman leveys" value={params.askelmaLeveys} min={800} max={1400} step={100} unit="mm" onChange={v => updateParam('askelmaLeveys', v)} isFabOS={isFabOS} />
           </Section>
 
           {/* Sivupalkit */}
-          <Section title="SIVUPALKIT RHS">
-            <div className="bg-indigo-500/10 border border-indigo-500/30 rounded p-2 mb-3 text-xs text-center text-indigo-300">
+          <Section title="SIVUPALKIT RHS" isFabOS={isFabOS}>
+            <div className={`rounded p-2 mb-3 text-xs text-center ${
+              isFabOS
+                ? 'bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-[#FF6B35]'
+                : 'bg-indigo-500/10 border border-indigo-500/30 text-indigo-300'
+            }`}>
               RHS {params.sivupalkkiH}×{params.sivupalkkiW}×{params.sivupalkkiT}
             </div>
-            <Slider label="Korkeus (H)" value={params.sivupalkkiH} min={100} max={200} step={10} unit="mm" onChange={v => updateParam('sivupalkkiH', v)} />
-            <Slider label="Leveys (W)" value={params.sivupalkkiW} min={40} max={80} step={10} unit="mm" onChange={v => updateParam('sivupalkkiW', v)} />
-            <Slider label="Seinämä (T)" value={params.sivupalkkiT} min={3} max={8} step={1} unit="mm" onChange={v => updateParam('sivupalkkiT', v)} />
+            <Slider label="Korkeus (H)" value={params.sivupalkkiH} min={100} max={200} step={10} unit="mm" onChange={v => updateParam('sivupalkkiH', v)} isFabOS={isFabOS} />
+            <Slider label="Leveys (W)" value={params.sivupalkkiW} min={40} max={80} step={10} unit="mm" onChange={v => updateParam('sivupalkkiW', v)} isFabOS={isFabOS} />
+            <Slider label="Seinämä (T)" value={params.sivupalkkiT} min={3} max={8} step={1} unit="mm" onChange={v => updateParam('sivupalkkiT', v)} isFabOS={isFabOS} />
 
             {/* Korkeusasema */}
             <div className="mt-4 mb-2">
-              <label className="block text-sm mb-2 text-slate-400">Korkeusasema:</label>
+              <label className={`block text-sm mb-2 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>Korkeusasema:</label>
               <div className="flex gap-1 mb-2">
                 <button
                   onClick={() => updateParam('sivupalkkiOffset', -params.sivupalkkiH / 2 + params.askelmaKorkeus)}
                   className={`flex-1 py-1.5 px-2 rounded text-xs font-medium transition-all ${
                     params.sivupalkkiOffset === -params.sivupalkkiH / 2 + params.askelmaKorkeus
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isFabOS ? 'bg-[#10B981] text-white' : 'bg-emerald-600 text-white'
+                      : isFabOS ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                   title="Palkin yläreuna askelman yläpinnan tasolla"
                 >
@@ -1138,8 +1166,8 @@ export default function StairConfigurator({ onBack }) {
                   onClick={() => updateParam('sivupalkkiOffset', 0)}
                   className={`flex-1 py-1.5 px-2 rounded text-xs font-medium transition-all ${
                     params.sivupalkkiOffset === 0
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isFabOS ? 'bg-[#10B981] text-white' : 'bg-emerald-600 text-white'
+                      : isFabOS ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                   title="Palkin keskiviiva askelman keskiviivan tasolla"
                 >
@@ -1149,8 +1177,8 @@ export default function StairConfigurator({ onBack }) {
                   onClick={() => updateParam('sivupalkkiOffset', params.sivupalkkiH / 2 - params.askelmaKorkeus)}
                   className={`flex-1 py-1.5 px-2 rounded text-xs font-medium transition-all ${
                     params.sivupalkkiOffset === params.sivupalkkiH / 2 - params.askelmaKorkeus
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isFabOS ? 'bg-[#10B981] text-white' : 'bg-emerald-600 text-white'
+                      : isFabOS ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                   title="Palkin alareuna askelman alapinnan tasolla"
                 >
@@ -1165,22 +1193,23 @@ export default function StairConfigurator({ onBack }) {
                 step={5}
                 unit="mm"
                 onChange={v => updateParam('sivupalkkiOffset', v)}
+                isFabOS={isFabOS}
               />
-              <div className="text-xs text-slate-500 mt-1">
+              <div className={`text-xs mt-1 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>
                 − = ylemmäs, + = alemmas
               </div>
             </div>
 
             {/* Alapään tyyppi */}
             <div className="mt-4 mb-2">
-              <label className="block text-sm mb-2 text-slate-400">Alapään tyyppi:</label>
+              <label className={`block text-sm mb-2 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>Alapään tyyppi:</label>
               <div className="flex gap-2">
                 <button
                   onClick={() => updateParam('alapaanTyyppi', 'suora')}
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                     params.alapaanTyyppi === 'suora'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                      : isFabOS ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
                   Suora
@@ -1189,8 +1218,8 @@ export default function StairConfigurator({ onBack }) {
                   onClick={() => updateParam('alapaanTyyppi', 'jiiri')}
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                     params.alapaanTyyppi === 'jiiri'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-indigo-600 text-white'
+                      : isFabOS ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
                   Jiiri
@@ -1200,35 +1229,47 @@ export default function StairConfigurator({ onBack }) {
           </Section>
 
           {/* Askelmat */}
-          <Section title="ASKELMAT (Meiser)">
-            <div className="text-xs text-slate-500 mb-2">Ritilä {params.askelmaKorkeus}×{params.askelmaSyvyys}×{params.askelmaLeveys}</div>
-            <Slider label="Ritilän korkeus" value={params.askelmaKorkeus} min={30} max={100} step={5} unit="mm" onChange={v => updateParam('askelmaKorkeus', v)} />
-            <Slider label="Etulatta" value={params.lattaKorkeus} min={40} max={80} step={5} unit="mm" onChange={v => updateParam('lattaKorkeus', v)} />
+          <Section title="ASKELMAT (Meiser)" isFabOS={isFabOS}>
+            <div className={`text-xs mb-2 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>Ritilä {params.askelmaKorkeus}×{params.askelmaSyvyys}×{params.askelmaLeveys}</div>
+            <Slider label="Ritilän korkeus" value={params.askelmaKorkeus} min={30} max={100} step={5} unit="mm" onChange={v => updateParam('askelmaKorkeus', v)} isFabOS={isFabOS} />
+            <Slider label="Etulatta" value={params.lattaKorkeus} min={40} max={80} step={5} unit="mm" onChange={v => updateParam('lattaKorkeus', v)} isFabOS={isFabOS} />
           </Section>
 
           {/* Yhteenveto */}
-          <div className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-4 mb-4 border border-slate-600/30">
-            <h3 className="text-sm font-semibold text-emerald-400 mb-2">YHTEENVETO</h3>
+          <div className={`rounded-xl p-4 mb-4 border ${
+            isFabOS
+              ? 'bg-gray-50 border-gray-200'
+              : 'bg-gradient-to-br from-slate-700/50 to-slate-800/50 border-slate-600/30'
+          }`}>
+            <h3 className={`text-sm font-semibold mb-2 ${isFabOS ? 'text-[#10B981]' : 'text-emerald-400'}`}>YHTEENVETO</h3>
             <div className="text-xs space-y-1">
-              <Row label="Askelmat" value={`${params.askelmia} kpl × ${params.askelmaLeveys} mm`} />
-              <Row label="Nousu / etenemä" value={`${params.askelnousu} / ${params.askelmaSyvyys} mm`} />
-              <Row label="Kokonaiskorkeus" value={`${kokonaisKorkeus} mm`} />
-              <Row label="Sivupalkit" value={`RHS ${params.sivupalkkiH}×${params.sivupalkkiW}×${params.sivupalkkiT}`} />
-              <Row label="Palkin offset" value={`${params.sivupalkkiOffset >= 0 ? '+' : ''}${params.sivupalkkiOffset} mm`} />
-              <Row label="Alapään tyyppi" value={params.alapaanTyyppi === 'suora' ? 'Suora' : 'Jiiri'} />
-              <Row label="Kaltevuus" value={`${kaltevuus.toFixed(1)}°`} warn={kaltevuus > 45} />
+              <Row label="Askelmat" value={`${params.askelmia} kpl × ${params.askelmaLeveys} mm`} isFabOS={isFabOS} />
+              <Row label="Nousu / etenemä" value={`${params.askelnousu} / ${params.askelmaSyvyys} mm`} isFabOS={isFabOS} />
+              <Row label="Kokonaiskorkeus" value={`${kokonaisKorkeus} mm`} isFabOS={isFabOS} />
+              <Row label="Sivupalkit" value={`RHS ${params.sivupalkkiH}×${params.sivupalkkiW}×${params.sivupalkkiT}`} isFabOS={isFabOS} />
+              <Row label="Palkin offset" value={`${params.sivupalkkiOffset >= 0 ? '+' : ''}${params.sivupalkkiOffset} mm`} isFabOS={isFabOS} />
+              <Row label="Alapään tyyppi" value={params.alapaanTyyppi === 'suora' ? 'Suora' : 'Jiiri'} isFabOS={isFabOS} />
+              <Row label="Kaltevuus" value={`${kaltevuus.toFixed(1)}°`} warn={kaltevuus > 45} isFabOS={isFabOS} />
             </div>
           </div>
 
           {/* Lataus */}
-          <button onClick={downloadIFC} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+          <button onClick={downloadIFC} className={`w-full font-semibold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
+            isFabOS
+              ? 'bg-gradient-to-r from-[#10B981] to-teal-500 hover:from-[#059669] hover:to-teal-600 text-white'
+              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+          }`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
             Lataa IFC
           </button>
-          <p className="text-xs text-slate-500 mt-2 text-center">IFC4 • BIM-yhteensopiva</p>
-          <div className="mt-2 bg-slate-700/30 rounded p-2 text-xs text-slate-400 text-center font-mono">
+          <p className={`text-xs mt-2 text-center ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>IFC4 • BIM-yhteensopiva</p>
+          <div className={`mt-2 rounded p-2 text-xs text-center font-mono ${
+            isFabOS
+              ? 'bg-gray-100 text-gray-600'
+              : 'bg-slate-700/30 text-slate-400'
+          }`}>
             LK_Porras_{params.askelmia}ask_{params.askelmaLeveys}mm.ifc
           </div>
         </div>
@@ -1238,20 +1279,20 @@ export default function StairConfigurator({ onBack }) {
 }
 
 // Apukomponentit
-function Section({ title, children }) {
+function Section({ title, children, isFabOS }) {
   return (
     <div className="mb-5">
-      <h3 className="text-xs font-semibold text-slate-500 mb-3 tracking-wide">{title}</h3>
+      <h3 className={`text-xs font-semibold mb-3 tracking-wide ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>{title}</h3>
       {children}
     </div>
   );
 }
 
-function Slider({ label, value, min, max, step, unit = '', onChange }) {
+function Slider({ label, value, min, max, step, unit = '', onChange, isFabOS }) {
   return (
     <div className="mb-3">
-      <label className="block text-sm mb-1 text-slate-300">
-        {label}: <span className="text-indigo-400 font-mono">{value}{unit}</span>
+      <label className={`block text-sm mb-1 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+        {label}: <span className={`font-mono ${isFabOS ? 'text-[#FF6B35]' : 'text-indigo-400'}`}>{value}{unit}</span>
       </label>
       <input
         type="range"
@@ -1260,17 +1301,21 @@ function Slider({ label, value, min, max, step, unit = '', onChange }) {
         step={step}
         value={value}
         onChange={e => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+        className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
+          isFabOS
+            ? 'bg-gray-200 accent-[#FF6B35]'
+            : 'bg-slate-700 accent-indigo-500'
+        }`}
       />
     </div>
   );
 }
 
-function Row({ label, value, warn }) {
+function Row({ label, value, warn, isFabOS }) {
   return (
     <div className="flex justify-between">
-      <span className="text-slate-400">{label}:</span>
-      <span className={warn ? 'text-amber-400' : 'text-slate-200'}>{value}</span>
+      <span className={isFabOS ? 'text-gray-500' : 'text-slate-400'}>{label}:</span>
+      <span className={warn ? 'text-amber-500' : isFabOS ? 'text-gray-800' : 'text-slate-200'}>{value}</span>
     </div>
   );
 }

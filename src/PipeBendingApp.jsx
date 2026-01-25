@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import AIChat from './components/AIChat';
+import DevelopmentMode from './components/DevelopmentMode';
 import VersionGallery from './components/VersionGallery';
 
 // ============================================
@@ -586,9 +587,9 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               onChange={(e) => updateParam('bendRadius', Number(e.target.value))}
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
             />
-            <span className="text-slate-500">mm</span>
+            <span className="text-slate-300 font-medium">mm</span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">Suositus: {selectedSize * 1.5}-{selectedSize * 2}mm</p>
+          <p className="text-xs text-slate-400 mt-1">Suositus: {selectedSize * 1.5}-{selectedSize * 2}mm</p>
         </div>
 
         {/* Suoraosuus minimi */}
@@ -603,9 +604,9 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               onChange={(e) => updateParam('minStraight', Number(e.target.value))}
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
             />
-            <span className="text-slate-500">mm</span>
+            <span className="text-slate-300 font-medium">mm</span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">Taivutusten välinen minimietäisyys</p>
+          <p className="text-xs text-slate-400 mt-1">Taivutusten välinen minimietäisyys</p>
         </div>
 
         {/* Maksimitaivutuskulma */}
@@ -621,7 +622,7 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
               max={180}
             />
-            <span className="text-slate-500">°</span>
+            <span className="text-slate-300 font-medium">°</span>
           </div>
         </div>
 
@@ -638,9 +639,9 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white"
               step={0.5}
             />
-            <span className="text-slate-500">°</span>
+            <span className="text-slate-300 font-medium">°</span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">Springback-kompensaatio</p>
+          <p className="text-xs text-slate-400 mt-1">Springback-kompensaatio</p>
         </div>
 
         {/* Seinämäpaksuus */}
@@ -656,7 +657,7 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               className="w-20 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-center"
               step={0.5}
             />
-            <span className="text-slate-500">-</span>
+            <span className="text-slate-300">-</span>
             <input
               type="number"
               value={currentParams.maxWall}
@@ -664,7 +665,7 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
               className="w-20 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-center"
               step={0.5}
             />
-            <span className="text-slate-500">mm</span>
+            <span className="text-slate-300 font-medium">mm</span>
           </div>
         </div>
 
@@ -904,7 +905,7 @@ function UsageTab({ params, selectedSize }) {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-emerald-400 font-medium">Alkusuora</span>
-                <span className="text-slate-400 text-sm">(ennen ensimmäistä taivutusta)</span>
+                <span className="text-slate-300 text-sm">(ennen ensimmäistä taivutusta)</span>
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <input
@@ -915,7 +916,7 @@ function UsageTab({ params, selectedSize }) {
                   min={0}
                   step={5}
                 />
-                <span className="text-slate-500">mm</span>
+                <span className="text-slate-300 font-medium">mm</span>
                 {getBendErrors('start').length > 0 ? (
                   <span className="text-red-400" title={getBendErrors('start')[0].message}>⚠️</span>
                 ) : (
@@ -1002,7 +1003,7 @@ function UsageTab({ params, selectedSize }) {
                             max={180}
                             step={5}
                           />
-                          <span className="text-slate-500 text-sm">°</span>
+                          <span className="text-slate-300 text-sm font-medium">°</span>
                         </div>
                       </div>
 
@@ -1017,7 +1018,7 @@ function UsageTab({ params, selectedSize }) {
                             min={0}
                             step={5}
                           />
-                          <span className="text-slate-500 text-sm">mm</span>
+                          <span className="text-slate-300 text-sm font-medium">mm</span>
                         </div>
                       </div>
 
@@ -1039,7 +1040,7 @@ function UsageTab({ params, selectedSize }) {
                             step={5}
                             disabled={bend.type === 'lesti'}
                           />
-                          <span className="text-slate-500 text-sm">mm</span>
+                          <span className="text-slate-300 text-sm font-medium">mm</span>
                         </div>
                       </div>
                     </div>
@@ -1185,6 +1186,7 @@ const PipeBendingApp = ({ onBack }) => {
 
   // AI Platform state
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showDevelopmentMode, setShowDevelopmentMode] = useState(false);
   const [showVersionGallery, setShowVersionGallery] = useState(false);
   const [currentVersionId, setCurrentVersionId] = useState(null);
   const [currentVersionName, setCurrentVersionName] = useState('Perusversio');
@@ -1414,6 +1416,24 @@ const PipeBendingApp = ({ onBack }) => {
           <div className={`relative w-full max-w-lg h-[80vh] rounded-2xl overflow-hidden shadow-2xl ${
             isFabOS ? 'bg-white' : 'bg-slate-800'
           }`}>
+            {/* Header with full development mode button */}
+            <div className={`absolute top-0 right-12 z-10 p-2`}>
+              <button
+                onClick={() => {
+                  setShowAIChat(false);
+                  setShowDevelopmentMode(true);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                  isFabOS
+                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
+                }`}
+                title="Avaa täysi kehitystila esikatselulla"
+              >
+                <span>🖥️</span>
+                Täysi kehitystila
+              </button>
+            </div>
             <AIChat
               moduleId="pipe-bending"
               currentConfig={moduleConfig}
@@ -1422,6 +1442,21 @@ const PipeBendingApp = ({ onBack }) => {
               onClose={() => setShowAIChat(false)}
             />
           </div>
+        </div>
+      )}
+
+      {/* Full Development Mode */}
+      {showDevelopmentMode && (
+        <div className="fixed inset-0 z-50">
+          <DevelopmentMode
+            moduleId="pipe-bending"
+            currentConfig={moduleConfig}
+            isFabOS={isFabOS}
+            onVersionCreated={handleVersionCreated}
+            onClose={() => setShowDevelopmentMode(false)}
+            AppComponent={null} // TODO: Create a preview-only version of PipeBendingApp
+            appProps={{}}
+          />
         </div>
       )}
 
