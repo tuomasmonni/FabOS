@@ -271,10 +271,13 @@ export default function AIChat({
 
     } catch (error) {
       console.error('Version creation error:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
+      console.error('Error details:', JSON.stringify(error, null, 2));
 
       setMessages(prev => [...prev, {
         role: 'system',
-        content: '❌ Virhe version luomisessa. Yritä uudelleen.',
+        content: `❌ Virhe version luomisessa: ${error?.message || error?.code || 'Tuntematon virhe'}. Yritä uudelleen.`,
         timestamp: new Date().toISOString()
       }]);
     } finally {
