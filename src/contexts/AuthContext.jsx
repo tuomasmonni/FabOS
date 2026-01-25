@@ -2,7 +2,7 @@
 // AUTH CONTEXT - Käyttäjän autentikaatio ja profiilinhallinta
 // ============================================================================
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseData } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -58,12 +58,12 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Hae käyttäjän profiili
+  // Hae käyttäjän profiili - käytetään supabaseData välttääksemme AbortError
   const fetchProfile = async (userId) => {
-    if (!supabase) return null;
+    if (!supabaseData) return null;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseData
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
@@ -83,7 +83,10 @@ export function AuthProvider({ children }) {
 
       return data;
     } catch (error) {
-      console.error('Profile fetch error:', error);
+      // Ohitetaan AbortError
+      if (error.name !== 'AbortError') {
+        console.error('Profile fetch error:', error);
+      }
       return null;
     }
   };
@@ -168,15 +171,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Luo profiili nimimerkillä
+  // Luo profiili nimimerkillä - käytetään supabaseData välttääksemme AbortError
   const createProfile = async (nickname) => {
-    if (!supabase || !user) {
+    if (!supabaseData || !user) {
       return { error: { message: 'Kirjautuminen vaaditaan' } };
     }
 
     try {
       // Tarkista nimimerkin saatavuus
-      const { data: existing } = await supabase
+      const { data: existing } = await supabaseData
         .from('user_profiles')
         .select('id')
         .ilike('nickname', nickname)
@@ -187,7 +190,7 @@ export function AuthProvider({ children }) {
       }
 
       // Luo profiili
-      const { data, error } = await supabase
+      const { data, error } = await supabaseData
         .from('user_profiles')
         .insert({
           id: user.id,
@@ -205,18 +208,22 @@ export function AuthProvider({ children }) {
       setShowNicknameModal(false);
       return { data };
     } catch (error) {
+      // Ohitetaan AbortError
+      if (error.name === 'AbortError') {
+        return { error: { message: 'Yhteys katkesi, yritä uudelleen' } };
+      }
       return { error };
     }
   };
 
-  // Päivitä profiili
+  // Päivitä profiili - käytetään supabaseData välttääksemme AbortError
   const updateProfile = async (updates) => {
-    if (!supabase || !user) {
+    if (!supabaseData || !user) {
       return { error: { message: 'Kirjautuminen vaaditaan' } };
     }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseData
         .from('user_profiles')
         .update(updates)
         .eq('id', user.id)
@@ -230,16 +237,20 @@ export function AuthProvider({ children }) {
       setProfile(data);
       return { data };
     } catch (error) {
+      // Ohitetaan AbortError
+      if (error.name === 'AbortError') {
+        return { error: { message: 'Yhteys katkesi, yritä uudelleen' } };
+      }
       return { error };
     }
   };
 
-  // Tarkista nimimerkin saatavuus
+  // Tarkista nimimerkin saatavuus - käytetään supabaseData välttääksemme AbortError
   const checkNicknameAvailable = async (nickname) => {
-    if (!supabase) return true;
+    if (!supabaseData) return true;
 
     try {
-      const { data } = await supabase
+      const { data } = await supabaseData
         .from('user_profiles')
         .select('id')
         .ilike('nickname', nickname)
@@ -247,7 +258,7 @@ export function AuthProvider({ children }) {
 
       return !data;
     } catch (error) {
-      // Jos virhe, oletetaan että on saatavilla (PGRST116 = not found)
+      // Jos virhe (mukaan lukien AbortError), oletetaan että on saatavilla (PGRST116 = not found)
       return true;
     }
   };
