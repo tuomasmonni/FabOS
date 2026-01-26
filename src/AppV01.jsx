@@ -65,6 +65,9 @@ const FabOSProto = ({ onBack }) => {
   const [currentPartQuantity, setCurrentPartQuantity] = useState(1);
   const [editingPartIndex, setEditingPartIndex] = useState(null);
 
+  // Tab state - 'draw' for drawing, 'parts' for parts list
+  const [activeTab, setActiveTab] = useState('draw');
+
   // Epic UI state
   const [showIntro, setShowIntro] = useState(true);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -78,11 +81,11 @@ const FabOSProto = ({ onBack }) => {
   const inputRef = useRef(null);
 
   const materials = [
-    { id: 'S235', name: 'Teräs S235', price: 2.5 },
-    { id: 'S355', name: 'Teräs S355', price: 3.0 },
-    { id: '304', name: 'RST 304', price: 8.0 },
-    { id: '316', name: 'RST 316', price: 12.0 },
-    { id: 'AL', name: 'Alumiini', price: 6.0 },
+    { id: 'S235', name: 'Teräs S235', price: 2.5, density: 7.85 },
+    { id: 'S355', name: 'Teräs S355', price: 3.0, density: 7.85 },
+    { id: '304', name: 'RST 304', price: 8.0, density: 8.0 },
+    { id: '316', name: 'RST 316', price: 12.0, density: 8.0 },
+    { id: 'AL', name: 'Alumiini', price: 6.0, density: 2.7 },
   ];
 
   const thicknesses = [1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30];
@@ -1668,11 +1671,24 @@ const FabOSProto = ({ onBack }) => {
     return { totalArea: totalArea - holeArea, holeArea };
   };
 
+  // Calculate weight for a part (in kg)
+  const calculateWeightForPart = (shapesList, mat, thick, qty) => {
+    const { totalArea } = calculateAreaForShapes(shapesList);
+    const density = materials.find((m) => m.id === mat)?.density || 7.85;
+    const areaM2 = totalArea / 1000000; // mm² to m²
+    const thickM = thick / 1000; // mm to m
+    const volumeM3 = areaM2 * thickM;
+    const weightKg = volumeM3 * density * 1000; // density is g/cm³, convert to kg/m³
+    return weightKg * qty;
+  };
+
   const calculatePriceForPart = (shapesList, mat, thick, qty) => {
     const { totalArea } = calculateAreaForShapes(shapesList);
-    const materialPrice = materials.find((m) => m.id === mat)?.price || 0;
+    const materialData = materials.find((m) => m.id === mat);
+    const materialPrice = materialData?.price || 0;
+    const density = materialData?.density || 7.85;
     const areaM2 = totalArea / 1000000;
-    const weight = areaM2 * thick * 7.85;
+    const weight = areaM2 * thick * density;
     const materialCost = weight * materialPrice;
     const cuttingCost = shapesList.reduce((acc, shape) => {
       let perimeter = 0;
@@ -2439,13 +2455,58 @@ const FabOSProto = ({ onBack }) => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`w-80 p-4 space-y-4 overflow-y-auto ${
+        <aside className={`w-80 flex flex-col ${
           isFabOS
             ? "bg-white border-r border-gray-200"
             : "bg-slate-800/50 border-r border-slate-700"
         }`} style={{ maxHeight: 'calc(100vh - 70px)' }}>
 
-          {/* Tools - AT TOP */}
+          {/* Tab Buttons */}
+          <div className={`flex border-b ${isFabOS ? 'border-gray-200' : 'border-slate-700'}`}>
+            <button
+              onClick={() => setActiveTab('draw')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'draw'
+                  ? isFabOS
+                    ? 'text-[#FF6B35] border-b-2 border-[#FF6B35] bg-[#FF6B35]/5'
+                    : 'text-cyan-400 border-b-2 border-cyan-400 bg-cyan-500/10'
+                  : isFabOS
+                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
+              }`}
+            >
+              ✏️ Piirto
+            </button>
+            <button
+              onClick={() => setActiveTab('parts')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                activeTab === 'parts'
+                  ? isFabOS
+                    ? 'text-[#FF6B35] border-b-2 border-[#FF6B35] bg-[#FF6B35]/5'
+                    : 'text-cyan-400 border-b-2 border-cyan-400 bg-cyan-500/10'
+                  : isFabOS
+                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
+              }`}
+            >
+              📦 Osaluettelo
+              {parts.length > 0 && (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  isFabOS ? 'bg-[#FF6B35]/20 text-[#FF6B35]' : 'bg-cyan-500/20 text-cyan-400'
+                }`}>
+                  {parts.length}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+          {/* === DRAW TAB === */}
+          {activeTab === 'draw' && (
+            <>
+            {/* Tools - AT TOP */}
           <div className={isFabOS ? "bg-white rounded-lg p-3 border border-gray-200" : "bg-slate-700/30 rounded-lg p-3"}>
             <h3 className={isFabOS ? "text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2" : "text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2"}>Päägeometria</h3>
             <div className="grid grid-cols-5 gap-1">
@@ -2717,38 +2778,6 @@ const FabOSProto = ({ onBack }) => {
                         </button>
                       </div>
                     ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Parts List */}
-          <div className="bg-slate-700/30 rounded-lg p-4">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
-              <span>📦 Osaluettelo ({parts.length})</span>
-              {parts.length > 0 && <span className="text-emerald-400">{parts.reduce((s, p) => s + calculatePriceForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} €</span>}
-            </h3>
-
-            {parts.length === 0 ? (
-              <p className="text-xs text-slate-500 italic text-center py-3">Ei osia luettelossa</p>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {parts.map((part, index) => (
-                  <div key={part.id} className={`bg-slate-800/50 rounded-lg p-3 border ${editingPartIndex === index ? 'border-amber-500' : 'border-slate-600'}`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="font-medium text-sm">{part.name}</div>
-                        <div className="text-xs text-slate-400">{part.quantity} kpl • {materials.find(m => m.id === part.material)?.name} • {part.thickness}mm</div>
-                      </div>
-                      <div className="text-sm font-mono text-emerald-400">
-                        {calculatePriceForPart(part.shapes, part.material, part.thickness, part.quantity).toFixed(2)} €
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button onClick={() => editPart(index)} className="flex-1 text-xs bg-slate-700 hover:bg-slate-600 py-1.5 rounded">✏️ Muokkaa</button>
-                      <button onClick={() => deletePart(index)} className="text-xs bg-red-900/30 hover:bg-red-900/50 text-red-400 py-1.5 px-3 rounded">🗑️</button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -3113,10 +3142,175 @@ const FabOSProto = ({ onBack }) => {
               </div>
             </div>
           )}
+            </>
+          )}
+
+          {/* === PARTS TAB === */}
+          {activeTab === 'parts' && (
+            <div className="space-y-4">
+              {/* Summary */}
+              <div className={`rounded-lg p-4 ${
+                isFabOS ? 'bg-[#FF6B35]/5 border border-[#FF6B35]/20' : 'bg-cyan-500/10 border border-cyan-500/20'
+              }`}>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className={`text-2xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-cyan-400'}`}>
+                      {parts.reduce((sum, p) => sum + calculateWeightForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} kg
+                    </div>
+                    <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Kokonaispaino</div>
+                  </div>
+                  <div>
+                    <div className={`text-2xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>
+                      {parts.reduce((sum, p) => sum + calculatePriceForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} €
+                    </div>
+                    <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Kokonaishinta</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Parts List */}
+              {parts.length === 0 ? (
+                <div className={`text-center py-12 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+                  <div className="text-4xl mb-3">📦</div>
+                  <p className="text-sm">Ei osia luettelossa</p>
+                  <p className="text-xs mt-1">Piirrä osa ja lisää se luetteloon</p>
+                  <button
+                    onClick={() => setActiveTab('draw')}
+                    className={`mt-4 px-4 py-2 rounded-lg text-sm font-medium ${
+                      isFabOS
+                        ? 'bg-[#FF6B35] text-white hover:bg-[#e5612f]'
+                        : 'bg-cyan-500 text-black hover:bg-cyan-400'
+                    }`}
+                  >
+                    ✏️ Aloita piirtäminen
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {parts.map((part, index) => {
+                    const partWeight = calculateWeightForPart(part.shapes, part.material, part.thickness, part.quantity);
+                    const partPrice = calculatePriceForPart(part.shapes, part.material, part.thickness, part.quantity);
+                    const materialName = materials.find(m => m.id === part.material)?.name || part.material;
+                    return (
+                      <div
+                        key={part.id}
+                        className={`rounded-lg p-4 border transition-all ${
+                          editingPartIndex === index
+                            ? isFabOS ? 'border-amber-400 bg-amber-50' : 'border-amber-500 bg-amber-500/10'
+                            : isFabOS ? 'border-gray-200 bg-gray-50 hover:border-gray-300' : 'border-slate-600 bg-slate-700/30 hover:border-slate-500'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className={`font-semibold ${isFabOS ? 'text-gray-800' : 'text-white'}`}>{part.name}</div>
+                            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                              {materialName} • {part.thickness} mm • {part.quantity} kpl
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>
+                              {partPrice.toFixed(2)} €
+                            </div>
+                            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                              {partWeight.toFixed(3)} kg
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              editPart(index);
+                              setActiveTab('draw');
+                            }}
+                            className={`flex-1 py-2 rounded text-xs font-medium ${
+                              isFabOS
+                                ? 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+                                : 'bg-slate-600 text-white hover:bg-slate-500'
+                            }`}
+                          >
+                            ✏️ Muokkaa
+                          </button>
+                          <button
+                            onClick={() => deletePart(index)}
+                            className={`px-4 py-2 rounded text-xs font-medium ${
+                              isFabOS
+                                ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'
+                                : 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
+                            }`}
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Add New Part Button */}
+              {parts.length > 0 && (
+                <button
+                  onClick={() => {
+                    setEditingPartIndex(null);
+                    setShapes([]);
+                    setCurrentPartName(`Osa ${parts.length + 1}`);
+                    setActiveTab('draw');
+                  }}
+                  className={`w-full py-3 rounded-lg text-sm font-medium border-2 border-dashed ${
+                    isFabOS
+                      ? 'border-gray-300 text-gray-500 hover:border-[#FF6B35] hover:text-[#FF6B35]'
+                      : 'border-slate-600 text-slate-400 hover:border-cyan-500 hover:text-cyan-400'
+                  }`}
+                >
+                  + Lisää uusi osa
+                </button>
+              )}
+            </div>
+          )}
+
+          </div>
         </aside>
 
-        {/* Main Canvas */}
+        {/* Main Content Area */}
         <main className={`flex-1 p-4 flex gap-4 ${isFabOS ? 'bg-gray-50' : ''}`}>
+
+          {/* Parts List Full View - shown when parts tab is active */}
+          {activeTab === 'parts' && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className={`text-center max-w-md ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                <div className="text-6xl mb-4">📋</div>
+                <h2 className={`text-xl font-semibold mb-2 ${isFabOS ? 'text-gray-700' : 'text-white'}`}>
+                  Osaluettelo
+                </h2>
+                <p className="text-sm mb-4">
+                  Hallinnoi ja tarkastele osia vasemmasta paneelista.
+                  {parts.length > 0 && ` Sinulla on ${parts.length} osaa.`}
+                </p>
+                {parts.length > 0 && (
+                  <div className={`rounded-lg p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800 border border-slate-700'}`}>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <div className={`text-3xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-cyan-400'}`}>
+                          {parts.reduce((sum, p) => sum + calculateWeightForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} kg
+                        </div>
+                        <div className="text-xs">Kokonaispaino</div>
+                      </div>
+                      <div>
+                        <div className={`text-3xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>
+                          {parts.reduce((sum, p) => sum + calculatePriceForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} €
+                        </div>
+                        <div className="text-xs">Kokonaishinta</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Canvas area - shown when draw tab is active */}
+          {activeTab === 'draw' && (
+            <>
           {/* AI Chat Panel */}
           {showAiChat && (
             <div className={`w-80 rounded-xl flex flex-col shadow-xl ${
@@ -3311,6 +3505,8 @@ const FabOSProto = ({ onBack }) => {
             <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>Zoom:</strong> Ctrl + rulla</div>
           </div>
           </div>
+            </>
+          )}
         </main>
       </div>
     </div>
