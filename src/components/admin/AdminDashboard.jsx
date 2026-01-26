@@ -66,7 +66,7 @@ export default function AdminDashboard({ onClose }) {
     try {
       setLoading(true);
       const response = await fetch(
-        `${supabaseUrl}/rest/v1/user_profiles?select=id,nickname,email,role,role_level,first_name,last_name,created_at&order=created_at.desc`,
+        `${supabaseUrl}/rest/v1/user_profiles?select=id,nickname,email,role,role_level,first_name,last_name,created_at,user_number&order=user_number.asc`,
         {
           method: 'GET',
           headers: {
@@ -263,6 +263,7 @@ export default function AdminDashboard({ onClose }) {
             <table className="w-full">
               <thead className={styles.tableHeader}>
                 <tr>
+                  <th className={`text-left p-4 font-medium ${styles.text} w-16`}>#</th>
                   <th className={`text-left p-4 font-medium ${styles.text}`}>Käyttäjä</th>
                   <th className={`text-left p-4 font-medium ${styles.text} hidden sm:table-cell`}>Sähköposti</th>
                   <th className={`text-left p-4 font-medium ${styles.text}`}>Rooli</th>
@@ -275,7 +276,7 @@ export default function AdminDashboard({ onClose }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className={`p-8 text-center ${styles.textMuted}`}>
+                    <td colSpan={6} className={`p-8 text-center ${styles.textMuted}`}>
                       <div className="flex items-center justify-center gap-2">
                         <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -287,13 +288,18 @@ export default function AdminDashboard({ onClose }) {
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className={`p-8 text-center ${styles.textMuted}`}>
+                    <td colSpan={6} className={`p-8 text-center ${styles.textMuted}`}>
                       {searchQuery ? 'Ei hakutuloksia' : 'Ei käyttäjiä'}
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map(u => (
                     <tr key={u.id} className={`border-t ${styles.tableRow}`}>
+                      <td className={`p-4 ${styles.text}`}>
+                        <span className={`font-mono font-bold ${isLegacy ? 'text-cyan-400' : 'text-[#FF6B35]'}`}>
+                          #{u.user_number || '-'}
+                        </span>
+                      </td>
                       <td className={`p-4 ${styles.text}`}>
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold">

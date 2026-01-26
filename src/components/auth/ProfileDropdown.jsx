@@ -119,6 +119,11 @@ export default function ProfileDropdown() {
               <p className={`font-medium ${styles.nickname}`}>
                 {profile?.nickname || 'Ei nimimerkkiä'}
               </p>
+              {profile?.user_number && (
+                <span className={`text-xs font-mono ${isLegacy ? 'text-cyan-400' : 'text-[#FF6B35]'}`}>
+                  #{profile.user_number}
+                </span>
+              )}
               <RoleBadge role={profile?.role} size="xs" showLabel={false} />
             </div>
             <p className={`text-sm truncate ${styles.email}`}>
