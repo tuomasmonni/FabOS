@@ -202,21 +202,88 @@ function Preview3D({ diameter, wallThickness, startStraight, bendData, color }) 
 // ============================================
 // PREVIEW COMPONENT FOR DEVELOPMENT MODE
 // ============================================
-// Kevyt esikatselu-versio DevelopmentMode:a varten
+// Täysi interaktiivinen esikatselu DevelopmentMode:a varten
 export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
-  // Demo-taivutusdata esikatselua varten
-  const demoBendData = [
-    { id: 1, angle: 90, straightAfter: 100, type: 'lesti', radius: 50 },
-    { id: 2, angle: 45, straightAfter: 80, type: 'rullaus', radius: 100 }
-  ];
-
   const diameter = config?.defaults?.pipeDiameter || 25;
   const wallThickness = config?.defaults?.wallThickness || 2;
   const pipeColor = config?.ui?.pipeColor || '#888888';
+  const maxBends = config?.features?.maxBends || 10;
+
+  // Interaktiivinen state esikatselussa
+  const [startStraight, setStartStraight] = useState(100);
+  const [bends, setBends] = useState([
+    { id: 1, angle: 90, straightAfter: 100, type: 'lesti', radius: diameter * 2 }
+  ]);
+  const [selectedMaterial, setSelectedMaterial] = useState(config?.defaults?.material || 'steel');
+
+  // Päivitä säteet kun diameter muuttuu configista
+  useEffect(() => {
+    setBends(prev => prev.map(b => ({
+      ...b,
+      radius: b.type === 'lesti' ? diameter * 2 : Math.max(b.radius, diameter * 4)
+    })));
+  }, [diameter]);
+
+  const addBend = () => {
+    if (bends.length >= maxBends) return;
+    setBends([...bends, {
+      id: Date.now(),
+      angle: 90,
+      straightAfter: 80,
+      type: 'lesti',
+      radius: diameter * 2
+    }]);
+  };
+
+  const updateBend = (id, field, value) => {
+    setBends(bends.map(b => b.id === id ? { ...b, [field]: value } : b));
+  };
+
+  const updateBendType = (id, newType) => {
+    setBends(bends.map(b => {
+      if (b.id === id) {
+        const newRadius = newType === 'lesti' ? diameter * 2 : diameter * 4;
+        return { ...b, type: newType, radius: newRadius };
+      }
+      return b;
+    }));
+  };
+
+  const removeBend = (id) => {
+    setBends(bends.filter(b => b.id !== id));
+  };
+
+  // Laske kokonaispituus
+  const calculateTotalLength = () => {
+    let total = startStraight;
+    bends.forEach(bend => {
+      const arcLength = (Math.abs(bend.angle) / 180) * Math.PI * bend.radius;
+      total += arcLength + bend.straightAfter;
+    });
+    return Math.round(total);
+  };
+
+  const materialNames = {
+    steel: 'Teräs',
+    stainless: 'RST',
+    aluminum: 'Alumiini',
+    copper: 'Kupari'
+  };
 
   return (
-    <div className={`h-full flex flex-col ${isFabOS ? 'bg-gray-50' : 'bg-slate-900'}`}>
-      {/* Info bar */}
+    <div className={`h-full flex flex-col relative ${isFabOS ? 'bg-gray-50' : 'bg-slate-900'}`}>
+      {/* ESIKATSELU-INDIKAATTORI - Selkeä visuaalinen merkki */}
+      <div className={`absolute inset-0 pointer-events-none z-10 border-4 rounded-lg ${
+        isFabOS ? 'border-[#FF6B35]/60' : 'border-amber-500/60'
+      }`}>
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full text-xs font-bold ${
+          isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-amber-500 text-black'
+        }`}>
+          👁️ ESIKATSELU - Muutokset eivät tallennu
+        </div>
+      </div>
+
+      {/* Header with config info */}
       <div className={`px-4 py-3 border-b ${isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800 border-slate-700'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -226,29 +293,26 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
                 Putkentaivutus
               </h3>
               <p className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
-                Esikatselu - Ø{diameter}mm
+                Ø{diameter}mm • {wallThickness}mm seinämä
               </p>
             </div>
           </div>
 
           {/* Feature badges */}
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap justify-end">
             {config?.features?.['3dVisualization'] && (
               <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'}`}>
-                3D
+                3D ✓
               </span>
             )}
             {config?.features?.exportDXF && (
               <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-blue-400'}`}>
-                DXF
+                DXF ✓
               </span>
             )}
-            {config?.features?.multipleBends && (
-              <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-400'}`}>
-                {config?.features?.maxBends || 10} taivutusta
-              </span>
-            )}
-            {/* Väri-indikaattori */}
+            <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-400'}`}>
+              Max {maxBends} taivutusta
+            </span>
             {pipeColor !== '#888888' && (
               <span
                 className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
@@ -260,34 +324,232 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
         </div>
       </div>
 
-      {/* 3D Preview */}
-      <div className="flex-1 p-4">
-        <div className={`h-full rounded-xl overflow-hidden border ${isFabOS ? 'border-gray-200' : 'border-slate-700'}`}>
-          <Preview3D
-            diameter={diameter}
-            wallThickness={wallThickness}
-            startStraight={100}
-            bendData={demoBendData}
-            color={pipeColor}
-          />
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Putken tiedot */}
+        <div className={`rounded-xl p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800/50'}`}>
+          <h4 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+            <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'}`}>1</span>
+            Putken tiedot
+          </h4>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className={`block text-xs mb-1 ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Halkaisija</label>
+              <div className={`px-3 py-2 rounded-lg text-sm font-medium ${isFabOS ? 'bg-gray-100 text-gray-900' : 'bg-slate-700 text-white'}`}>
+                Ø{diameter} mm
+              </div>
+            </div>
+            <div>
+              <label className={`block text-xs mb-1 ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Seinämä</label>
+              <div className={`px-3 py-2 rounded-lg text-sm font-medium ${isFabOS ? 'bg-gray-100 text-gray-900' : 'bg-slate-700 text-white'}`}>
+                {wallThickness} mm
+              </div>
+            </div>
+            <div>
+              <label className={`block text-xs mb-1 ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Materiaali</label>
+              <select
+                value={selectedMaterial}
+                onChange={(e) => setSelectedMaterial(e.target.value)}
+                className={`w-full px-3 py-2 rounded-lg text-sm ${isFabOS ? 'bg-gray-100 text-gray-900 border border-gray-200' : 'bg-slate-700 text-white border border-slate-600'}`}
+              >
+                {(config?.materials || ['steel', 'stainless', 'aluminum']).map(mat => (
+                  <option key={mat} value={mat}>{materialNames[mat] || mat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Taivutukset */}
+        <div className={`rounded-xl p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800/50'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className={`text-sm font-semibold flex items-center gap-2 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+              <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'}`}>2</span>
+              Taivutukset ({bends.length}/{maxBends})
+            </h4>
+            <button
+              onClick={addBend}
+              disabled={bends.length >= maxBends}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bends.length >= maxBends
+                  ? isFabOS ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  : isFabOS ? 'bg-[#FF6B35] text-white hover:bg-[#e5612f]' : 'bg-emerald-500 text-white hover:bg-emerald-400'
+              }`}
+            >
+              + Lisää
+            </button>
+          </div>
+
+          {/* Alkusuora */}
+          <div className={`p-3 rounded-lg mb-2 ${isFabOS ? 'bg-green-50 border border-green-200' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
+            <div className="flex items-center justify-between">
+              <span className={`text-sm font-medium ${isFabOS ? 'text-green-700' : 'text-emerald-400'}`}>Alkusuora</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={startStraight}
+                  onChange={(e) => setStartStraight(Number(e.target.value))}
+                  className={`w-20 px-2 py-1 rounded text-sm text-center ${isFabOS ? 'bg-white border border-green-300 text-gray-900' : 'bg-slate-800 border border-emerald-500/50 text-white'}`}
+                  min={0}
+                  step={10}
+                />
+                <span className={`text-sm ${isFabOS ? 'text-green-600' : 'text-emerald-400'}`}>mm</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Taivutuslista */}
+          <div className="space-y-2">
+            {bends.map((bend, index) => (
+              <div
+                key={bend.id}
+                className={`p-3 rounded-lg ${isFabOS ? 'bg-gray-50 border border-gray-200' : 'bg-slate-700/50'}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-medium ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                      Taivutus {index + 1}
+                    </span>
+                    {/* Tyyppi toggle */}
+                    <div className={`flex rounded-md p-0.5 ${isFabOS ? 'bg-gray-200' : 'bg-slate-600'}`}>
+                      <button
+                        onClick={() => updateBendType(bend.id, 'lesti')}
+                        className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                          bend.type === 'lesti'
+                            ? 'bg-amber-500 text-white'
+                            : isFabOS ? 'text-gray-500' : 'text-slate-400'
+                        }`}
+                      >
+                        L
+                      </button>
+                      <button
+                        onClick={() => updateBendType(bend.id, 'rullaus')}
+                        className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                          bend.type === 'rullaus'
+                            ? 'bg-cyan-500 text-white'
+                            : isFabOS ? 'text-gray-500' : 'text-slate-400'
+                        }`}
+                      >
+                        R
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeBend(bend.id)}
+                    className={`text-xs ${isFabOS ? 'text-gray-400 hover:text-red-500' : 'text-slate-500 hover:text-red-400'}`}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className={`block text-[10px] mb-0.5 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>Kulma</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={bend.angle}
+                        onChange={(e) => updateBend(bend.id, 'angle', Number(e.target.value))}
+                        className={`w-full px-2 py-1 rounded text-sm ${isFabOS ? 'bg-white border border-gray-300 text-gray-900' : 'bg-slate-800 border border-slate-600 text-white'}`}
+                        min={-180}
+                        max={180}
+                        step={5}
+                      />
+                      <span className={`text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>°</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={`block text-[10px] mb-0.5 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>Suora jälkeen</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={bend.straightAfter}
+                        onChange={(e) => updateBend(bend.id, 'straightAfter', Number(e.target.value))}
+                        className={`w-full px-2 py-1 rounded text-sm ${isFabOS ? 'bg-white border border-gray-300 text-gray-900' : 'bg-slate-800 border border-slate-600 text-white'}`}
+                        min={0}
+                        step={10}
+                      />
+                      <span className={`text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>mm</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={`block text-[10px] mb-0.5 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>Säde R</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={bend.radius}
+                        onChange={(e) => updateBend(bend.id, 'radius', Number(e.target.value))}
+                        disabled={bend.type === 'lesti'}
+                        className={`w-full px-2 py-1 rounded text-sm ${
+                          bend.type === 'lesti'
+                            ? isFabOS ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                            : isFabOS ? 'bg-white border border-gray-300 text-gray-900' : 'bg-slate-800 border border-slate-600 text-white'
+                        }`}
+                        min={bend.type === 'lesti' ? diameter * 2 : diameter * 4}
+                        step={5}
+                      />
+                      <span className={`text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>mm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {bends.length === 0 && (
+            <div className={`text-center py-4 text-sm ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+              Lisää taivutus yllä olevasta napista
+            </div>
+          )}
+        </div>
+
+        {/* 3D Esikatselu */}
+        <div className={`rounded-xl p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800/50'}`}>
+          <h4 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+            <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'}`}>3</span>
+            3D Esikatselu
+          </h4>
+          <div className="h-64 rounded-lg overflow-hidden">
+            <Preview3D
+              diameter={diameter}
+              wallThickness={wallThickness}
+              startStraight={startStraight}
+              bendData={bends}
+              color={pipeColor}
+            />
+          </div>
+          <div className={`mt-2 text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+            🖱️ Pyöritä • 🔍 Zoomaa • ⌨️ Shift+siirrä
+          </div>
         </div>
       </div>
 
-      {/* Config summary */}
+      {/* Footer summary */}
       <div className={`px-4 py-3 border-t ${isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800 border-slate-700'}`}>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Halkaisija</div>
-            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{diameter} mm</div>
+        <div className="flex items-center justify-between">
+          <div className="grid grid-cols-3 gap-4 text-center flex-1">
+            <div>
+              <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Pituus</div>
+              <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{calculateTotalLength()} mm</div>
+            </div>
+            <div>
+              <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Taivutuksia</div>
+              <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{bends.length} kpl</div>
+            </div>
+            <div>
+              <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Materiaali</div>
+              <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{materialNames[selectedMaterial]}</div>
+            </div>
           </div>
-          <div>
-            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Max taivutukset</div>
-            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{config?.features?.maxBends || 10}</div>
-          </div>
-          <div>
-            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Materiaalit</div>
-            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{config?.materials?.length || 4}</div>
-          </div>
+          <button
+            disabled
+            className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium ${
+              isFabOS ? 'bg-gray-200 text-gray-400' : 'bg-slate-700 text-slate-500'
+            } cursor-not-allowed`}
+            title="Pyydä tarjous -toiminto ei ole käytettävissä esikatselussa"
+          >
+            Pyydä tarjous
+          </button>
         </div>
       </div>
     </div>
