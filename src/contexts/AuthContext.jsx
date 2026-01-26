@@ -193,6 +193,10 @@ export function AuthProvider({ children }) {
     }
 
     try {
+      // Hae käyttäjän access token RLS-policyja varten
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || supabaseAnonKey;
+
       // Tarkista nimimerkin saatavuus REST API:lla
       const checkResponse = await fetch(
         `${supabaseUrl}/rest/v1/user_profiles?nickname=ilike.${encodeURIComponent(nickname)}`,
@@ -200,7 +204,7 @@ export function AuthProvider({ children }) {
           method: 'GET',
           headers: {
             'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       );
@@ -229,7 +233,7 @@ export function AuthProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
           'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Prefer': 'return=representation'
         },
         body: JSON.stringify(profileData)
@@ -267,6 +271,10 @@ export function AuthProvider({ children }) {
     }
 
     try {
+      // Hae käyttäjän access token RLS-policyja varten
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || supabaseAnonKey;
+
       // Käytetään suoraa REST API kutsua ohittaen SDK:n schema cache
       const response = await fetch(
         `${supabaseUrl}/rest/v1/user_profiles?id=eq.${user.id}`,
@@ -275,7 +283,7 @@ export function AuthProvider({ children }) {
           headers: {
             'Content-Type': 'application/json',
             'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Prefer': 'return=representation'
           },
           body: JSON.stringify(updates)
