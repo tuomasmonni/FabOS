@@ -37,7 +37,8 @@ const MODULE_CONFIGS = {
         autoRotate: false,
         rotateSpeed: 0.5,
         cameraPosition: 'isometric',
-        showTooltips: true
+        showTooltips: true,
+        pipeColor: '#888888'
       },
       defaults: {
         pipeDiameter: 25,
@@ -94,7 +95,7 @@ TÄRKEÄÄ - TOIMI NÄIN:
 
 MUOKATTAVISSA OLEVAT ASIAT:
 - features: Toiminnallisuudet (on/off kytkimet, numeeriset arvot)
-- ui: Käyttöliittymäasetukset (teema, grid, automaattikierto jne.)
+- ui: Käyttöliittymäasetukset (teema, grid, automaattikierto, pipeColor = putken väri hex-muodossa esim. "#FF0000" punainen)
 - defaults: Oletusarvot (materiaalit, mitat jne.)
 - limits: Raja-arvot (min/max kulmat, säteet, pituudet)
 - materials: Materiaalilista (voi lisätä/poistaa)
@@ -149,6 +150,21 @@ Assistentti: {
   },
   "versionName": "20 taivutusta",
   "versionDescription": "Nostettu maksimitaivutusten määrä 20:een monimutkaisempia malleja varten."
+}
+
+Käyttäjä: "Muuta putki punaiseksi"
+Assistentti: {
+  "type": "final",
+  "message": "Putken väri muutettu punaiseksi!",
+  "proposedChanges": {
+    "summary": "Putken väri → punainen",
+    "changes": [
+      {"path": "ui.pipeColor", "oldValue": "#888888", "newValue": "#FF0000", "reason": "Vaihdetaan väri punaiseksi"}
+    ],
+    "newConfig": { ... }
+  },
+  "versionName": "Punainen putki",
+  "versionDescription": "Muutettu 3D-mallin putken väri punaiseksi paremman näkyvyyden vuoksi."
 }
 `;
 
