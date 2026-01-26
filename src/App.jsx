@@ -17,6 +17,7 @@ const CustomerVotingPage = lazy(() => import('./CustomerVotingPage'));
 const FeatureSuggestionPage = lazy(() => import('./FeatureSuggestionPage'));
 const StairConfigurator = lazy(() => import('./StairConfigurator'));
 const GratingConfigurator = lazy(() => import('./GratingConfigurator'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 
 // Lazy load FabOS version selector
 const FabOSVersionSelector = lazy(() => import('./FabOSVersionSelector'));
@@ -51,7 +52,7 @@ const InitialLoadingScreen = () => (
 // Main app content that uses theme
 function AppContent() {
   const { theme, isLoading, selectTheme } = useTheme();
-  const { showProfilePage, closeProfilePage } = useAuth();
+  const { showProfilePage, closeProfilePage, showAdminDashboard, closeAdminDashboard } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [showSelector, setShowSelector] = useState(true);
 
@@ -98,6 +99,15 @@ function AppContent() {
 
   const isLegacy = theme === THEMES.LEGACY;
   const LoadingScreen = isLegacy ? LoadingScreenLegacy : LoadingScreenFabOS;
+
+  // Show admin dashboard if requested
+  if (showAdminDashboard) {
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <AdminDashboard onClose={closeAdminDashboard} />
+      </Suspense>
+    );
+  }
 
   // Show profile page if requested
   if (showProfilePage) {

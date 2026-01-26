@@ -4,6 +4,75 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+// ============================================================================
+// ROOLIVAKIOT JA -TYYPIT
+// ============================================================================
+
+// Roolien nimet (käytetään koodissa)
+export const ROLES = {
+  GUEST: 'guest',
+  USER: 'user',
+  BETA_TESTER: 'beta_tester',
+  DEVELOPER: 'developer',
+  STAFF: 'staff',
+  MODERATOR: 'moderator',
+  ADMIN: 'admin',
+  OWNER: 'owner',
+  SUPER_ADMIN: 'super_admin'
+};
+
+// Roolien numeeriset tasot hierarkiavertailuja varten
+export const ROLE_LEVELS = {
+  guest: 0,
+  user: 1,
+  beta_tester: 2,
+  developer: 3,
+  staff: 4,
+  moderator: 5,
+  admin: 6,
+  owner: 7,
+  super_admin: 8
+};
+
+// Roolien suomenkieliset nimet
+export const ROLE_NAMES = {
+  guest: 'Vieras',
+  user: 'Käyttäjä',
+  beta_tester: 'Beta-testaaja',
+  developer: 'Kehittäjä',
+  staff: 'Henkilökunta',
+  moderator: 'Moderaattori',
+  admin: 'Ylläpitäjä',
+  owner: 'Omistaja',
+  super_admin: 'Pääkäyttäjä'
+};
+
+// Roolien värit (Tailwind-luokat)
+export const ROLE_COLORS = {
+  guest: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300' },
+  user: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
+  beta_tester: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300' },
+  developer: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300' },
+  staff: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
+  moderator: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300' },
+  admin: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-300' },
+  owner: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300' },
+  super_admin: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300' }
+};
+
+// Roolien ikonit
+export const ROLE_ICONS = {
+  guest: '👤',
+  user: '👤',
+  beta_tester: '🧪',
+  developer: '💻',
+  staff: '👔',
+  moderator: '🛡️',
+  admin: '⚙️',
+  owner: '👑',
+  super_admin: '🔐'
+};
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -13,6 +82,7 @@ export function AuthProvider({ children }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [showProfilePage, setShowProfilePage] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
 
   useEffect(() => {
     // Tarkista nykyinen sessio
@@ -346,6 +416,47 @@ export function AuthProvider({ children }) {
   const closeNicknameModal = () => setShowNicknameModal(false);
   const openProfilePage = () => setShowProfilePage(true);
   const closeProfilePage = () => setShowProfilePage(false);
+  const openAdminDashboard = () => setShowAdminDashboard(true);
+  const closeAdminDashboard = () => setShowAdminDashboard(false);
+
+  // ============================================================================
+  // ROOLITARKISTUSFUNKTIOT
+  // ============================================================================
+
+  // Hae käyttäjän nykyinen rooli (palauttaa 'guest' jos ei kirjautunut)
+  const getUserRole = () => {
+    if (!user || !profile) return ROLES.GUEST;
+    return profile.role || ROLES.USER;
+  };
+
+  // Hae käyttäjän roolitaso (0-8)
+  const getUserRoleLevel = () => {
+    const role = getUserRole();
+    return ROLE_LEVELS[role] ?? 0;
+  };
+
+  // Tarkista onko käyttäjällä tietty rooli
+  const hasRole = (role) => {
+    return getUserRole() === role;
+  };
+
+  // Tarkista onko käyttäjällä vähintään tietty roolitaso
+  const hasMinRole = (minRole) => {
+    const userLevel = getUserRoleLevel();
+    const requiredLevel = ROLE_LEVELS[minRole] ?? 0;
+    return userLevel >= requiredLevel;
+  };
+
+  // Alias hasMinRole-funktiolle - intuitiivisempi nimi
+  const isAtLeast = (role) => hasMinRole(role);
+
+  // Apufunktiot yleisimpiin tarkistuksiin
+  const canAccessBeta = () => hasMinRole(ROLES.BETA_TESTER);
+  const canDevelop = () => hasMinRole(ROLES.DEVELOPER);
+  const isStaff = () => hasMinRole(ROLES.STAFF);
+  const canModerate = () => hasMinRole(ROLES.MODERATOR);
+  const isAdmin = () => hasMinRole(ROLES.ADMIN);
+  const canManageRoles = () => hasRole(ROLES.SUPER_ADMIN);
 
   const value = {
     // Tila
@@ -374,12 +485,28 @@ export function AuthProvider({ children }) {
     showLoginModal,
     showNicknameModal,
     showProfilePage,
+    showAdminDashboard,
     openLoginModal,
     closeLoginModal,
     openNicknameModal,
     closeNicknameModal,
     openProfilePage,
-    closeProfilePage
+    closeProfilePage,
+    openAdminDashboard,
+    closeAdminDashboard,
+
+    // Roolitarkistusfunktiot
+    getUserRole,
+    getUserRoleLevel,
+    hasRole,
+    hasMinRole,
+    isAtLeast,
+    canAccessBeta,
+    canDevelop,
+    isStaff,
+    canModerate,
+    isAdmin,
+    canManageRoles
   };
 
   return (

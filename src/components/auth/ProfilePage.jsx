@@ -2,9 +2,10 @@
 // PROFILE PAGE - Käyttäjän profiilisivu
 // ============================================================================
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, ROLE_NAMES } from '../../contexts/AuthContext';
 import { useTheme, THEMES } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import RoleBadge from './RoleBadge';
 
 // Maat ja ammatit (sama kuin NicknameSetup:ssa)
 const COUNTRIES = [
@@ -276,6 +277,13 @@ export default function ProfilePage({ onClose }) {
                   {profile?.nickname?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
                 </div>
 
+                {/* Rooli-badge */}
+                {profile?.role && profile.role !== 'user' && (
+                  <div className="mb-2">
+                    <RoleBadge role={profile.role} size="md" />
+                  </div>
+                )}
+
                 {/* Nimimerkki */}
                 {isEditing ? (
                   <div className="w-full space-y-2">
@@ -327,6 +335,12 @@ export default function ProfilePage({ onClose }) {
                 <div className="flex justify-between">
                   <span className={styles.textMuted}>Sähköposti</span>
                   <span className={`${styles.text} text-sm truncate ml-2`}>{user?.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className={styles.textMuted}>Rooli</span>
+                  <span className={styles.text}>
+                    {ROLE_NAMES[profile?.role] || ROLE_NAMES.user}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className={styles.textMuted}>Liittynyt</span>
