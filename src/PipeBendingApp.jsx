@@ -1341,13 +1341,13 @@ const PipeBendingApp = ({ onBack }) => {
                 <span className="hidden sm:inline">Versiot</span>
               </button>
               <button
-                onClick={() => setShowAIChat(true)}
+                onClick={() => setShowDevelopmentMode(true)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                   isFabOS
                     ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 text-white hover:opacity-90'
                     : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:opacity-90'
                 }`}
-                title="Pyydä muutoksia AI:n avulla"
+                title="Avaa AI-kehitystila esikatselulla"
               >
                 <span>🤖</span>
                 <span className="hidden sm:inline">Pyydä muutosta</span>
@@ -1406,14 +1406,14 @@ const PipeBendingApp = ({ onBack }) => {
 
       {/* AI Chat Modal */}
       {showAIChat && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 pb-4 px-4">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowAIChat(false)}
           />
-          {/* Modal */}
-          <div className={`relative w-full max-w-lg h-[80vh] rounded-2xl overflow-hidden shadow-2xl ${
+          {/* Modal - positioned higher so version number stays below */}
+          <div className={`relative w-full max-w-lg h-[75vh] rounded-2xl overflow-hidden shadow-2xl ${
             isFabOS ? 'bg-white' : 'bg-slate-800'
           }`}>
             {/* Header with full development mode button */}

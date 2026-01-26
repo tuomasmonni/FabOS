@@ -1,0 +1,101 @@
+# ============================================================================
+# AI CODE GENERATION WORKFLOW
+# ============================================================================
+# Automaattinen koodinmuutosprosessi käyttäjän pyyntöjen perusteella
+# Triggeröityy webhook-kutsulla API:sta
+
+name: AI Code Generation
+
+on:
+  repository_dispatch:
+    types: [generate-code]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate code with Claude
+        id: generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VERSION_ID: ${{ github.event.client_payload.version_id }}
+          MODULE_ID: ${{ github.event.client_payload.module_id }}
+          USER_REQUEST: ${{ github.event.client_payload.user_request }}
+          PROPOSED_CHANGES: ${{ github.event.client_payload.proposed_changes }}
+          USER_EMAIL: ${{ github.event.client_payload.user_email }}
+        run: node scripts/ai-code-generator.js
+
+      - name: Commit and push changes
+        if: steps.generate.outputs.changes_made == 'true'
+        run: |
+          git config --local user.email "ai-assistant@fabos.fi"
+          git config --local user.name "FabOS AI Assistant"
+
+          BRANCH_NAME="ai-update/${{ github.event.client_payload.version_id }}"
+          git checkout -b $BRANCH_NAME
+
+          git add -A
+          git commit -m "feat(${{ github.event.client_payload.module_id }}): ${{ github.event.client_payload.version_name }}
+
+          Automaattisesti generoitu AI-assistentin avulla.
+
+          Käyttäjän pyyntö: ${{ github.event.client_payload.user_request }}
+
+          Muutokset:
+          ${{ steps.generate.outputs.change_summary }}"
+
+          git push origin $BRANCH_NAME
+
+      - name: Merge to main (auto-deploy)
+        if: steps.generate.outputs.changes_made == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="ai-update/${{ github.event.client_payload.version_id }}"
+
+          # Merge suoraan mainiin (ketterä kehitys, ei PR-byrokratiaa)
+          git checkout main
+          git merge $BRANCH_NAME --no-ff -m "Merge AI update: ${{ github.event.client_payload.version_name }}"
+          git push origin main
+
+          # Siivoa branch
+          git push origin --delete $BRANCH_NAME || true
+
+      - name: Update version status
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          VERSION_ID: ${{ github.event.client_payload.version_id }}
+          SUCCESS: ${{ steps.generate.outputs.changes_made }}
+        run: node scripts/update-version-status.js
+
+      - name: Send email notification
+        if: always()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          USER_EMAIL: ${{ github.event.client_payload.user_email }}
+          VERSION_NAME: ${{ github.event.client_payload.version_name }}
+          VERSION_ID: ${{ github.event.client_payload.version_id }}
+          SUCCESS: ${{ steps.generate.outputs.changes_made }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+        run: node scripts/send-notification.js

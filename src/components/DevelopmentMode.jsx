@@ -336,8 +336,10 @@ export default function DevelopmentMode({
   const [showRating, setShowRating] = useState(false);
   const [previewConfig, setPreviewConfig] = useState(currentConfig);
   const [configHistory, setConfigHistory] = useState([currentConfig]);
+  const [attachedFiles, setAttachedFiles] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Scroll to bottom when new message
   useEffect(() => {
@@ -545,6 +547,86 @@ export default function DevelopmentMode({
     }
   };
 
+  // Handle file attachment
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      // Accept images and common document types
+      const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf', 'text/plain'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      return validTypes.includes(file.type) && file.size <= maxSize;
+    });
+
+    if (validFiles.length > 0) {
+      // Convert files to base64 for display and sending
+      validFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setAttachedFiles(prev => [...prev, {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: event.target.result,
+            preview: file.type.startsWith('image/') ? event.target.result : null
+          }]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Handle paste event for screenshots
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setAttachedFiles(prev => [...prev, {
+              name: `screenshot-${Date.now()}.png`,
+              type: 'image/png',
+              size: file.size,
+              data: event.target.result,
+              preview: event.target.result
+            }]);
+          };
+          reader.readAsDataURL(file);
+        }
+        break;
+      }
+    }
+  };
+
+  // Remove attached file
+  const removeAttachedFile = (index) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Send message with attachments
+  const sendMessageWithAttachments = () => {
+    if (!input.trim() && attachedFiles.length === 0) return;
+
+    // Include attachment info in the message
+    let messageContent = input.trim();
+    if (attachedFiles.length > 0) {
+      const fileNames = attachedFiles.map(f => f.name).join(', ');
+      messageContent += `\n\n📎 Liitetiedostot: ${fileNames}`;
+    }
+
+    sendMessage(messageContent);
+    setAttachedFiles([]);
+  };
+
   return (
     <div className={`flex flex-col h-screen ${isFabOS ? 'bg-[#F7F7F7]' : 'bg-slate-900'}`}>
       {/* Header */}
@@ -642,13 +724,73 @@ export default function DevelopmentMode({
 
           {/* Input */}
           <div className={`p-3 border-t ${isFabOS ? 'border-gray-200' : 'border-slate-700'}`}>
+            {/* Attached files preview */}
+            {attachedFiles.length > 0 && (
+              <div className={`mb-2 p-2 rounded-lg ${isFabOS ? 'bg-gray-100' : 'bg-slate-700'}`}>
+                <p className={`text-xs mb-2 ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                  📎 Liitetiedostot:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {attachedFiles.map((file, index) => (
+                    <div key={index} className={`relative group flex items-center gap-2 px-2 py-1 rounded-lg ${
+                      isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-600 border border-slate-500'
+                    }`}>
+                      {file.preview ? (
+                        <img src={file.preview} alt={file.name} className="w-8 h-8 object-cover rounded" />
+                      ) : (
+                        <span className="text-lg">📄</span>
+                      )}
+                      <span className={`text-xs truncate max-w-[100px] ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+                        {file.name}
+                      </span>
+                      <button
+                        onClick={() => removeAttachedFile(index)}
+                        className={`ml-1 w-4 h-4 flex items-center justify-center rounded-full text-xs ${
+                          isFabOS
+                            ? 'bg-gray-200 hover:bg-red-100 text-gray-500 hover:text-red-500'
+                            : 'bg-slate-500 hover:bg-red-500/50 text-slate-300 hover:text-red-300'
+                        }`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-2">
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.pdf,.txt"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {/* Attachment button */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                className={`px-3 py-2 rounded-xl transition-all self-end ${
+                  isFabOS
+                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200'
+                    : 'bg-slate-700 hover:bg-slate-600 text-slate-400 border border-slate-600'
+                }`}
+                title="Liitä kuva tai tiedosto (tai liitä Ctrl+V)"
+              >
+                📎
+              </button>
+
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={showRating ? "Jatka kehitystä tai hyväksy muutos..." : "Kirjoita muutospyyntö..."}
+                onPaste={handlePaste}
+                placeholder={showRating ? "Jatka kehitystä tai hyväksy muutos..." : "Kirjoita muutospyyntö... (Ctrl+V liittää kuvan)"}
                 rows={2}
                 disabled={isLoading}
                 className={`flex-1 px-3 py-2 rounded-xl resize-none text-sm ${
@@ -658,10 +800,10 @@ export default function DevelopmentMode({
                 } outline-none transition-all`}
               />
               <button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || isLoading}
+                onClick={sendMessageWithAttachments}
+                disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
                 className={`px-4 py-2 rounded-xl font-medium transition-all self-end ${
-                  input.trim() && !isLoading
+                  (input.trim() || attachedFiles.length > 0) && !isLoading
                     ? isFabOS
                       ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
                       : 'bg-emerald-500 hover:bg-emerald-400 text-white'
@@ -673,6 +815,9 @@ export default function DevelopmentMode({
                 ➤
               </button>
             </div>
+            <p className={`text-[10px] mt-1 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+              Enter lähettää • Shift+Enter uusi rivi • Ctrl+V liittää kuvakaappauksen
+            </p>
           </div>
         </div>
 
@@ -694,7 +839,7 @@ export default function DevelopmentMode({
             )}
           </div>
 
-          {/* App component */}
+          {/* App component / Config Preview */}
           <div className="flex-1 overflow-auto">
             {AppComponent ? (
               <AppComponent
@@ -704,13 +849,124 @@ export default function DevelopmentMode({
                 onBack={null} // Disable back button in preview
               />
             ) : (
-              <div className={`h-full flex items-center justify-center ${
-                isFabOS ? 'bg-gray-50 text-gray-400' : 'bg-slate-900 text-slate-500'
-              }`}>
-                <div className="text-center">
-                  <span className="text-4xl mb-4 block">📱</span>
-                  <p>Sovelluksen esikatselu</p>
-                  <p className="text-sm mt-2">Komponenttia ei ole määritetty</p>
+              <div className={`h-full p-6 ${isFabOS ? 'bg-gray-50' : 'bg-slate-900'}`}>
+                {/* Config preview when no app component */}
+                <div className={`rounded-xl border p-6 ${
+                  isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800 border-slate-700'
+                }`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="text-3xl">⚙️</span>
+                    <div>
+                      <h3 className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+                        Moduulin konfiguraatio
+                      </h3>
+                      <p className={`text-sm ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                        {moduleId || 'Tuntematon moduuli'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Features section */}
+                  {previewConfig?.features && (
+                    <div className="mb-6">
+                      <h4 className={`text-sm font-medium mb-3 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+                        📦 Ominaisuudet
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(previewConfig.features).map(([key, value]) => (
+                          <div key={key} className={`flex items-center justify-between px-3 py-2 rounded-lg ${
+                            isFabOS ? 'bg-gray-50' : 'bg-slate-700/50'
+                          }`}>
+                            <span className={`text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                              {key}
+                            </span>
+                            <span className={`text-sm font-medium ${
+                              value === true
+                                ? 'text-green-500'
+                                : value === false
+                                  ? 'text-red-400'
+                                  : isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'
+                            }`}>
+                              {typeof value === 'boolean' ? (value ? '✓' : '✗') : value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Limits section */}
+                  {previewConfig?.limits && (
+                    <div className="mb-6">
+                      <h4 className={`text-sm font-medium mb-3 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+                        📐 Rajat
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(previewConfig.limits).map(([key, value]) => (
+                          <div key={key} className={`flex items-center justify-between px-3 py-2 rounded-lg ${
+                            isFabOS ? 'bg-gray-50' : 'bg-slate-700/50'
+                          }`}>
+                            <span className={`text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                              {key}
+                            </span>
+                            <span className={`text-sm font-medium ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+                              {value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Materials section */}
+                  {previewConfig?.materials && (
+                    <div className="mb-6">
+                      <h4 className={`text-sm font-medium mb-3 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+                        🔩 Materiaalit
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {previewConfig.materials.map((mat) => (
+                          <span key={mat} className={`px-3 py-1 rounded-full text-sm ${
+                            isFabOS
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          }`}>
+                            {mat}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Raw JSON toggle */}
+                  <details className={`mt-4 rounded-lg ${isFabOS ? 'bg-gray-50' : 'bg-slate-700/50'}`}>
+                    <summary className={`px-3 py-2 cursor-pointer text-sm font-medium ${
+                      isFabOS ? 'text-gray-600' : 'text-slate-400'
+                    }`}>
+                      📄 Näytä JSON
+                    </summary>
+                    <pre className={`p-3 text-xs overflow-auto max-h-64 ${
+                      isFabOS ? 'text-gray-700' : 'text-slate-300'
+                    }`}>
+                      {JSON.stringify(previewConfig, null, 2)}
+                    </pre>
+                  </details>
+
+                  {/* Change indicator */}
+                  {testingVersion && (
+                    <div className={`mt-4 p-3 rounded-lg border ${
+                      isFabOS
+                        ? 'bg-green-50 border-green-200 text-green-700'
+                        : 'bg-green-500/10 border-green-500/30 text-green-400'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        <span>✨</span>
+                        <span className="text-sm font-medium">
+                          Muutokset aktiivisena: {testingVersion.name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
