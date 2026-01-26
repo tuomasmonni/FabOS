@@ -14,7 +14,29 @@ import { useAuth } from '../contexts/AuthContext';
 function ChatMessage({ message, isFabOS, onTest, onReject }) {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
-  const hasProposal = message.proposedChanges && message.type === 'final';
+
+  // Parsitaan content jos se on JSON-stringi (fallback)
+  let displayContent = message.content;
+  let parsedProposal = message.proposedChanges;
+  let parsedType = message.type;
+  let parsedVersionName = message.versionName;
+
+  // Jos content näyttää JSON:lta, yritä parsia se
+  if (typeof message.content === 'string' && message.content.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(message.content);
+      if (parsed.message) {
+        displayContent = parsed.message;
+        parsedProposal = parsed.proposedChanges || parsedProposal;
+        parsedType = parsed.type || parsedType;
+        parsedVersionName = parsed.versionName || parsedVersionName;
+      }
+    } catch (e) {
+      // Ei ole JSON, käytetään alkuperäistä
+    }
+  }
+
+  const hasProposal = parsedProposal && parsedType === 'final';
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
@@ -48,7 +70,7 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
         )}
 
         {/* Message content */}
-        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+        <div className="text-sm whitespace-pre-wrap">{displayContent}</div>
 
         {/* Questions (if clarification) */}
         {message.questions && message.questions.length > 0 && (
@@ -73,13 +95,18 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
               Tehdäänkö uusi versio?
             </p>
             <p className={`text-xs mb-3 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
-              {message.proposedChanges.summary}
+              {parsedProposal.summary}
             </p>
 
             {/* Action buttons */}
             <div className="flex gap-2 mt-3">
               <button
-                onClick={() => onTest?.(message)}
+                onClick={() => onTest?.({
+                  ...message,
+                  proposedChanges: parsedProposal,
+                  type: parsedType,
+                  versionName: parsedVersionName
+                })}
                 className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${
                   isFabOS
                     ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
@@ -89,7 +116,10 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
                 Kyllä, tee versio!
               </button>
               <button
-                onClick={() => onReject?.(message)}
+                onClick={() => onReject?.({
+                  ...message,
+                  versionName: parsedVersionName
+                })}
                 className={`py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                   isFabOS
                     ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
@@ -667,15 +697,36 @@ export default function DevelopmentMode({
 
       const result = await response.json();
 
+      // Varmista että result on parsittu oikein
+      let parsedResult = result;
+
+      // Jos result.message on JSON-stringi, parsitaan se
+      if (typeof result.message === 'string' && result.message.trim().startsWith('{')) {
+        try {
+          parsedResult = JSON.parse(result.message);
+        } catch (e) {
+          // Jos ei ole JSON, käytetään alkuperäistä
+        }
+      }
+
+      // Jos koko result on stringi (harvinainen tapaus)
+      if (typeof result === 'string' && result.trim().startsWith('{')) {
+        try {
+          parsedResult = JSON.parse(result);
+        } catch (e) {
+          parsedResult = { type: 'message', message: result };
+        }
+      }
+
       const assistantMessage = {
         role: 'assistant',
-        content: result.message,
+        content: parsedResult.message || 'Muutos ehdotettu.',
         timestamp: new Date().toISOString(),
-        questions: result.questions,
-        proposedChanges: result.proposedChanges,
-        type: result.type,
-        versionName: result.versionName,
-        versionDescription: result.versionDescription
+        questions: parsedResult.questions,
+        proposedChanges: parsedResult.proposedChanges,
+        type: parsedResult.type,
+        versionName: parsedResult.versionName,
+        versionDescription: parsedResult.versionDescription
       };
 
       setMessages(prev => [...prev, assistantMessage]);
