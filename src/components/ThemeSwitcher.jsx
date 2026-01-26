@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useTheme, THEMES } from '../contexts/ThemeContext';
 
+// ============================================================================
+// THEME SWITCHER - CURRENTLY HIDDEN
+// ============================================================================
+// Legacy theme is hidden from users. All development focuses on FabOS theme.
+// To re-enable theme switching, set ENABLE_THEME_SWITCHER to true.
+// ============================================================================
+const ENABLE_THEME_SWITCHER = false;
+
 export default function ThemeSwitcher({ variant = 'default' }) {
   const { theme, selectTheme, clearTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +17,11 @@ export default function ThemeSwitcher({ variant = 'default' }) {
 
   // Different styles for light vs dark backgrounds
   const isDark = variant === 'dark' || isLegacy;
+
+  // Hidden - return null when theme switcher is disabled
+  if (!ENABLE_THEME_SWITCHER) {
+    return null;
+  }
 
   return (
     <div className="relative">

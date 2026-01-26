@@ -7,17 +7,31 @@ export const THEMES = {
   FABOS: 'fabos'
 };
 
+// ============================================================================
+// DEFAULT THEME CONFIGURATION
+// ============================================================================
+// FabOS is the default and only active theme.
+// Legacy theme is hidden from users but code remains for potential future use.
+// ============================================================================
+const DEFAULT_THEME = THEMES.FABOS;
+
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if theme was selected before
+    // Check if theme was selected before, otherwise use default (FabOS)
     const savedTheme = localStorage.getItem('fabos-selected-theme');
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.body.classList.add(`theme-${savedTheme}`);
+    const themeToUse = savedTheme || DEFAULT_THEME;
+
+    setTheme(themeToUse);
+    document.body.classList.add(`theme-${themeToUse}`);
+
+    // Save default theme if none was set
+    if (!savedTheme) {
+      localStorage.setItem('fabos-selected-theme', DEFAULT_THEME);
     }
+
     setIsLoading(false);
   }, []);
 
