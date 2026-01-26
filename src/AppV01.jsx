@@ -791,7 +791,7 @@ const FabOSProto = ({ onBack }) => {
     }
 
     const newPart = {
-      id: Date.now(),
+      id: editingPartIndex !== null ? parts[editingPartIndex].id : Date.now(),
       name: currentPartName,
       quantity: currentPartQuantity,
       shapes: JSON.parse(JSON.stringify(shapes)),
@@ -801,15 +801,16 @@ const FabOSProto = ({ onBack }) => {
     };
 
     if (editingPartIndex !== null) {
+      // Updating existing part - keep canvas as is
       const updatedParts = [...parts];
       updatedParts[editingPartIndex] = newPart;
       setParts(updatedParts);
-      setEditingPartIndex(null);
+      // Don't reset canvas - part stays visible for further editing
     } else {
+      // Adding new part - reset canvas for next part
       setParts([...parts, newPart]);
+      resetCanvas();
     }
-
-    resetCanvas();
   };
 
   const resetCanvas = () => {
