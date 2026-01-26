@@ -244,14 +244,20 @@ export function AuthProvider({ children }) {
       await supabase.auth.signOut({ scope: 'local' });
       setUser(null);
       setProfile(null);
+
+      // Navigoi kirjautumissivulle poistamalla URL-parametrit
+      // Tämä varmistaa että käyttäjä näkee LoginPagen eikä jää moduuliin
+      const url = new URL(window.location.origin);
+      window.location.href = url.toString();
     } catch (error) {
       // Ohitetaan AbortError, joka on yleinen Supabase SDK:n ongelma
       if (error.name !== 'AbortError') {
         console.error('Sign out error:', error);
       }
-      // Varmistetaan silti että tila nollataan
+      // Varmistetaan silti että tila nollataan ja navigoidaan
       setUser(null);
       setProfile(null);
+      window.location.href = window.location.origin;
     }
   };
 
