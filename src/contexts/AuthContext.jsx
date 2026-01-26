@@ -2,7 +2,7 @@
 // AUTH CONTEXT - Käyttäjän autentikaatio ja profiilinhallinta
 // ============================================================================
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, supabaseData } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -302,20 +302,31 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Tarkista nimimerkin saatavuus - käytetään supabaseData välttääksemme AbortError
+  // Tarkista nimimerkin saatavuus - käytetään suoraa REST API kutsua
   const checkNicknameAvailable = async (nickname) => {
-    if (!supabaseData) return true;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) return true;
 
     try {
-      const { data } = await supabaseData
-        .from('user_profiles')
-        .select('id')
-        .ilike('nickname', nickname)
-        .single();
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/user_profiles?nickname=ilike.${encodeURIComponent(nickname)}&select=id`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          }
+        }
+      );
 
-      return !data;
+      if (!response.ok) return true;
+
+      const data = await response.json();
+      return !data || data.length === 0;
     } catch (error) {
-      // Jos virhe (mukaan lukien AbortError), oletetaan että on saatavilla (PGRST116 = not found)
+      // Jos virhe, oletetaan että on saatavilla
       return true;
     }
   };
