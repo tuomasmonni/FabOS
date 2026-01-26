@@ -109,21 +109,26 @@ export function AuthProvider({ children }) {
 
   // Tarkista onko käyttäjä kirjautunut
   const checkSession = async () => {
+    console.log('[AuthContext] checkSession called, supabase:', !!supabase);
+
     if (!supabase) {
+      console.log('[AuthContext] No supabase client - setting loading false');
       setLoading(false);
       return;
     }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('[AuthContext] Session result:', session?.user?.email || 'no session');
       setUser(session?.user ?? null);
 
       if (session?.user) {
         await fetchProfile(session.user.id);
       }
     } catch (error) {
-      console.error('Session check error:', error);
+      console.error('[AuthContext] Session check error:', error);
     } finally {
+      console.log('[AuthContext] Setting loading false');
       setLoading(false);
     }
   };

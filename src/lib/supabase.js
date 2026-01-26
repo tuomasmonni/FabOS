@@ -395,6 +395,70 @@ export function watchVersionStatus(versionId, callback, intervalMs = 5000) {
 }
 
 // ============================================================================
+// USER VERSIONS - Käyttäjän omat versiot
+// ============================================================================
+
+// Hae käyttäjän luomat versiot
+export async function getUserVersions(userEmail) {
+  if (!supabaseData || !userEmail) {
+    return [];
+  }
+
+  const { data, error } = await supabaseData
+    .from('versions')
+    .select('*')
+    .eq('creator_email', userEmail)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching user versions:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// ============================================================================
+// VERSION NUMBERING - Semanttinen versionumerointi
+// ============================================================================
+
+// Generoi seuraava versionumero käyttäjälle
+export async function generateNextVersionNumber(userEmail, moduleId) {
+  if (!supabaseData || !userEmail) {
+    // Demo-tilassa: käytä aikaleimapohjaista
+    return `v1.0.${Date.now().toString(36).slice(-4)}`;
+  }
+
+  try {
+    // Hae käyttäjän aikaisemmat versiot tästä moduulista
+    const { data } = await supabaseData
+      .from('versions')
+      .select('version_number')
+      .eq('creator_email', userEmail)
+      .eq('module_id', moduleId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (data && data.length > 0) {
+      // Parsitaan edellinen versionumero
+      const lastVersion = data[0].version_number;
+      const match = lastVersion.match(/v?(\d+)\.(\d+)\.(\d+)/);
+
+      if (match) {
+        const [, major, minor, patch] = match.map(Number);
+        // Kasvata patch-numeroa
+        return `v${major}.${minor}.${patch + 1}`;
+      }
+    }
+
+    // Ensimmäinen versio tälle käyttäjälle/moduulille
+    return 'v1.0.1';
+  } catch (error) {
+    console.error('Error generating version number:', error);
+    return `v1.0.${Date.now().toString(36).slice(-4)}`;
+  }
+}
+
+// ============================================================================
 // FINGERPRINT - Tunnista anonyymit käyttäjät
 // ============================================================================
 export function generateFingerprint() {

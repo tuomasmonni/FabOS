@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme, THEMES } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LoginModal, NicknameSetup, ProfilePage } from './components/auth';
+import { LoginModal, NicknameSetup, ProfilePage, RequireAuth } from './components/auth';
 import VersionBadge from './components/VersionBadge';
 import ThemeSelectorPage from './ThemeSelector';
 import VersionSelector from './VersionSelector';
@@ -49,10 +49,91 @@ const InitialLoadingScreen = () => (
   </div>
 );
 
+// Login page for unauthenticated users
+const LoginPage = () => {
+  const { openLoginModal } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      {/* Header */}
+      <header className="px-6 py-4 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+              <span className="text-white text-xl">⚙️</span>
+            </div>
+            <span className="text-xl font-bold text-white">Levykauppa</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 flex items-center justify-center p-8">
+        <div className="max-w-lg w-full text-center">
+          {/* Logo/Icon */}
+          <div className="w-32 h-32 mx-auto mb-8 rounded-3xl flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30">
+            <span className="text-6xl">🔐</span>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl font-bold mb-4 text-white">
+            Tervetuloa Levykauppa-alustalle!
+          </h1>
+
+          {/* Description */}
+          <p className="text-lg mb-8 text-slate-400">
+            Kirjaudu sisään käyttääksesi sovellusta. Voit luoda uuden tilin kirjautumissivulla.
+          </p>
+
+          {/* Features box */}
+          <div className="p-6 rounded-2xl mb-8 text-left bg-slate-800/50 border border-slate-700">
+            <h3 className="text-sm font-semibold mb-4 text-slate-300">
+              Rekisteröityneille käyttäjille:
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { icon: '🎨', text: 'Pääsy kaikkiin moduuleihin ja konfiguraattoreihin' },
+                { icon: '🤖', text: 'AI-avusteinen kehitystila omien versioiden luomiseen' },
+                { icon: '📊', text: 'Henkilökohtaiset tilastot ja saavutukset' },
+                { icon: '⭐', text: 'Mahdollisuus äänestää ja arvostella versioita' },
+                { icon: '📧', text: 'Sähköposti-ilmoitukset päivityksistä' }
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-sm text-slate-400">
+                  <span className="text-lg">{item.icon}</span>
+                  {item.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Login button */}
+          <button
+            onClick={openLoginModal}
+            className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
+          >
+            Kirjaudu sisään
+          </button>
+
+          <p className="text-sm mt-4 text-slate-500">
+            Ei vielä tiliä? Voit rekisteröityä kirjautumissivulla.
+          </p>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="px-6 py-4 text-center border-t border-slate-700">
+        <p className="text-sm text-slate-500">
+          © 2025 Levykauppa
+        </p>
+      </footer>
+    </div>
+  );
+};
+
 // Main app content that uses theme
 function AppContent() {
   const { theme, isLoading, selectTheme } = useTheme();
-  const { showProfilePage, closeProfilePage, showAdminDashboard, closeAdminDashboard } = useAuth();
+  const { showProfilePage, closeProfilePage, showAdminDashboard, closeAdminDashboard, isAuthenticated, loading: authLoading } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [showSelector, setShowSelector] = useState(true);
 
@@ -87,12 +168,26 @@ function AppContent() {
     window.history.pushState({}, '', url);
   };
 
-  // Show loading while checking theme
-  if (isLoading) {
+  // Debug logging
+  console.log('[AppContent] Auth state:', { isAuthenticated, authLoading, isLoading, theme });
+
+  // Show loading while checking theme OR auth
+  if (isLoading || authLoading) {
+    console.log('[AppContent] Showing loading screen');
     return <InitialLoadingScreen />;
   }
 
-  // If no theme selected, show theme selector
+  // IMPORTANT: Check auth BEFORE theme selection
+  // If not authenticated, show login page directly
+  // This prevents unauthenticated users from accessing the theme selector
+  if (!isAuthenticated) {
+    console.log('[AppContent] User not authenticated - showing login page');
+    return <LoginPage />;
+  }
+
+  console.log('[AppContent] User authenticated - proceeding to app');
+
+  // If no theme selected, show theme selector (only for authenticated users)
   if (!theme) {
     return <ThemeSelectorPage />;
   }
@@ -100,6 +195,38 @@ function AppContent() {
   const isLegacy = theme === THEMES.LEGACY;
   const LoadingScreen = isLegacy ? LoadingScreenLegacy : LoadingScreenFabOS;
 
+  // Wrap all content in RequireAuth - user must be logged in
+  return (
+    <RequireAuth>
+      <AuthenticatedContent
+        showAdminDashboard={showAdminDashboard}
+        closeAdminDashboard={closeAdminDashboard}
+        showProfilePage={showProfilePage}
+        closeProfilePage={closeProfilePage}
+        showSelector={showSelector}
+        isLegacy={isLegacy}
+        LoadingScreen={LoadingScreen}
+        handleVersionSelect={handleVersionSelect}
+        handleBackToSelector={handleBackToSelector}
+        selectedVersion={selectedVersion}
+      />
+    </RequireAuth>
+  );
+}
+
+// Separate component for authenticated content
+function AuthenticatedContent({
+  showAdminDashboard,
+  closeAdminDashboard,
+  showProfilePage,
+  closeProfilePage,
+  showSelector,
+  isLegacy,
+  LoadingScreen,
+  handleVersionSelect,
+  handleBackToSelector,
+  selectedVersion
+}) {
   // Show admin dashboard if requested
   if (showAdminDashboard) {
     return (

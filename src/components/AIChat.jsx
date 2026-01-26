@@ -5,8 +5,74 @@
 // Käytetään moduulien muokkauspyyntöihin
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint } from '../lib/supabase';
+import { createVersion, generateFingerprint, generateNextVersionNumber, watchVersionStatus } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+
+// ============================================================================
+// CODE GENERATION STATUS COMPONENT
+// ============================================================================
+function CodeGenerationStatus({ versionName, status, isFabOS, onClose }) {
+  const statusMessages = {
+    pending: { icon: '⏳', text: 'Odottaa käsittelyä...', color: 'amber' },
+    generating: { icon: '🔄', text: 'AI generoi koodia...', color: 'blue' },
+    deployed: { icon: '✅', text: 'Valmis ja deployattu!', color: 'green' },
+    failed: { icon: '❌', text: 'Generointi epäonnistui', color: 'red' }
+  };
+
+  const current = statusMessages[status] || statusMessages.pending;
+  const isActive = status === 'pending' || status === 'generating';
+
+  const colorClasses = {
+    amber: isFabOS ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-amber-900/30 border-amber-700 text-amber-300',
+    blue: isFabOS ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-blue-900/30 border-blue-700 text-blue-300',
+    green: isFabOS ? 'bg-green-50 border-green-200 text-green-800' : 'bg-green-900/30 border-green-700 text-green-300',
+    red: isFabOS ? 'bg-red-50 border-red-200 text-red-800' : 'bg-red-900/30 border-red-700 text-red-300'
+  };
+
+  return (
+    <div className={`mx-4 my-2 p-4 rounded-xl border ${colorClasses[current.color]}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className={`text-2xl ${isActive ? 'animate-pulse' : ''}`}>{current.icon}</span>
+          <div>
+            <p className="font-medium text-sm">{versionName}</p>
+            <p className="text-xs opacity-75">{current.text}</p>
+          </div>
+        </div>
+        {!isActive && (
+          <button
+            onClick={onClose}
+            className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+              isFabOS ? 'hover:bg-gray-200' : 'hover:bg-slate-700'
+            }`}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      {isActive && (
+        <div className="mt-3">
+          <div className={`h-1 rounded-full overflow-hidden ${isFabOS ? 'bg-gray-200' : 'bg-slate-700'}`}>
+            <div
+              className={`h-full rounded-full ${
+                status === 'generating'
+                  ? 'bg-blue-500 animate-pulse'
+                  : 'bg-amber-500'
+              }`}
+              style={{
+                width: status === 'generating' ? '60%' : '20%',
+                transition: 'width 1s ease-in-out'
+              }}
+            />
+          </div>
+          <p className={`text-[10px] mt-2 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>
+            💡 Voit sulkea tämän ikkunan - saat sähköposti-ilmoituksen kun valmis!
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ============================================================================
 // CHAT MESSAGE COMPONENT
@@ -248,8 +314,10 @@ export default function AIChat({
   const [pendingVersion, setPendingVersion] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [showEmailInput, setShowEmailInput] = useState(false);
+  const [activeGeneration, setActiveGeneration] = useState(null); // Track active code generation
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const statusWatcherRef = useRef(null);
 
   // Scroll to bottom when new message
   useEffect(() => {
@@ -259,6 +327,15 @@ export default function AIChat({
   // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
+  }, []);
+
+  // Cleanup status watcher on unmount
+  useEffect(() => {
+    return () => {
+      if (statusWatcherRef.current) {
+        statusWatcherRef.current();
+      }
+    };
   }, []);
 
   // If not authenticated, show login required screen
@@ -362,11 +439,14 @@ export default function AIChat({
       const fingerprint = generateFingerprint();
       const email = user?.email || userEmail || '';
 
+      // Generoi semanttinen versionumero
+      const versionNumber = await generateNextVersionNumber(email, moduleId);
+
       const newVersion = await createVersion({
         module_id: moduleId,
         name: pendingVersion.name,
         description: pendingVersion.description,
-        version_number: `1.0.0-alpha-${Date.now().toString(36)}`,
+        version_number: versionNumber,
         config: pendingVersion.config,
         version_type: 'experimental',
         user_fingerprint: fingerprint,
@@ -376,12 +456,36 @@ export default function AIChat({
       });
 
       if (generateCode && newVersion?.id) {
-        // Triggeröi automaattinen koodin generointi
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `⏳ Versio "${pendingVersion.name}" luotu! AI generoi nyt koodimuutokset automaattisesti...\n\n${email ? `📧 Saat ilmoituksen osoitteeseen ${email} kun koodi on valmis.` : ''}`,
-          timestamp: new Date().toISOString()
-        }]);
+        // Aseta aktiivinen generointi
+        setActiveGeneration({
+          id: newVersion.id,
+          name: pendingVersion.name,
+          versionNumber,
+          status: 'pending'
+        });
+
+        // Aloita statuksen seuranta
+        statusWatcherRef.current = watchVersionStatus(newVersion.id, (statusData) => {
+          setActiveGeneration(prev => prev ? {
+            ...prev,
+            status: statusData.deployment_status
+          } : null);
+
+          // Ilmoita valmistumisesta
+          if (statusData.deployment_status === 'deployed') {
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `🎉 Versio "${pendingVersion.name}" (${versionNumber}) on nyt valmis ja deployattu tuotantoon!\n\nVoit testata muutoksia heti.`,
+              timestamp: new Date().toISOString()
+            }]);
+          } else if (statusData.deployment_status === 'failed') {
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `❌ Koodin generointi epäonnistui versiolle "${pendingVersion.name}". Yritä uudelleen yksinkertaisemmalla pyynnöllä.`,
+              timestamp: new Date().toISOString()
+            }]);
+          }
+        });
 
         try {
           const triggerResponse = await fetch('/api/trigger-code-generation', {
@@ -390,7 +494,7 @@ export default function AIChat({
             body: JSON.stringify({
               versionId: newVersion.id,
               moduleId: moduleId,
-              versionName: pendingVersion.name,
+              versionName: `${pendingVersion.name} (${versionNumber})`,
               userRequest: pendingVersion.userRequest || pendingVersion.description,
               proposedChanges: pendingVersion.config,
               userEmail: email
@@ -398,19 +502,16 @@ export default function AIChat({
           });
 
           if (triggerResponse.ok) {
-            setMessages(prev => [...prev, {
-              role: 'system',
-              content: `🚀 Koodin generointi käynnistetty! Prosessi vie tyypillisesti 2-5 minuuttia. Voit sulkea tämän ikkunan - saat ilmoituksen kun valmis.`,
-              timestamp: new Date().toISOString()
-            }]);
+            setActiveGeneration(prev => prev ? { ...prev, status: 'generating' } : null);
           } else {
             throw new Error('Trigger failed');
           }
         } catch (triggerError) {
           console.error('Code generation trigger failed:', triggerError);
+          setActiveGeneration(null);
           setMessages(prev => [...prev, {
             role: 'system',
-            content: `⚠️ Automaattinen koodin generointi ei käynnistynyt. Versio on silti tallennettu config-muutoksilla.`,
+            content: `⚠️ Automaattinen koodin generointi ei käynnistynyt. Versio ${versionNumber} on silti tallennettu config-muutoksilla.`,
             timestamp: new Date().toISOString()
           }]);
         }
@@ -418,7 +519,7 @@ export default function AIChat({
         // Vain config-muutos
         setMessages(prev => [...prev, {
           role: 'system',
-          content: `✅ Uusi versio "${pendingVersion.name}" luotu onnistuneesti! Voit nyt testata sitä versiogalleriassa.`,
+          content: `✅ Uusi versio "${pendingVersion.name}" (${versionNumber}) luotu onnistuneesti! Voit nyt testata sitä versiogalleriassa.`,
           timestamp: new Date().toISOString()
         }]);
       }
@@ -486,6 +587,16 @@ export default function AIChat({
 
       {/* Quick actions */}
       <QuickActions onSelect={sendMessage} isFabOS={isFabOS} />
+
+      {/* Active code generation status */}
+      {activeGeneration && (
+        <CodeGenerationStatus
+          versionName={`${activeGeneration.name} (${activeGeneration.versionNumber})`}
+          status={activeGeneration.status}
+          isFabOS={isFabOS}
+          onClose={() => setActiveGeneration(null)}
+        />
+      )}
 
       {/* Messages */}
       <div className={`flex-1 overflow-y-auto p-4 ${isFabOS ? 'bg-gray-50' : 'bg-slate-800/50'}`}>

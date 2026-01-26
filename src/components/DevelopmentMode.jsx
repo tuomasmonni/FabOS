@@ -5,7 +5,7 @@
 // Flow: Pyyntö → AI ehdotus → Testaus → Arvio → Hyväksy/Jatka
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint } from '../lib/supabase';
+import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -476,17 +476,21 @@ export default function DevelopmentMode({
 
     try {
       const fingerprint = generateFingerprint();
+      const email = user?.email || '';
+
+      // Generoi semanttinen versionumero
+      const versionNumber = await generateNextVersionNumber(email, moduleId);
 
       const newVersion = await createVersion({
         module_id: moduleId,
         name: testingVersion.name,
         description: testingVersion.description,
-        version_number: `1.0.0-alpha-${Date.now().toString(36)}`,
+        version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
         user_fingerprint: fingerprint,
         deployment_status: 'config_only',
-        creator_email: user?.email || '',
+        creator_email: email,
         user_request: testingVersion.userRequest,
         developer_rating: rating,
         developer_feedback: feedback
@@ -494,7 +498,7 @@ export default function DevelopmentMode({
 
       setMessages(prev => [...prev, {
         role: 'system',
-        content: `✅ Versio "${testingVersion.name}" tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
+        content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
         timestamp: new Date().toISOString()
       }]);
 
