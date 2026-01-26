@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ThemeSwitcher from './components/ThemeSwitcher';
 
+// Sovelluksen versio - tulee package.json:sta Viten kautta
+const APP_VERSION = __APP_VERSION__ || '0.12.0';
+
 const publicVersions = [
   {
     id: 'v01',
@@ -610,6 +613,9 @@ const VersionSelector = ({ onSelect }) => {
             <code className="bg-slate-800 px-2 py-1 rounded text-cyan-400">
               ?version=v01
             </code>
+          </p>
+          <p className="mt-4 text-slate-600">
+            FabOS v{APP_VERSION} • © 2026
           </p>
         </div>
       </div>

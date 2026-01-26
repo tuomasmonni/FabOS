@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { ProfileDropdown } from './components/auth';
 
+// Sovelluksen versio - tulee package.json:sta Viten kautta
+const APP_VERSION = __APP_VERSION__ || '0.12.0';
+
 const publicVersions = [
   {
     id: 'v01',
@@ -308,7 +311,7 @@ const FabOSVersionSelector = ({ onSelect }) => {
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
               <span className="text-2xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
-              <span className="text-gray-500 ml-4">© 2026</span>
+              <span className="text-gray-500 ml-4">v{APP_VERSION} • © 2026</span>
             </div>
             <div className="flex items-center gap-8 text-gray-400 text-sm">
               <a href="#" className="hover:text-white transition-colors">Käyttöehdot</a>

@@ -6,6 +6,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { createVersion, generateFingerprint } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
 // CHAT MESSAGE COMPONENT
@@ -138,6 +139,93 @@ function QuickActions({ onSelect, isFabOS }) {
 }
 
 // ============================================================================
+// LOGIN REQUIRED COMPONENT
+// ============================================================================
+function LoginRequired({ isFabOS, onClose, onLogin }) {
+  return (
+    <div className={`flex flex-col h-full ${isFabOS ? 'bg-white' : 'bg-slate-800'}`}>
+      {/* Header */}
+      <div className={`flex items-center justify-between px-4 py-3 border-b ${
+        isFabOS ? 'bg-gray-50 border-gray-200' : 'bg-slate-900 border-slate-700'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+            isFabOS ? 'bg-[#FF6B35]' : 'bg-gradient-to-br from-emerald-500 to-cyan-500'
+          }`}>
+            <span className="text-white text-lg">🤖</span>
+          </div>
+          <div>
+            <h3 className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+              AI Kehitysassistentti
+            </h3>
+            <p className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+              Kirjautuminen vaaditaan
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className={`p-2 rounded-lg transition-colors ${
+            isFabOS ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-slate-700 text-slate-400'
+          }`}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className={`flex-1 flex items-center justify-center p-8 ${isFabOS ? 'bg-gray-50' : 'bg-slate-800/50'}`}>
+        <div className="text-center max-w-md">
+          <div className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
+            isFabOS ? 'bg-[#FF6B35]/10' : 'bg-emerald-500/20'
+          }`}>
+            <span className="text-4xl">🔐</span>
+          </div>
+
+          <h2 className={`text-xl font-bold mb-3 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+            Kirjaudu käyttääksesi AI-kehittäjää
+          </h2>
+
+          <p className={`mb-6 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+            AI-kehitysominaisuudet ovat käytettävissä vain kirjautuneille käyttäjille.
+            Näin voimme seurata kehitystä ja tarjota sinulle paremman kokemuksen.
+          </p>
+
+          <div className={`p-4 rounded-xl mb-6 text-left ${
+            isFabOS ? 'bg-blue-50 border border-blue-200' : 'bg-blue-900/20 border border-blue-700'
+          }`}>
+            <p className={`text-sm font-medium mb-2 ${isFabOS ? 'text-blue-800' : 'text-blue-300'}`}>
+              Kirjautuneet käyttäjät voivat:
+            </p>
+            <ul className={`text-sm space-y-1 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
+              <li>✓ Pyytää AI:ta tekemään muutoksia moduuleihin</li>
+              <li>✓ Testata muutoksia reaaliajassa</li>
+              <li>✓ Tallentaa omia versioita</li>
+              <li>✓ Arvostella ja dokumentoida kehitystyötä</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={onLogin}
+            className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${
+              isFabOS
+                ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+            }`}
+          >
+            Kirjaudu sisään
+          </button>
+
+          <p className={`text-xs mt-4 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>
+            Ei vielä tiliä? Kirjautumissivulla voit myös rekisteröityä.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // MAIN CHAT COMPONENT
 // ============================================================================
 export default function AIChat({
@@ -147,16 +235,19 @@ export default function AIChat({
   onVersionCreated,
   onClose
 }) {
+  const { user, isAuthenticated, openLoginModal } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hei! 👋 Olen kehitysassistenttisi. Kerro mitä haluaisit muuttaa tai parantaa putkentaivutusmoduulissa, niin autan sinua luomaan uuden version!',
+      content: 'Hei! 👋 Olen kehitysassistenttisi. Kerro mitä haluaisit muuttaa tai parantaa putkentaivutusmoduulissa, niin autan sinua luomaan uuden version!\n\n🚀 Uutta: Kun luot version, AI generoi oikean koodin automaattisesti ja saat sähköposti-ilmoituksen kun se on valmis!',
       timestamp: new Date().toISOString()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pendingVersion, setPendingVersion] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -169,6 +260,20 @@ export default function AIChat({
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // If not authenticated, show login required screen
+  if (!isAuthenticated) {
+    return (
+      <LoginRequired
+        isFabOS={isFabOS}
+        onClose={onClose}
+        onLogin={() => {
+          onClose?.();
+          openLoginModal();
+        }}
+      />
+    );
+  }
 
   const sendMessage = async (text) => {
     if (!text.trim() || isLoading) return;
@@ -239,13 +344,23 @@ export default function AIChat({
     }
   };
 
-  const handleCreateVersion = async () => {
+  const handleCreateVersion = async (generateCode = false) => {
     if (!pendingVersion) return;
+
+    // Käytä automaattisesti kirjautuneen käyttäjän sähköpostia
+    const emailToUse = user?.email || userEmail;
+
+    // Jos koodi generoidaan eikä sähköpostia ole, pyydä se
+    if (generateCode && !emailToUse) {
+      setShowEmailInput(true);
+      return;
+    }
 
     setIsLoading(true);
 
     try {
       const fingerprint = generateFingerprint();
+      const email = user?.email || userEmail || '';
 
       const newVersion = await createVersion({
         module_id: moduleId,
@@ -254,17 +369,63 @@ export default function AIChat({
         version_number: `1.0.0-alpha-${Date.now().toString(36)}`,
         config: pendingVersion.config,
         version_type: 'experimental',
-        creator_fingerprint: fingerprint
+        user_fingerprint: fingerprint,
+        deployment_status: generateCode ? 'pending' : 'config_only',
+        creator_email: email,
+        user_request: pendingVersion.userRequest
       });
 
-      // Lisää onnistumisviesti
-      setMessages(prev => [...prev, {
-        role: 'system',
-        content: `✅ Uusi versio "${pendingVersion.name}" luotu onnistuneesti! Voit nyt testata sitä versiogalleriassa.`,
-        timestamp: new Date().toISOString()
-      }]);
+      if (generateCode && newVersion?.id) {
+        // Triggeröi automaattinen koodin generointi
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `⏳ Versio "${pendingVersion.name}" luotu! AI generoi nyt koodimuutokset automaattisesti...\n\n${email ? `📧 Saat ilmoituksen osoitteeseen ${email} kun koodi on valmis.` : ''}`,
+          timestamp: new Date().toISOString()
+        }]);
+
+        try {
+          const triggerResponse = await fetch('/api/trigger-code-generation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              versionId: newVersion.id,
+              moduleId: moduleId,
+              versionName: pendingVersion.name,
+              userRequest: pendingVersion.userRequest || pendingVersion.description,
+              proposedChanges: pendingVersion.config,
+              userEmail: email
+            })
+          });
+
+          if (triggerResponse.ok) {
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `🚀 Koodin generointi käynnistetty! Prosessi vie tyypillisesti 2-5 minuuttia. Voit sulkea tämän ikkunan - saat ilmoituksen kun valmis.`,
+              timestamp: new Date().toISOString()
+            }]);
+          } else {
+            throw new Error('Trigger failed');
+          }
+        } catch (triggerError) {
+          console.error('Code generation trigger failed:', triggerError);
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: `⚠️ Automaattinen koodin generointi ei käynnistynyt. Versio on silti tallennettu config-muutoksilla.`,
+            timestamp: new Date().toISOString()
+          }]);
+        }
+      } else {
+        // Vain config-muutos
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `✅ Uusi versio "${pendingVersion.name}" luotu onnistuneesti! Voit nyt testata sitä versiogalleriassa.`,
+          timestamp: new Date().toISOString()
+        }]);
+      }
 
       setPendingVersion(null);
+      setShowEmailInput(false);
+      setUserEmail('');
 
       // Ilmoita parent-komponentille
       onVersionCreated?.(newVersion);
@@ -352,8 +513,65 @@ export default function AIChat({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Email input for code generation */}
+      {showEmailInput && (
+        <div className={`px-4 py-3 border-t ${
+          isFabOS ? 'bg-blue-50 border-blue-200' : 'bg-blue-900/30 border-blue-700'
+        }`}>
+          <p className={`text-sm font-medium mb-2 ${isFabOS ? 'text-blue-800' : 'text-blue-300'}`}>
+            📧 Sähköpostiosoite ilmoitusta varten
+          </p>
+          <p className={`text-xs mb-3 ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+            Saat ilmoituksen kun koodi on generoitu ja otettu käyttöön.
+          </p>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="esim. nimi@yritys.fi"
+              className={`flex-1 px-3 py-2 rounded-lg text-sm ${
+                isFabOS
+                  ? 'bg-white border border-blue-300 text-gray-900 placeholder-gray-400'
+                  : 'bg-slate-700 border border-blue-600 text-white placeholder-slate-400'
+              }`}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleCreateVersion(true)}
+              disabled={isLoading || !userEmail.includes('@')}
+              className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+                userEmail.includes('@') && !isLoading
+                  ? isFabOS
+                    ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                  : isFabOS
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              🚀 Generoi koodi
+            </button>
+            <button
+              onClick={() => {
+                setShowEmailInput(false);
+                handleCreateVersion(false);
+              }}
+              className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+                isFabOS
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+              }`}
+            >
+              Vain config
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Pending version confirmation */}
-      {pendingVersion && (
+      {pendingVersion && !showEmailInput && (
         <div className={`px-4 py-3 border-t ${
           isFabOS ? 'bg-green-50 border-green-200' : 'bg-emerald-900/30 border-emerald-700'
         }`}>
@@ -363,9 +581,27 @@ export default function AIChat({
           <p className={`text-xs mb-3 ${isFabOS ? 'text-green-700' : 'text-emerald-400'}`}>
             <strong>{pendingVersion.name}</strong>: {pendingVersion.description}
           </p>
+
+          {/* Kaksi vaihtoehtoa: config vs koodi */}
+          <div className={`mb-3 p-3 rounded-lg ${isFabOS ? 'bg-white border border-green-200' : 'bg-slate-800 border border-emerald-700'}`}>
+            <p className={`text-xs font-medium mb-2 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
+              Valitse toteutustapa:
+            </p>
+            <div className="space-y-2">
+              <div className={`text-xs ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                <strong className={isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}>🚀 Generoi koodi</strong>
+                <span className="ml-2">AI kirjoittaa oikeat koodimuutokset ja deployaa automaattisesti</span>
+              </div>
+              <div className={`text-xs ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                <strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>⚙️ Vain config</strong>
+                <span className="ml-2">Tallennetaan JSON-konfiguraatio (nopea, mutta rajatumpi)</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <button
-              onClick={handleCreateVersion}
+              onClick={() => handleCreateVersion(true)}
               disabled={isLoading}
               className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
                 isFabOS
@@ -373,19 +609,30 @@ export default function AIChat({
                   : 'bg-emerald-500 hover:bg-emerald-400 text-white'
               }`}
             >
-              ✓ Luo versio
+              🚀 Generoi koodi
             </button>
             <button
-              onClick={() => setPendingVersion(null)}
+              onClick={() => handleCreateVersion(false)}
+              disabled={isLoading}
               className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
                 isFabOS
                   ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                   : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
             >
-              Peruuta
+              ⚙️ Vain config
             </button>
           </div>
+          <button
+            onClick={() => setPendingVersion(null)}
+            className={`w-full mt-2 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+              isFabOS
+                ? 'text-gray-500 hover:text-gray-700'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            Peruuta
+          </button>
         </div>
       )}
 

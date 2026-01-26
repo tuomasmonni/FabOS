@@ -209,6 +209,108 @@ function DeveloperRating({ isFabOS, onRate, onContinue, onRevert, versionName })
 }
 
 // ============================================================================
+// LOGIN REQUIRED COMPONENT FOR DEVELOPMENT MODE
+// ============================================================================
+function DevLoginRequired({ isFabOS, onClose, onLogin }) {
+  return (
+    <div className={`flex flex-col h-screen ${isFabOS ? 'bg-[#F7F7F7]' : 'bg-slate-900'}`}>
+      {/* Header */}
+      <header className={`flex items-center justify-between px-4 py-3 border-b ${
+        isFabOS ? 'bg-[#1A1A2E] border-gray-700' : 'bg-slate-900 border-slate-700'
+      }`}>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-sm">Palaa sovellukseen</span>
+          </button>
+          <div className={`w-px h-6 ${isFabOS ? 'bg-gray-600' : 'bg-slate-700'}`}></div>
+          {isFabOS ? (
+            <div className="flex items-center gap-3">
+              <span className="text-xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
+              <span className="text-xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
+              <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded">KEHITYSTILA</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                🛠️
+              </div>
+              <span className="text-white font-medium">Kehitystila</span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className={`flex-1 flex items-center justify-center p-8`}>
+        <div className="text-center max-w-lg">
+          <div className={`w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center ${
+            isFabOS ? 'bg-[#FF6B35]/10' : 'bg-purple-500/20'
+          }`}>
+            <span className="text-5xl">🔐</span>
+          </div>
+
+          <h2 className={`text-2xl font-bold mb-4 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+            Kirjaudu käyttääksesi kehitystilaa
+          </h2>
+
+          <p className={`mb-6 text-lg ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+            Kehitystila on tarkoitettu rekisteröityneille käyttäjille.
+            Kirjautumalla voimme seurata kuka on kehittänyt mitäkin ominaisuutta.
+          </p>
+
+          <div className={`p-5 rounded-xl mb-8 text-left ${
+            isFabOS ? 'bg-white border border-gray-200 shadow-lg' : 'bg-slate-800 border border-slate-700'
+          }`}>
+            <p className={`text-sm font-semibold mb-3 ${isFabOS ? 'text-gray-800' : 'text-slate-200'}`}>
+              Kehitystilassa voit:
+            </p>
+            <ul className={`text-sm space-y-2 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+              <li className="flex items-center gap-2">
+                <span className={`${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>✓</span>
+                Pyytää AI:ta kehittämään uusia ominaisuuksia
+              </li>
+              <li className="flex items-center gap-2">
+                <span className={`${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>✓</span>
+                Testata muutoksia reaaliajassa split-näkymässä
+              </li>
+              <li className="flex items-center gap-2">
+                <span className={`${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>✓</span>
+                Arvostella ja dokumentoida kehitystyötä
+              </li>
+              <li className="flex items-center gap-2">
+                <span className={`${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>✓</span>
+                Palauttaa edellisiin versioihin tarvittaessa
+              </li>
+            </ul>
+          </div>
+
+          <button
+            onClick={onLogin}
+            className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all ${
+              isFabOS
+                ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white shadow-lg'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+            }`}
+          >
+            Kirjaudu sisään
+          </button>
+
+          <p className={`text-sm mt-4 ${isFabOS ? 'text-gray-500' : 'text-slate-500'}`}>
+            Ei vielä tiliä? Kirjautumissivulla voit myös rekisteröityä.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // MAIN DEVELOPMENT MODE COMPONENT
 // ============================================================================
 export default function DevelopmentMode({
@@ -220,7 +322,7 @@ export default function DevelopmentMode({
   AppComponent, // The app to show in preview (e.g., PipeBendingApp)
   appProps = {} // Props to pass to the app
 }) {
-  const { user } = useAuth();
+  const { user, isAuthenticated, openLoginModal } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -246,6 +348,20 @@ export default function DevelopmentMode({
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // If not authenticated, show login required screen
+  if (!isAuthenticated) {
+    return (
+      <DevLoginRequired
+        isFabOS={isFabOS}
+        onClose={onClose}
+        onLogin={() => {
+          onClose?.();
+          openLoginModal();
+        }}
+      />
+    );
+  }
 
   const sendMessage = async (text) => {
     if (!text.trim() || isLoading) return;

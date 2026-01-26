@@ -58,21 +58,32 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Hae käyttäjän profiili - käytetään supabaseData välttääksemme AbortError
+  // Hae käyttäjän profiili - käytetään suoraa REST API kutsua välttääksemme schema cache ongelmat
   const fetchProfile = async (userId) => {
-    if (!supabaseData) return null;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) return null;
 
     try {
-      const { data, error } = await supabaseData
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/user_profiles?id=eq.${userId}&select=*`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          }
+        }
+      );
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = not found, se on ok uusille käyttäjille
-        console.error('Profile fetch error:', error);
+      if (!response.ok) {
+        console.error('Profile fetch error:', response.status);
+        return null;
       }
+
+      const dataArray = await response.json();
+      const data = dataArray && dataArray.length > 0 ? dataArray[0] : null;
 
       setProfile(data);
 
@@ -83,10 +94,7 @@ export function AuthProvider({ children }) {
 
       return data;
     } catch (error) {
-      // Ohitetaan AbortError
-      if (error.name !== 'AbortError') {
-        console.error('Profile fetch error:', error);
-      }
+      console.error('Profile fetch error:', error);
       return null;
     }
   };
@@ -171,77 +179,126 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Luo profiili nimimerkillä - käytetään supabaseData välttääksemme AbortError
-  const createProfile = async (nickname) => {
-    if (!supabaseData || !user) {
+  // Luo profiili nimimerkillä ja lisätiedoilla - käytetään suoraa REST API kutsua
+  const createProfile = async (nickname, additionalData = {}) => {
+    if (!user) {
       return { error: { message: 'Kirjautuminen vaaditaan' } };
     }
 
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return { error: { message: 'Supabase ei ole konfiguroitu' } };
+    }
+
     try {
-      // Tarkista nimimerkin saatavuus
-      const { data: existing } = await supabaseData
-        .from('user_profiles')
-        .select('id')
-        .ilike('nickname', nickname)
-        .single();
+      // Tarkista nimimerkin saatavuus REST API:lla
+      const checkResponse = await fetch(
+        `${supabaseUrl}/rest/v1/user_profiles?nickname=ilike.${encodeURIComponent(nickname)}`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          }
+        }
+      );
 
-      if (existing) {
-        return { error: { message: 'Nimimerkki on jo käytössä' } };
+      if (checkResponse.ok) {
+        const existing = await checkResponse.json();
+        if (existing && existing.length > 0) {
+          return { error: { message: 'Nimimerkki on jo käytössä' } };
+        }
       }
 
-      // Luo profiili
-      const { data, error } = await supabaseData
-        .from('user_profiles')
-        .insert({
-          id: user.id,
-          nickname: nickname.trim(),
-          email: user.email
-        })
-        .select()
-        .single();
+      // Luo profiili kaikilla kentillä
+      const profileData = {
+        id: user.id,
+        nickname: nickname.trim(),
+        email: user.email,
+        first_name: additionalData.first_name || null,
+        last_name: additionalData.last_name || null,
+        country: additionalData.country || null,
+        profession: additionalData.profession || null,
+        company: additionalData.company || null
+      };
 
-      if (error) {
-        return { error };
+      const response = await fetch(`${supabaseUrl}/rest/v1/user_profiles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(profileData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Profile creation REST error:', response.status, errorData);
+        return { error: { message: errorData.message || `HTTP ${response.status}` } };
       }
 
-      setProfile(data);
+      const data = await response.json();
+      const createdProfile = Array.isArray(data) ? data[0] : data;
+
+      setProfile(createdProfile);
       setShowNicknameModal(false);
-      return { data };
+      return { data: createdProfile };
     } catch (error) {
-      // Ohitetaan AbortError
-      if (error.name === 'AbortError') {
-        return { error: { message: 'Yhteys katkesi, yritä uudelleen' } };
-      }
-      return { error };
+      console.error('Profile creation error:', error);
+      return { error: { message: 'Profiilin luonti epäonnistui' } };
     }
   };
 
-  // Päivitä profiili - käytetään supabaseData välttääksemme AbortError
+  // Päivitä profiili - käytetään suoraa REST API kutsua välttääksemme schema cache ongelmat
   const updateProfile = async (updates) => {
-    if (!supabaseData || !user) {
+    if (!user) {
       return { error: { message: 'Kirjautuminen vaaditaan' } };
     }
 
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return { error: { message: 'Supabase ei ole konfiguroitu' } };
+    }
+
     try {
-      const { data, error } = await supabaseData
-        .from('user_profiles')
-        .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
+      // Käytetään suoraa REST API kutsua ohittaen SDK:n schema cache
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/user_profiles?id=eq.${user.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(updates)
+        }
+      );
 
-      if (error) {
-        return { error };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Profile update REST error:', response.status, errorData);
+        return { error: { message: errorData.message || `HTTP ${response.status}` } };
       }
 
-      setProfile(data);
-      return { data };
+      const data = await response.json();
+      const updatedProfile = Array.isArray(data) ? data[0] : data;
+
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+      }
+
+      return { data: updatedProfile };
     } catch (error) {
-      // Ohitetaan AbortError
-      if (error.name === 'AbortError') {
-        return { error: { message: 'Yhteys katkesi, yritä uudelleen' } };
-      }
-      return { error };
+      console.error('Profile update error:', error);
+      return { error: { message: 'Profiilin päivitys epäonnistui' } };
     }
   };
 

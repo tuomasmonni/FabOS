@@ -6,11 +6,42 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, THEMES } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
+// Maat ja ammatit (sama kuin NicknameSetup:ssa)
+const COUNTRIES = [
+  { code: 'FI', name: 'Suomi' },
+  { code: 'SE', name: 'Ruotsi' },
+  { code: 'NO', name: 'Norja' },
+  { code: 'DK', name: 'Tanska' },
+  { code: 'EE', name: 'Viro' },
+  { code: 'DE', name: 'Saksa' },
+  { code: 'PL', name: 'Puola' },
+  { code: 'GB', name: 'Iso-Britannia' },
+  { code: 'US', name: 'Yhdysvallat' },
+  { code: 'OTHER', name: 'Muu' }
+];
+
+const PROFESSIONS = [
+  { value: 'engineer', label: 'Insinööri / Suunnittelija' },
+  { value: 'production', label: 'Tuotantovastaava' },
+  { value: 'sales', label: 'Myynti' },
+  { value: 'management', label: 'Johto' },
+  { value: 'developer', label: 'Ohjelmistokehittäjä' },
+  { value: 'student', label: 'Opiskelija' },
+  { value: 'entrepreneur', label: 'Yrittäjä' },
+  { value: 'other', label: 'Muu' }
+];
+
 export default function ProfilePage({ onClose }) {
   const { user, profile, updateProfile, refreshProfile } = useAuth();
   const { theme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [nickname, setNickname] = useState(profile?.nickname || '');
+  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [lastName, setLastName] = useState(profile?.last_name || '');
+  const [country, setCountry] = useState(profile?.country || '');
+  const [profession, setProfession] = useState(profile?.profession || '');
+  const [company, setCompany] = useState(profile?.company || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -20,6 +51,18 @@ export default function ProfilePage({ onClose }) {
   const [loadingStats, setLoadingStats] = useState(true);
 
   const isLegacy = theme === THEMES.LEGACY;
+
+  // Synkronoi profiilin tiedot lomakkeeseen kun profiili latautuu
+  useEffect(() => {
+    if (profile) {
+      setNickname(profile.nickname || '');
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setCountry(profile.country || '');
+      setProfession(profile.profession || '');
+      setCompany(profile.company || '');
+    }
+  }, [profile]);
 
   // Hae tilastot ja badget
   useEffect(() => {
@@ -94,6 +137,52 @@ export default function ProfilePage({ onClose }) {
     }
 
     setSaving(false);
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setError('');
+
+    const updates = {
+      first_name: firstName.trim() || null,
+      last_name: lastName.trim() || null,
+      country: country || null,
+      profession: profession || null,
+      company: company.trim() || null
+    };
+
+    const { error: updateError } = await updateProfile(updates);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setSuccess('Profiilitiedot päivitetty!');
+      setIsEditingProfile(false);
+      setTimeout(() => setSuccess(''), 3000);
+    }
+
+    setSaving(false);
+  };
+
+  const handleCancelProfileEdit = () => {
+    setIsEditingProfile(false);
+    setFirstName(profile?.first_name || '');
+    setLastName(profile?.last_name || '');
+    setCountry(profile?.country || '');
+    setProfession(profile?.profession || '');
+    setCompany(profile?.company || '');
+    setError('');
+  };
+
+  // Helper funktiot
+  const getCountryName = (code) => {
+    const country = COUNTRIES.find(c => c.code === code);
+    return country?.name || code || '-';
+  };
+
+  const getProfessionLabel = (value) => {
+    const prof = PROFESSIONS.find(p => p.value === value);
+    return prof?.label || value || '-';
   };
 
   // Tyylit teeman mukaan
@@ -233,7 +322,7 @@ export default function ProfilePage({ onClose }) {
                 )}
               </div>
 
-              {/* Tiedot */}
+              {/* Perustiedot */}
               <div className={`space-y-3 pt-4 border-t ${styles.divider}`}>
                 <div className="flex justify-between">
                   <span className={styles.textMuted}>Sähköposti</span>
@@ -248,6 +337,141 @@ export default function ProfilePage({ onClose }) {
                   <span className={`font-bold ${styles.title}`}>{totalPoints}</span>
                 </div>
               </div>
+            </div>
+
+            {/* Profiilitiedot-kortti */}
+            <div className={`rounded-2xl border p-6 mt-6 ${styles.card}`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-bold ${styles.title}`}>Profiilitiedot</h3>
+                {!isEditingProfile && (
+                  <button
+                    onClick={() => setIsEditingProfile(true)}
+                    className={`text-sm px-3 py-1 rounded-lg ${styles.buttonSecondary}`}
+                  >
+                    Muokkaa
+                  </button>
+                )}
+              </div>
+
+              {isEditingProfile ? (
+                <div className="space-y-4">
+                  {/* Etunimi ja sukunimi */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-xs font-medium mb-1 ${styles.textMuted}`}>
+                        Etunimi
+                      </label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${styles.input}`}
+                        placeholder="Etunimi"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium mb-1 ${styles.textMuted}`}>
+                        Sukunimi
+                      </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${styles.input}`}
+                        placeholder="Sukunimi"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Maa */}
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${styles.textMuted}`}>
+                      Maa
+                    </label>
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${styles.input}`}
+                    >
+                      <option value="">Valitse maa...</option>
+                      {COUNTRIES.map(c => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Ammatti */}
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${styles.textMuted}`}>
+                      Ammatti
+                    </label>
+                    <select
+                      value={profession}
+                      onChange={(e) => setProfession(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${styles.input}`}
+                    >
+                      <option value="">Valitse ammatti...</option>
+                      {PROFESSIONS.map(p => (
+                        <option key={p.value} value={p.value}>{p.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Yritys */}
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${styles.textMuted}`}>
+                      Yritys <span className={styles.textMuted}>(valinnainen)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${styles.input}`}
+                      placeholder="Yrityksen nimi"
+                    />
+                  </div>
+
+                  {/* Toimintopainikkeet */}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className={`flex-1 py-2 rounded-lg font-medium ${styles.button}`}
+                    >
+                      {saving ? 'Tallennetaan...' : 'Tallenna'}
+                    </button>
+                    <button
+                      onClick={handleCancelProfileEdit}
+                      className={`flex-1 py-2 rounded-lg ${styles.buttonSecondary}`}
+                    >
+                      Peruuta
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className={styles.textMuted}>Nimi</span>
+                    <span className={styles.text}>
+                      {profile?.first_name || profile?.last_name
+                        ? `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
+                        : '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={styles.textMuted}>Maa</span>
+                    <span className={styles.text}>{getCountryName(profile?.country)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={styles.textMuted}>Ammatti</span>
+                    <span className={styles.text}>{getProfessionLabel(profile?.profession)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={styles.textMuted}>Yritys</span>
+                    <span className={styles.text}>{profile?.company || '-'}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

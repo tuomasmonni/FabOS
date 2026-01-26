@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme, THEMES } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginModal, NicknameSetup, ProfilePage } from './components/auth';
+import VersionBadge from './components/VersionBadge';
 import ThemeSelectorPage from './ThemeSelector';
 import VersionSelector from './VersionSelector';
 import './index.css';
@@ -140,6 +141,8 @@ const App = () => {
         {/* Auth modaalit - aina renderöitynä */}
         <LoginModal />
         <NicknameSetup />
+        {/* Versionumero näkyy aina vasemmassa alakulmassa */}
+        <VersionBadge position="bottom-left" />
       </AuthProvider>
     </ThemeProvider>
   );

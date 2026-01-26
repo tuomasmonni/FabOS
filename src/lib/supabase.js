@@ -342,6 +342,59 @@ export async function getConversationMessages(conversationId) {
 }
 
 // ============================================================================
+// DEPLOYMENT STATUS
+// ============================================================================
+
+// Hae version deployment status
+export async function getVersionDeploymentStatus(versionId) {
+  if (!supabaseData) {
+    return { deployment_status: 'config_only' };
+  }
+
+  const { data, error } = await supabaseData
+    .from('versions')
+    .select('deployment_status, deployed_at')
+    .eq('id', versionId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// Tarkkaile version statusta (polling)
+export function watchVersionStatus(versionId, callback, intervalMs = 5000) {
+  const checkStatus = async () => {
+    try {
+      const status = await getVersionDeploymentStatus(versionId);
+      callback(status);
+
+      // Lopeta pollaus kun valmis
+      if (status.deployment_status === 'deployed' || status.deployment_status === 'failed') {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Status check failed:', error);
+      return true;
+    }
+  };
+
+  // Ensimmäinen tarkistus heti
+  checkStatus();
+
+  // Jatka pollaamista
+  const intervalId = setInterval(async () => {
+    const shouldContinue = await checkStatus();
+    if (!shouldContinue) {
+      clearInterval(intervalId);
+    }
+  }, intervalMs);
+
+  // Palauta funktio polausksen lopettamiseen
+  return () => clearInterval(intervalId);
+}
+
+// ============================================================================
 // FINGERPRINT - Tunnista anonyymit käyttäjät
 // ============================================================================
 export function generateFingerprint() {

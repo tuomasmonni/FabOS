@@ -12,11 +12,23 @@ import { getVersions, voteVersion, incrementViewCount, generateFingerprint } fro
 function VersionCard({ version, isFabOS, onSelect, onVote, isSelected }) {
   const isStable = version.version_type === 'stable';
   const fingerprint = generateFingerprint();
+  const deploymentStatus = version.deployment_status || 'config_only';
 
   const handleVote = async (e, type) => {
     e.stopPropagation();
     await onVote(version.id, type, fingerprint);
   };
+
+  // Deployment status badge config
+  const statusConfig = {
+    pending: { icon: '⏳', text: 'Jonossa', className: isFabOS ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-blue-400' },
+    generating: { icon: '⚙️', text: 'Generoidaan', className: isFabOS ? 'bg-purple-100 text-purple-700 animate-pulse' : 'bg-purple-500/20 text-purple-400 animate-pulse' },
+    deployed: { icon: '🚀', text: 'Deployattu', className: isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400' },
+    failed: { icon: '❌', text: 'Epäonnistui', className: isFabOS ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400' },
+    config_only: null
+  };
+
+  const statusInfo = statusConfig[deploymentStatus];
 
   return (
     <div
@@ -31,7 +43,14 @@ function VersionCard({ version, isFabOS, onSelect, onVote, isSelected }) {
             : 'bg-slate-800 border border-slate-700 hover:border-slate-600'
       }`}
     >
-      {/* Badge */}
+      {/* Deployment status badge (top left) */}
+      {statusInfo && (
+        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded-full text-xs font-bold ${statusInfo.className}`}>
+          {statusInfo.icon} {statusInfo.text}
+        </div>
+      )}
+
+      {/* Version type badge (top right) */}
       <div className={`absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-xs font-bold ${
         isStable
           ? 'bg-green-500 text-white'
@@ -112,11 +131,36 @@ function VersionDetail({ version, isFabOS, onTest, onClose }) {
   if (!version) return null;
 
   const isStable = version.version_type === 'stable';
+  const deploymentStatus = version.deployment_status || 'config_only';
+
+  // Deployment status config
+  const statusConfig = {
+    pending: { icon: '⏳', text: 'Odottaa generointia', description: 'Koodi generoidaan pian automaattisesti', className: isFabOS ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-blue-900/30 border-blue-700 text-blue-300' },
+    generating: { icon: '⚙️', text: 'AI generoi koodia', description: 'Koodimuutoksia kirjoitetaan automaattisesti', className: isFabOS ? 'bg-purple-50 border-purple-200 text-purple-700 animate-pulse' : 'bg-purple-900/30 border-purple-700 text-purple-300 animate-pulse' },
+    deployed: { icon: '🚀', text: 'Deployattu tuotantoon', description: version.deployed_at ? `Otettu käyttöön ${new Date(version.deployed_at).toLocaleDateString('fi-FI')}` : 'Koodi on tuotannossa', className: isFabOS ? 'bg-green-50 border-green-200 text-green-700' : 'bg-green-900/30 border-green-700 text-green-300' },
+    failed: { icon: '❌', text: 'Generointi epäonnistui', description: 'AI ei pystynyt generoimaan koodia', className: isFabOS ? 'bg-red-50 border-red-200 text-red-700' : 'bg-red-900/30 border-red-700 text-red-300' },
+    config_only: { icon: '⚙️', text: 'Vain konfiguraatio', description: 'Muutokset tehty JSON-konfiguraatioon', className: isFabOS ? 'bg-gray-50 border-gray-200 text-gray-600' : 'bg-slate-700 border-slate-600 text-slate-400' }
+  };
+
+  const statusInfo = statusConfig[deploymentStatus];
 
   return (
     <div className={`rounded-2xl p-6 ${
       isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800 border border-slate-700'
     }`}>
+      {/* Deployment status banner */}
+      {statusInfo && (
+        <div className={`mb-4 p-3 rounded-xl border ${statusInfo.className}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{statusInfo.icon}</span>
+            <div>
+              <p className="font-medium text-sm">{statusInfo.text}</p>
+              <p className="text-xs opacity-75">{statusInfo.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
