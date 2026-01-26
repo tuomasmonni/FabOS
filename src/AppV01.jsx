@@ -3271,46 +3271,8 @@ const FabOSProto = ({ onBack }) => {
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main Content Area - Canvas always visible */}
         <main className={`flex-1 p-4 flex gap-4 ${isFabOS ? 'bg-gray-50' : ''}`}>
-
-          {/* Parts List Full View - shown when parts tab is active */}
-          {activeTab === 'parts' && (
-            <div className="flex-1 flex items-center justify-center">
-              <div className={`text-center max-w-md ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
-                <div className="text-6xl mb-4">📋</div>
-                <h2 className={`text-xl font-semibold mb-2 ${isFabOS ? 'text-gray-700' : 'text-white'}`}>
-                  Osaluettelo
-                </h2>
-                <p className="text-sm mb-4">
-                  Hallinnoi ja tarkastele osia vasemmasta paneelista.
-                  {parts.length > 0 && ` Sinulla on ${parts.length} osaa.`}
-                </p>
-                {parts.length > 0 && (
-                  <div className={`rounded-lg p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800 border border-slate-700'}`}>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <div className={`text-3xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-cyan-400'}`}>
-                          {parts.reduce((sum, p) => sum + calculateWeightForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} kg
-                        </div>
-                        <div className="text-xs">Kokonaispaino</div>
-                      </div>
-                      <div>
-                        <div className={`text-3xl font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>
-                          {parts.reduce((sum, p) => sum + calculatePriceForPart(p.shapes, p.material, p.thickness, p.quantity), 0).toFixed(2)} €
-                        </div>
-                        <div className="text-xs">Kokonaishinta</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Canvas area - shown when draw tab is active */}
-          {activeTab === 'draw' && (
-            <>
           {/* AI Chat Panel */}
           {showAiChat && (
             <div className={`w-80 rounded-xl flex flex-col shadow-xl ${
@@ -3505,8 +3467,6 @@ const FabOSProto = ({ onBack }) => {
             <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>Zoom:</strong> Ctrl + rulla</div>
           </div>
           </div>
-            </>
-          )}
         </main>
       </div>
     </div>
