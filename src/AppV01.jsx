@@ -2437,24 +2437,24 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Polygon Drawing Info */}
           {isDrawingPolygon && (
-            <div className="bg-emerald-900/30 border border-emerald-500/50 rounded-lg p-3">
-              <h3 className="text-sm font-semibold text-emerald-400 mb-2">⬡ Piirretään monikulmio</h3>
-              <div className="text-xs text-slate-300 space-y-1">
-                <p>Pisteitä: <span className="font-mono text-emerald-400">{polygonPoints.length}</span></p>
-                {polygonPoints.length < 3 && <p className="text-amber-400">Lisää vähintään 3 pistettä</p>}
+            <div className={isFabOS ? "bg-emerald-50 border border-emerald-300 rounded-lg p-3" : "bg-emerald-900/30 border border-emerald-500/50 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-sm font-semibold text-emerald-700 mb-2" : "text-sm font-semibold text-emerald-400 mb-2"}>⬡ Piirretään monikulmio</h3>
+              <div className={isFabOS ? "text-xs text-gray-600 space-y-1" : "text-xs text-slate-300 space-y-1"}>
+                <p>Pisteitä: <span className={isFabOS ? "font-mono text-emerald-600" : "font-mono text-emerald-400"}>{polygonPoints.length}</span></p>
+                {polygonPoints.length < 3 && <p className={isFabOS ? "text-amber-600" : "text-amber-400"}>Lisää vähintään 3 pistettä</p>}
               </div>
-              <div className="mt-2 text-xs text-slate-400 space-y-0.5">
+              <div className={isFabOS ? "mt-2 text-xs text-gray-500 space-y-0.5" : "mt-2 text-xs text-slate-400 space-y-0.5"}>
                 <p>• Klikkaa lisätäksesi pisteitä</p>
-                <p>• <kbd className="bg-slate-700 px-1 rounded">Enter</kbd> tai klikkaa 1. pistettä sulkeaksesi</p>
-                <p>• <kbd className="bg-slate-700 px-1 rounded">Backspace</kbd> poistaa viimeisen pisteen</p>
-                <p>• <kbd className="bg-slate-700 px-1 rounded">Esc</kbd> peruuttaa</p>
+                <p>• <kbd className={isFabOS ? "bg-gray-200 px-1 rounded" : "bg-slate-700 px-1 rounded"}>Enter</kbd> tai klikkaa 1. pistettä sulkeaksesi</p>
+                <p>• <kbd className={isFabOS ? "bg-gray-200 px-1 rounded" : "bg-slate-700 px-1 rounded"}>Backspace</kbd> poistaa viimeisen pisteen</p>
+                <p>• <kbd className={isFabOS ? "bg-gray-200 px-1 rounded" : "bg-slate-700 px-1 rounded"}>Esc</kbd> peruuttaa</p>
               </div>
               <div className="mt-3 flex gap-2">
                 <button onClick={closePolygon} disabled={polygonPoints.length < 3}
-                  className={`flex-1 text-xs py-1.5 rounded font-medium ${polygonPoints.length >= 3 ? 'bg-emerald-500 hover:bg-emerald-400 text-black' : 'bg-slate-600 text-slate-400 cursor-not-allowed'}`}>
+                  className={`flex-1 text-xs py-1.5 rounded font-medium ${polygonPoints.length >= 3 ? 'bg-emerald-500 hover:bg-emerald-400 text-white' : isFabOS ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-slate-600 text-slate-400 cursor-not-allowed'}`}>
                   ✓ Sulje muoto
                 </button>
-                <button onClick={cancelPolygon} className="text-xs py-1.5 px-3 rounded bg-slate-700 hover:bg-slate-600">
+                <button onClick={cancelPolygon} className={isFabOS ? "text-xs py-1.5 px-3 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" : "text-xs py-1.5 px-3 rounded bg-slate-700 hover:bg-slate-600"}>
                   ✕ Peruuta
                 </button>
               </div>
@@ -2462,27 +2462,31 @@ const FabOSProto = ({ onBack }) => {
           )}
 
           {/* Current Part Settings */}
-          <div className={`rounded-lg p-4 border ${editingPartIndex !== null ? 'bg-amber-900/20 border-amber-600/50' : 'bg-cyan-900/20 border-cyan-600/50'}`}>
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className={`rounded-lg p-4 border ${
+            isFabOS
+              ? editingPartIndex !== null ? 'bg-amber-50 border-amber-300' : 'bg-[#FF6B35]/5 border-[#FF6B35]/30'
+              : editingPartIndex !== null ? 'bg-amber-900/20 border-amber-600/50' : 'bg-cyan-900/20 border-cyan-600/50'
+          }`}>
+            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isFabOS ? 'text-gray-800' : ''}`}>
               {editingPartIndex !== null ? '✏️ Muokataan osaa' : '➕ Uusi osa'}
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-slate-400">Osan nimi</label>
+                <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Osan nimi</label>
                 <input type="text" value={currentPartName} onChange={(e) => setCurrentPartName(e.target.value)}
-                  className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm" placeholder="Anna osalle nimi" />
+                  className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-800" : "w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"} placeholder="Anna osalle nimi" />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs text-slate-400">Määrä (kpl)</label>
+                  <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Määrä (kpl)</label>
                   <input type="number" value={currentPartQuantity} onChange={(e) => setCurrentPartQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm" min={1} />
+                    className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-800" : "w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"} min={1} />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Hinta</label>
-                  <div className="mt-1 bg-slate-600/50 rounded px-3 py-2 text-sm font-mono text-emerald-400">
+                  <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Hinta</label>
+                  <div className={isFabOS ? "mt-1 bg-gray-100 rounded px-3 py-2 text-sm font-mono text-[#FF6B35]" : "mt-1 bg-slate-600/50 rounded px-3 py-2 text-sm font-mono text-emerald-400"}>
                     {currentPartPrice.toFixed(2)} €
                   </div>
                 </div>
@@ -2490,26 +2494,32 @@ const FabOSProto = ({ onBack }) => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs text-slate-400">Materiaali</label>
-                  <select value={material} onChange={(e) => setMaterial(e.target.value)} className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-xs">
+                  <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Materiaali</label>
+                  <select value={material} onChange={(e) => setMaterial(e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-800" : "w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-xs"}>
                     {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Paksuus</label>
-                  <select value={thickness} onChange={(e) => setThickness(parseFloat(e.target.value))} className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-xs">
+                  <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Paksuus</label>
+                  <select value={thickness} onChange={(e) => setThickness(parseFloat(e.target.value))} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-xs text-gray-800" : "w-full mt-1 bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-xs"}>
                     {thicknesses.map((t) => <option key={t} value={t}>{t} mm</option>)}
                   </select>
                 </div>
               </div>
 
               <button onClick={addPartToList} disabled={shapes.length === 0}
-                className={`w-full py-2.5 rounded-lg font-semibold transition-all ${shapes.length === 0 ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : editingPartIndex !== null ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-cyan-500 hover:bg-cyan-400 text-black'}`}>
+                className={`w-full py-2.5 rounded-lg font-semibold transition-all ${
+                  shapes.length === 0
+                    ? isFabOS ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                    : editingPartIndex !== null
+                      ? 'bg-amber-500 hover:bg-amber-400 text-white'
+                      : isFabOS ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white' : 'bg-cyan-500 hover:bg-cyan-400 text-black'
+                }`}>
                 {editingPartIndex !== null ? '💾 Tallenna muutokset' : '➕ Lisää osa luetteloon'}
               </button>
 
               {editingPartIndex !== null && (
-                <button onClick={cancelEditing} className="w-full py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm">
+                <button onClick={cancelEditing} className={isFabOS ? "w-full py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm" : "w-full py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm"}>
                   Peruuta muokkaus
                 </button>
               )}
@@ -2517,16 +2527,16 @@ const FabOSProto = ({ onBack }) => {
           </div>
 
           {/* Geometry List */}
-          <div className="bg-slate-700/30 rounded-lg p-4">
+          <div className={isFabOS ? "bg-gray-100 rounded-lg p-4" : "bg-slate-700/30 rounded-lg p-4"}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <h3 className={isFabOS ? "text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center gap-2" : "text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2"}>
                 <span>📐 Geometria ({totalGeometryCount})</span>
               </h3>
               <div className="flex items-center gap-2">
-                {shapes.length > 0 && <span className="text-xs text-slate-500">{(totalArea / 100).toFixed(1)} cm²</span>}
+                {shapes.length > 0 && <span className={isFabOS ? "text-xs text-gray-500" : "text-xs text-slate-500"}>{(totalArea / 100).toFixed(1)} cm²</span>}
                 <button
                   onClick={() => setShowAllDimensions(!showAllDimensions)}
-                  className={`p-1.5 rounded transition-all ${showAllDimensions ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-600/50 text-slate-400 hover:text-slate-300'}`}
+                  className={`p-1.5 rounded transition-all ${showAllDimensions ? isFabOS ? 'bg-[#FF6B35]/20 text-[#FF6B35]' : 'bg-cyan-500/20 text-cyan-400' : isFabOS ? 'bg-gray-200 text-gray-500 hover:text-gray-700' : 'bg-slate-600/50 text-slate-400 hover:text-slate-300'}`}
                   title={showAllDimensions ? 'Piilota kaikki mitat (D)' : 'Näytä kaikki mitat (D)'}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2541,7 +2551,7 @@ const FabOSProto = ({ onBack }) => {
             </div>
 
             {shapes.length === 0 ? (
-              <p className="text-xs text-slate-500 italic text-center py-4">Ei geometriaa. Piirrä muotoja työkaluilla.</p>
+              <p className={isFabOS ? "text-xs text-gray-500 italic text-center py-4" : "text-xs text-slate-500 italic text-center py-4"}>Ei geometriaa. Piirrä muotoja työkaluilla.</p>
             ) : (
               <div className="space-y-1 max-h-52 overflow-y-auto">
                 {shapes.map((shape, shapeIndex) => (
@@ -2550,29 +2560,29 @@ const FabOSProto = ({ onBack }) => {
                     <div
                       className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-all ${
                         selectedShape === shapeIndex && !selectedHole
-                          ? 'bg-cyan-500/20 border border-cyan-500/50'
+                          ? isFabOS ? 'bg-[#FF6B35]/20 border border-[#FF6B35]/50' : 'bg-cyan-500/20 border border-cyan-500/50'
                           : hoveredShape === shapeIndex
                           ? 'bg-orange-500/10 border border-orange-500/30'
-                          : 'hover:bg-slate-600/50 border border-transparent'
+                          : isFabOS ? 'hover:bg-gray-200 border border-transparent' : 'hover:bg-slate-600/50 border border-transparent'
                       }`}
                       onClick={() => selectShapeFromList(shapeIndex)}
                       onMouseEnter={() => setHoveredShape(shapeIndex)}
                       onMouseLeave={() => setHoveredShape(null)}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg">{getShapeIcon(shape.type)}</span>
+                        <span className={`text-lg ${isFabOS ? 'text-gray-700' : ''}`}>{getShapeIcon(shape.type)}</span>
                         <div className="min-w-0">
-                          <div className="text-sm font-medium truncate">
+                          <div className={`text-sm font-medium truncate ${isFabOS ? 'text-gray-800' : ''}`}>
                             {shape.type === 'rectangle' ? 'Suorakaide' : shape.type === 'circle' ? 'Ympyrä' : shape.type === 'polygon' ? 'Monikulmio' : 'L-muoto'}
                           </div>
-                          <div className="text-xs text-slate-400 truncate">{getShapeDescription(shape)}</div>
+                          <div className={isFabOS ? "text-xs text-gray-500 truncate" : "text-xs text-slate-400 truncate"}>{getShapeDescription(shape)}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
                         {/* Toggle dimensions visibility for this shape */}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleShapeDimensions(shapeIndex); }}
-                          className={`p-1 rounded transition-colors ${shape.showDimensions !== false ? 'text-cyan-400 hover:bg-cyan-500/20' : 'text-slate-500 hover:bg-slate-600'}`}
+                          className={`p-1 rounded transition-colors ${shape.showDimensions !== false ? isFabOS ? 'text-[#FF6B35] hover:bg-[#FF6B35]/20' : 'text-cyan-400 hover:bg-cyan-500/20' : isFabOS ? 'text-gray-400 hover:bg-gray-200' : 'text-slate-500 hover:bg-slate-600'}`}
                           title={shape.showDimensions !== false ? 'Piilota mitat' : 'Näytä mitat'}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2601,19 +2611,19 @@ const FabOSProto = ({ onBack }) => {
                         key={`hole-${shapeIndex}-${holeIndex}`}
                         className={`flex items-center justify-between px-2 py-1 ml-4 rounded cursor-pointer transition-all ${
                           selectedHole?.shapeIndex === shapeIndex && selectedHole?.holeIndex === holeIndex
-                            ? 'bg-amber-500/20 border border-amber-500/50'
+                            ? isFabOS ? 'bg-amber-100 border border-amber-400' : 'bg-amber-500/20 border border-amber-500/50'
                             : hoveredHole?.shapeIndex === shapeIndex && hoveredHole?.holeIndex === holeIndex
                             ? 'bg-orange-500/10 border border-orange-500/30'
-                            : 'hover:bg-slate-600/50 border border-transparent'
+                            : isFabOS ? 'hover:bg-gray-200 border border-transparent' : 'hover:bg-slate-600/50 border border-transparent'
                         }`}
                         onClick={() => selectHoleFromList(shapeIndex, holeIndex)}
                         onMouseEnter={() => setHoveredHole({ shapeIndex, holeIndex })}
                         onMouseLeave={() => setHoveredHole(null)}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-slate-500">└</span>
+                          <span className={isFabOS ? "text-gray-400" : "text-slate-500"}>└</span>
                           <span className="text-sm">◉</span>
-                          <div className="text-xs text-slate-300 truncate">{getHoleDescription(shape, hole)}</div>
+                          <div className={isFabOS ? "text-xs text-gray-600 truncate" : "text-xs text-slate-300 truncate"}>{getHoleDescription(shape, hole)}</div>
                         </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); deleteHole(shapeIndex, holeIndex); }}
@@ -2685,53 +2695,53 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Selected Hole */}
           {selectedHoleInfo && selectedHoleInfo.dims && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-amber-400 uppercase mb-2">
+            <div className={isFabOS ? "bg-amber-50 border border-amber-300 rounded-lg p-3" : "bg-amber-500/10 border border-amber-500/30 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-xs font-semibold text-amber-700 uppercase mb-2" : "text-xs font-semibold text-amber-400 uppercase mb-2"}>
                 {selectedHoleInfo.hole?.type === 'cutout' ? '⬡ Valittu aukko' : '◉ Valittu reikä'}
               </h3>
               <div className="space-y-2 text-sm">
                 {/* Cutout type info */}
                 {selectedHoleInfo.dims.type === 'cutout' && (
                   <>
-                    <div className="text-xs text-slate-400">
-                      <p>Tyyppi: <span className="text-orange-400 font-medium">Monikulmioaukko</span></p>
-                      <p>Koko: <span className="text-amber-300 font-mono">{selectedHoleInfo.dims.width?.toFixed(0) || 0} × {selectedHoleInfo.dims.height?.toFixed(0) || 0} mm</span></p>
+                    <div className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>
+                      <p>Tyyppi: <span className={isFabOS ? "text-orange-600 font-medium" : "text-orange-400 font-medium"}>Monikulmioaukko</span></p>
+                      <p>Koko: <span className={isFabOS ? "text-amber-700 font-mono" : "text-amber-300 font-mono"}>{selectedHoleInfo.dims.width?.toFixed(0) || 0} × {selectedHoleInfo.dims.height?.toFixed(0) || 0} mm</span></p>
                     </div>
-                    <div><label className="text-slate-400 text-xs">X siirtymä (mm)</label>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>X siirtymä (mm)</label>
                     <input type="number" value={(selectedHoleInfo.hole?.x || 0).toFixed(0)} onChange={(e) => {
                       const updated = [...shapes];
                       updated[selectedHole.shapeIndex].holes[selectedHole.holeIndex].x = parseFloat(e.target.value) || 0;
                       updateShapes(updated);
-                    }} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
-                    <div><label className="text-slate-400 text-xs">Y siirtymä (mm)</label>
+                    }} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Y siirtymä (mm)</label>
                     <input type="number" value={(selectedHoleInfo.hole?.y || 0).toFixed(0)} onChange={(e) => {
                       const updated = [...shapes];
                       updated[selectedHole.shapeIndex].holes[selectedHole.holeIndex].y = parseFloat(e.target.value) || 0;
                       updateShapes(updated);
-                    }} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
+                    }} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
                   </>
                 )}
                 {/* Circular hole */}
                 {selectedHoleInfo.dims.type !== 'cutout' && selectedHoleInfo.hole?.diameter != null && (
                   <div>
-                    <label className="text-slate-400 text-xs">Halkaisija (mm)</label>
-                    <input type="number" value={(selectedHoleInfo.hole.diameter || 10).toFixed(0)} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, diameter: parseFloat(e.target.value) || 1 })} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" />
+                    <label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Halkaisija (mm)</label>
+                    <input type="number" value={(selectedHoleInfo.hole.diameter || 10).toFixed(0)} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, diameter: parseFloat(e.target.value) || 1 })} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} />
                   </div>
                 )}
                 {selectedHoleInfo.dims.type === 'cartesian' && selectedHoleInfo.dims.fromBottom !== undefined && (
                   <>
-                    <div><label className="text-slate-400 text-xs">X vasemmasta (mm)</label>
-                    <input type="number" value={selectedHoleInfo.dims.fromLeft?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, fromLeft: parseFloat(e.target.value) || 0 })} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
-                    <div><label className="text-slate-400 text-xs">Y alhaalta (mm)</label>
-                    <input type="number" value={selectedHoleInfo.dims.fromBottom?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, fromBottom: parseFloat(e.target.value) || 0 })} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>X vasemmasta (mm)</label>
+                    <input type="number" value={selectedHoleInfo.dims.fromLeft?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, fromLeft: parseFloat(e.target.value) || 0 })} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Y alhaalta (mm)</label>
+                    <input type="number" value={selectedHoleInfo.dims.fromBottom?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, fromBottom: parseFloat(e.target.value) || 0 })} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
                   </>
                 )}
                 {selectedHoleInfo.dims.type === 'polar' && selectedHoleInfo.dims.distance !== undefined && (
                   <>
-                    <div><label className="text-slate-400 text-xs">Etäisyys (mm)</label>
-                    <input type="number" value={selectedHoleInfo.dims.distance?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, distance: parseFloat(e.target.value) || 0 })} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
-                    <div><label className="text-slate-400 text-xs">Kulma (°)</label>
-                    <input type="number" value={selectedHoleInfo.dims.angle?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, angle: parseFloat(e.target.value) || 0 })} className="w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300" /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Etäisyys (mm)</label>
+                    <input type="number" value={selectedHoleInfo.dims.distance?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, distance: parseFloat(e.target.value) || 0 })} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Kulma (°)</label>
+                    <input type="number" value={selectedHoleInfo.dims.angle?.toFixed(0) || 0} onChange={(e) => updateHoleFromDimensions(selectedHole.shapeIndex, selectedHole.holeIndex, { ...selectedHoleInfo.dims, angle: parseFloat(e.target.value) || 0 })} className={isFabOS ? "w-full mt-1 bg-white border border-amber-400 rounded px-3 py-1.5 text-sm font-mono text-amber-700" : "w-full mt-1 bg-slate-700 border border-amber-500/50 rounded px-3 py-1.5 text-sm font-mono text-amber-300"} /></div>
                   </>
                 )}
               </div>
@@ -2740,12 +2750,12 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Selected Polygon */}
           {selectedShape !== null && shapes[selectedShape]?.type === 'polygon' && !selectedHole && (
-            <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-cyan-400 uppercase mb-2">⬡ Monikulmio</h3>
+            <div className={isFabOS ? "bg-[#FF6B35]/5 border border-[#FF6B35]/30 rounded-lg p-3" : "bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-xs font-semibold text-[#FF6B35] uppercase mb-2" : "text-xs font-semibold text-cyan-400 uppercase mb-2"}>⬡ Monikulmio</h3>
 
               {/* Global Fillet Radius */}
-              <div className="mb-3 p-2 bg-green-500/10 border border-green-500/30 rounded">
-                <label className="text-green-400 text-xs font-medium flex items-center gap-1">
+              <div className={isFabOS ? "mb-3 p-2 bg-green-50 border border-green-300 rounded" : "mb-3 p-2 bg-green-500/10 border border-green-500/30 rounded"}>
+                <label className={isFabOS ? "text-green-700 text-xs font-medium flex items-center gap-1" : "text-green-400 text-xs font-medium flex items-center gap-1"}>
                   <span>◠</span> Kulmien pyöristys (R)
                 </label>
                 <div className="flex items-center gap-2 mt-1">
@@ -2760,7 +2770,7 @@ const FabOSProto = ({ onBack }) => {
                       updated[selectedShape].filletRadius = parseFloat(e.target.value) || 0;
                       updateShapes(updated);
                     }}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-green-500"
+                    className={isFabOS ? "flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500" : "flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-green-500"}
                   />
                   <input
                     type="number"
@@ -2773,18 +2783,18 @@ const FabOSProto = ({ onBack }) => {
                       updated[selectedShape].filletRadius = Math.max(0, parseFloat(e.target.value) || 0);
                       updateShapes(updated);
                     }}
-                    className="w-14 bg-slate-700 border border-green-500/50 rounded px-1.5 py-0.5 text-center font-mono text-green-300 text-xs"
+                    className={isFabOS ? "w-14 bg-white border border-green-400 rounded px-1.5 py-0.5 text-center font-mono text-green-700 text-xs" : "w-14 bg-slate-700 border border-green-500/50 rounded px-1.5 py-0.5 text-center font-mono text-green-300 text-xs"}
                   />
-                  <span className="text-green-400 text-xs">mm</span>
+                  <span className={isFabOS ? "text-green-700 text-xs" : "text-green-400 text-xs"}>mm</span>
                 </div>
               </div>
 
               {/* Points list */}
-              <h4 className="text-xs text-slate-400 mb-1">Pisteet:</h4>
+              <h4 className={isFabOS ? "text-xs text-gray-600 mb-1" : "text-xs text-slate-400 mb-1"}>Pisteet:</h4>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {shapes[selectedShape]?.points?.map((point, i) => (
                   <div key={i} className="flex items-center gap-1 text-xs">
-                    <span className="text-slate-500 w-4">{i + 1}.</span>
+                    <span className={isFabOS ? "text-gray-500 w-4" : "text-slate-500 w-4"}>{i + 1}.</span>
                     <input type="number" value={point.x.toFixed(0)}
                       onChange={(e) => {
                         if (!shapes[selectedShape]?.points?.[i]) return;
@@ -2792,7 +2802,7 @@ const FabOSProto = ({ onBack }) => {
                         updated[selectedShape].points[i].x = parseFloat(e.target.value) || 0;
                         updateShapes(updated);
                       }}
-                      className="w-12 bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-center font-mono text-cyan-300"
+                      className={isFabOS ? "w-12 bg-white border border-gray-300 rounded px-1 py-0.5 text-center font-mono text-[#FF6B35]" : "w-12 bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-center font-mono text-cyan-300"}
                       title="X"
                     />
                     <input type="number" value={point.y.toFixed(0)}
@@ -2802,10 +2812,10 @@ const FabOSProto = ({ onBack }) => {
                         updated[selectedShape].points[i].y = parseFloat(e.target.value) || 0;
                         updateShapes(updated);
                       }}
-                      className="w-12 bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-center font-mono text-cyan-300"
+                      className={isFabOS ? "w-12 bg-white border border-gray-300 rounded px-1 py-0.5 text-center font-mono text-[#FF6B35]" : "w-12 bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-center font-mono text-cyan-300"}
                       title="Y"
                     />
-                    <span className="text-green-400" title="Kulman pyöristys">R:</span>
+                    <span className={isFabOS ? "text-green-600" : "text-green-400"} title="Kulman pyöristys">R:</span>
                     <input type="number" value={point.fillet || 0}
                       onChange={(e) => {
                         if (!shapes[selectedShape]?.points?.[i]) return;
@@ -2813,7 +2823,7 @@ const FabOSProto = ({ onBack }) => {
                         updated[selectedShape].points[i].fillet = Math.max(0, parseFloat(e.target.value) || 0);
                         updateShapes(updated);
                       }}
-                      className="w-10 bg-slate-700 border border-green-500/30 rounded px-1 py-0.5 text-center font-mono text-green-300"
+                      className={isFabOS ? "w-10 bg-white border border-green-400 rounded px-1 py-0.5 text-center font-mono text-green-600" : "w-10 bg-slate-700 border border-green-500/30 rounded px-1 py-0.5 text-center font-mono text-green-300"}
                       title="Tämän kulman pyöristys (0 = käytä globaalia)"
                       min="0"
                     />
@@ -2979,9 +2989,9 @@ const FabOSProto = ({ onBack }) => {
               )}
 
               {shapes[selectedShape]?.points && (
-                <div className="mt-2 pt-2 border-t border-slate-600 text-xs text-slate-400">
-                  <p>Pinta-ala: <span className="text-cyan-400 font-mono">{(calculatePolygonArea(shapes[selectedShape]?.points || []) / 100).toFixed(1)} cm²</span></p>
-                  <p>Piiri: <span className="text-cyan-400 font-mono">{calculatePolygonPerimeter(shapes[selectedShape]?.points || []).toFixed(0)} mm</span></p>
+                <div className={isFabOS ? "mt-2 pt-2 border-t border-gray-300 text-xs text-gray-600" : "mt-2 pt-2 border-t border-slate-600 text-xs text-slate-400"}>
+                  <p>Pinta-ala: <span className={isFabOS ? "text-[#FF6B35] font-mono" : "text-cyan-400 font-mono"}>{(calculatePolygonArea(shapes[selectedShape]?.points || []) / 100).toFixed(1)} cm²</span></p>
+                  <p>Piiri: <span className={isFabOS ? "text-[#FF6B35] font-mono" : "text-cyan-400 font-mono"}>{calculatePolygonPerimeter(shapes[selectedShape]?.points || []).toFixed(0)} mm</span></p>
                 </div>
               )}
             </div>
@@ -2989,23 +2999,23 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Selected Shape (non-polygon) */}
           {selectedShape !== null && shapes[selectedShape] && !selectedHole && shapes[selectedShape].type !== 'polygon' && (
-            <div className="bg-slate-700/50 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase mb-2">Valittu muoto</h3>
+            <div className={isFabOS ? "bg-gray-100 rounded-lg p-3" : "bg-slate-700/50 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-xs font-semibold text-gray-600 uppercase mb-2" : "text-xs font-semibold text-slate-400 uppercase mb-2"}>Valittu muoto</h3>
               <div className="space-y-2 text-sm">
                 {shapes[selectedShape].type === 'rectangle' && (
                   <div className="grid grid-cols-2 gap-2">
-                    <div><label className="text-slate-400 text-xs">Leveys (mm)</label><input type="number" value={shapes[selectedShape].width.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'width', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
-                    <div><label className="text-slate-400 text-xs">Korkeus (mm)</label><input type="number" value={shapes[selectedShape].height.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'height', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Leveys (mm)</label><input type="number" value={shapes[selectedShape].width.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'width', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Korkeus (mm)</label><input type="number" value={shapes[selectedShape].height.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'height', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
                   </div>
                 )}
                 {shapes[selectedShape].type === 'circle' && (
-                  <div><label className="text-slate-400 text-xs">Säde (mm)</label><input type="number" value={shapes[selectedShape].radius.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'radius', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
+                  <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Säde (mm)</label><input type="number" value={shapes[selectedShape].radius.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'radius', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
                 )}
                 {shapes[selectedShape].type === 'lshape' && (
                   <div className="grid grid-cols-3 gap-2">
-                    <div><label className="text-slate-400 text-xs">Leveys</label><input type="number" value={shapes[selectedShape].width.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'width', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
-                    <div><label className="text-slate-400 text-xs">Korkeus</label><input type="number" value={shapes[selectedShape].height.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'height', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
-                    <div><label className="text-slate-400 text-xs">Laippa</label><input type="number" value={shapes[selectedShape].legWidth.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'legWidth', e.target.value)} className="w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono" /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Leveys</label><input type="number" value={shapes[selectedShape].width.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'width', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Korkeus</label><input type="number" value={shapes[selectedShape].height.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'height', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
+                    <div><label className={isFabOS ? "text-gray-600 text-xs" : "text-slate-400 text-xs"}>Laippa</label><input type="number" value={shapes[selectedShape].legWidth.toFixed(0)} onChange={(e) => updateShapeDimension(selectedShape, 'legWidth', e.target.value)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm font-mono text-gray-800" : "w-full mt-1 bg-slate-600 border border-slate-500 rounded px-2 py-1.5 text-sm font-mono"} /></div>
                   </div>
                 )}
               </div>
@@ -3014,8 +3024,8 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Add Hole Section - shown when any shape is selected */}
           {selectedShape !== null && shapes[selectedShape] && !selectedHole && !isDrawingCutout && (
-            <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-orange-400 uppercase mb-2">✂️ Lisää aukko</h3>
+            <div className={isFabOS ? "bg-orange-50 border border-orange-300 rounded-lg p-3" : "bg-orange-500/10 border border-orange-500/30 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-xs font-semibold text-orange-600 uppercase mb-2" : "text-xs font-semibold text-orange-400 uppercase mb-2"}>✂️ Lisää aukko</h3>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
@@ -3023,8 +3033,8 @@ const FabOSProto = ({ onBack }) => {
                   }}
                   className={`p-2 rounded-lg text-center transition-all flex flex-col items-center gap-1 ${
                     tool === 'hole'
-                      ? 'bg-orange-500/30 border-2 border-orange-500 text-orange-300'
-                      : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700 text-slate-300'
+                      ? isFabOS ? 'bg-orange-100 border-2 border-orange-500 text-orange-700' : 'bg-orange-500/30 border-2 border-orange-500 text-orange-300'
+                      : isFabOS ? 'bg-white border-2 border-gray-300 hover:bg-gray-100 text-gray-700' : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700 text-slate-300'
                   }`}
                 >
                   <span className="text-lg">◉</span>
@@ -3032,7 +3042,7 @@ const FabOSProto = ({ onBack }) => {
                 </button>
                 <button
                   onClick={() => startCutoutDrawing(selectedShape)}
-                  className="p-2 rounded-lg text-center transition-all flex flex-col items-center gap-1 bg-slate-700/50 border-2 border-transparent hover:bg-slate-700 hover:border-orange-500/50 text-slate-300"
+                  className={isFabOS ? "p-2 rounded-lg text-center transition-all flex flex-col items-center gap-1 bg-white border-2 border-gray-300 hover:bg-gray-100 hover:border-orange-400 text-gray-700" : "p-2 rounded-lg text-center transition-all flex flex-col items-center gap-1 bg-slate-700/50 border-2 border-transparent hover:bg-slate-700 hover:border-orange-500/50 text-slate-300"}
                 >
                   <span className="text-lg">⬡</span>
                   <span className="text-xs">Monikulmio</span>
@@ -3040,9 +3050,9 @@ const FabOSProto = ({ onBack }) => {
               </div>
               {tool === 'hole' && (
                 <div className="mt-2">
-                  <label className="text-xs text-slate-400">Reiän Ø (mm)</label>
-                  <input type="number" value={holeSize} onChange={(e) => setHoleSize(parseFloat(e.target.value) || 10)} className="w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm" min={1} />
-                  <p className="text-xs text-slate-500 mt-1">Klikkaa muotoa lisätäksesi reikä</p>
+                  <label className={isFabOS ? "text-xs text-gray-600" : "text-xs text-slate-400"}>Reiän Ø (mm)</label>
+                  <input type="number" value={holeSize} onChange={(e) => setHoleSize(parseFloat(e.target.value) || 10)} className={isFabOS ? "w-full mt-1 bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-800" : "w-full mt-1 bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm"} min={1} />
+                  <p className={isFabOS ? "text-xs text-gray-500 mt-1" : "text-xs text-slate-500 mt-1"}>Klikkaa muotoa lisätäksesi reikä</p>
                 </div>
               )}
             </div>
@@ -3050,12 +3060,12 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Cutout Drawing Mode Indicator */}
           {isDrawingCutout && cutoutTargetShape !== null && (
-            <div className="bg-orange-500/20 border-2 border-orange-500 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-orange-400 uppercase mb-2">✂️ Piirretään aukkoa</h3>
-              <p className="text-xs text-orange-300 mb-2">
+            <div className={isFabOS ? "bg-orange-100 border-2 border-orange-500 rounded-lg p-3" : "bg-orange-500/20 border-2 border-orange-500 rounded-lg p-3"}>
+              <h3 className={isFabOS ? "text-xs font-semibold text-orange-700 uppercase mb-2" : "text-xs font-semibold text-orange-400 uppercase mb-2"}>✂️ Piirretään aukkoa</h3>
+              <p className={isFabOS ? "text-xs text-orange-700 mb-2" : "text-xs text-orange-300 mb-2"}>
                 Klikkaa lisätäksesi pisteitä. {cutoutPoints.length} pistettä.
               </p>
-              <p className="text-xs text-slate-400 mb-3">
+              <p className={isFabOS ? "text-xs text-gray-600 mb-3" : "text-xs text-slate-400 mb-3"}>
                 • Vähintään 3 pistettä vaaditaan<br/>
                 • Klikkaa ensimmäistä pistettä sulkeaksesi<br/>
                 • Enter = sulje, Esc = peruuta
@@ -3064,13 +3074,13 @@ const FabOSProto = ({ onBack }) => {
                 <button
                   onClick={closeCutout}
                   disabled={cutoutPoints.length < 3}
-                  className="flex-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-400 disabled:bg-slate-600 disabled:text-slate-400 text-white text-xs rounded font-medium transition-colors"
+                  className={isFabOS ? "flex-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-400 disabled:bg-gray-300 disabled:text-gray-500 text-white text-xs rounded font-medium transition-colors" : "flex-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-400 disabled:bg-slate-600 disabled:text-slate-400 text-white text-xs rounded font-medium transition-colors"}
                 >
                   ✓ Valmis
                 </button>
                 <button
                   onClick={cancelCutout}
-                  className="flex-1 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white text-xs rounded font-medium transition-colors"
+                  className={isFabOS ? "flex-1 px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded font-medium transition-colors" : "flex-1 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white text-xs rounded font-medium transition-colors"}
                 >
                   ✕ Peruuta
                 </button>
