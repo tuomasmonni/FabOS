@@ -38,7 +38,7 @@ const demoVersions = [
     description: 'Alkuperäinen putkentaivutusmoduuli kaikilla perustoiminnoilla.',
     version_number: '1.0.0',
     version_type: 'stable',
-    author_name: 'Levykauppa Team',
+    author_name: 'FabOS Team',
     votes_up: 45,
     votes_down: 2,
     view_count: 1250,

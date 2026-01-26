@@ -77,7 +77,7 @@ const MODULE_CONFIGS = {
 
 // System prompt AI:lle
 const getSystemPrompt = (moduleId, currentConfig) => `
-Olet Levykauppa-sovelluksen kehitysassistentti. Autat käyttäjiä muokkaamaan
+Olet FabOS-alustan kehitysassistentti. Autat käyttäjiä muokkaamaan
 ${MODULE_CONFIGS[moduleId]?.name || moduleId}-moduulia.
 
 NYKYINEN KONFIGURAATIO:

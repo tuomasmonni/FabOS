@@ -1,5 +1,5 @@
 -- ============================================================================
--- LEVYKAUPPA AI VERSION PLATFORM - DATABASE SCHEMA
+-- FABOS AI VERSION PLATFORM - DATABASE SCHEMA
 -- ============================================================================
 -- Tämä schema luo taulut käyttäjien luomien versioiden hallintaan
 -- Aloitetaan PipeBendingApp-moduulilla testilaboratoriona
@@ -330,7 +330,7 @@ INSERT INTO versions (
         }
     }',
     'stable',
-    'Levykauppa Team'
+    'FabOS Team'
 ) ON CONFLICT (id) DO NOTHING;
 
 -- Päivitä moduulin stable-versio

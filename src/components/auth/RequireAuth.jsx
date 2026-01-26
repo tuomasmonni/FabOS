@@ -57,7 +57,7 @@ export default function RequireAuth({ children }) {
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                   <span className="text-white text-xl">⚙️</span>
                 </div>
-                <span className="text-xl font-bold text-white">Levykauppa</span>
+                <span className="text-xl font-bold text-white">FabOS</span>
               </div>
             )}
           </div>
@@ -79,7 +79,7 @@ export default function RequireAuth({ children }) {
             <h1 className={`text-3xl font-bold mb-4 ${
               isLegacy ? 'text-white' : 'text-gray-900'
             }`}>
-              Tervetuloa {isFabOS ? 'FabOS' : 'Levykauppa'}-alustalle!
+              Tervetuloa FabOS-alustalle!
             </h1>
 
             {/* Description */}
@@ -145,7 +145,7 @@ export default function RequireAuth({ children }) {
           <p className={`text-sm ${
             isLegacy ? 'text-slate-500' : 'text-gray-500'
           }`}>
-            {isFabOS ? 'FabOS - Valmistuksen tulevaisuus' : '© 2025 Levykauppa'}
+© 2025 FabOS - Valmistuksen tulevaisuus
           </p>
         </footer>
       </div>

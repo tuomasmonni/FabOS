@@ -1,4 +1,4 @@
-# Claude Development Instructions for FabOS/Levykauppa
+# Claude Development Instructions for FabOS
 
 ## IMPORTANT: Development Focus
 

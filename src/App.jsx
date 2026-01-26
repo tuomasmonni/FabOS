@@ -54,15 +54,15 @@ const LoginPage = () => {
   const { openLoginModal, openSignupModal } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="min-h-screen bg-[#1A1A2E] flex flex-col">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-slate-700">
+      <header className="px-6 py-4 border-b border-gray-700">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <span className="text-white text-xl">⚙️</span>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
+              <span className="text-2xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
             </div>
-            <span className="text-xl font-bold text-white">Levykauppa</span>
           </div>
         </div>
       </header>
@@ -71,23 +71,26 @@ const LoginPage = () => {
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-lg w-full text-center">
           {/* Logo/Icon */}
-          <div className="w-32 h-32 mx-auto mb-8 rounded-3xl flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30">
-            <span className="text-6xl">🔐</span>
+          <div className="w-32 h-32 mx-auto mb-8 rounded-3xl flex items-center justify-center bg-[#FF6B35]/10 border border-[#FF6B35]/30">
+            <div className="text-center">
+              <span className="text-4xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
+              <span className="text-4xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
+            </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl font-bold mb-4 text-white">
-            Tervetuloa Levykauppa-alustalle!
+          <h1 className="text-3xl font-bold mb-4 text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            Tervetuloa FabOS-alustalle!
           </h1>
 
           {/* Description */}
-          <p className="text-lg mb-8 text-slate-400">
+          <p className="text-lg mb-8 text-gray-400">
             Kirjaudu sisään tai luo uusi tili käyttääksesi sovellusta.
           </p>
 
           {/* Features box */}
-          <div className="p-6 rounded-2xl mb-8 text-left bg-slate-800/50 border border-slate-700">
-            <h3 className="text-sm font-semibold mb-4 text-slate-300">
+          <div className="p-6 rounded-2xl mb-8 text-left bg-white/5 border border-gray-700">
+            <h3 className="text-sm font-semibold mb-4 text-gray-300">
               Rekisteröityneille käyttäjille:
             </h3>
             <ul className="space-y-3">
@@ -98,7 +101,7 @@ const LoginPage = () => {
                 { icon: '⭐', text: 'Mahdollisuus äänestää ja arvostella versioita' },
                 { icon: '📧', text: 'Sähköposti-ilmoitukset päivityksistä' }
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-slate-400">
+                <li key={i} className="flex items-center gap-3 text-sm text-gray-400">
                   <span className="text-lg">{item.icon}</span>
                   {item.text}
                 </li>
@@ -110,29 +113,29 @@ const LoginPage = () => {
           <div className="space-y-3">
             <button
               onClick={() => openLoginModal('password')}
-              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
+              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-[#FF6B35] hover:bg-[#e5612f] text-white shadow-lg shadow-[#FF6B35]/25"
             >
               Kirjaudu sisään
             </button>
 
             <button
               onClick={openSignupModal}
-              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-white/10 hover:bg-white/20 text-white border border-gray-600"
             >
               Luo uusi tili
             </button>
           </div>
 
-          <p className="text-sm mt-4 text-slate-500">
+          <p className="text-sm mt-4 text-gray-500">
             Rekisteröityminen on ilmaista ja vie vain hetken.
           </p>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-4 text-center border-t border-slate-700">
-        <p className="text-sm text-slate-500">
-          © 2025 Levykauppa
+      <footer className="px-6 py-4 text-center border-t border-gray-700">
+        <p className="text-sm text-gray-500">
+          © 2025 FabOS - Valmistuksen tulevaisuus
         </p>
       </footer>
     </div>
