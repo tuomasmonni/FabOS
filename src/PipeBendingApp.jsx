@@ -62,7 +62,7 @@ const DEFAULT_PIPE_PARAMS = {
 // ============================================
 // 3D PUTKI KOMPONENTTI
 // ============================================
-function Pipe3D({ diameter, wallThickness, bends, startStraight, bendData }) {
+function Pipe3D({ diameter, wallThickness, bends, startStraight, bendData, color = '#888888' }) {
   const meshRef = useRef();
 
   // Luo putken geometria taivutuksilla
@@ -152,7 +152,7 @@ function Pipe3D({ diameter, wallThickness, bends, startStraight, bendData }) {
   return (
     <mesh ref={meshRef} geometry={geometry}>
       <meshStandardMaterial
-        color="#888888"
+        color={color}
         metalness={0.8}
         roughness={0.3}
         side={THREE.DoubleSide}
@@ -164,7 +164,7 @@ function Pipe3D({ diameter, wallThickness, bends, startStraight, bendData }) {
 // ============================================
 // 3D NÄKYMÄ
 // ============================================
-function Preview3D({ diameter, wallThickness, startStraight, bendData }) {
+function Preview3D({ diameter, wallThickness, startStraight, bendData, color }) {
   return (
     <div className="w-full h-full bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
       <Canvas>
@@ -180,6 +180,7 @@ function Preview3D({ diameter, wallThickness, startStraight, bendData }) {
           wallThickness={wallThickness}
           startStraight={startStraight}
           bendData={bendData}
+          color={color}
         />
 
         <Grid
@@ -211,6 +212,7 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
 
   const diameter = config?.defaults?.pipeDiameter || 25;
   const wallThickness = config?.defaults?.wallThickness || 2;
+  const pipeColor = config?.ui?.pipeColor || '#888888';
 
   return (
     <div className={`h-full flex flex-col ${isFabOS ? 'bg-gray-50' : 'bg-slate-900'}`}>
@@ -230,7 +232,7 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
           </div>
 
           {/* Feature badges */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {config?.features?.['3dVisualization'] && (
               <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'}`}>
                 3D
@@ -246,6 +248,14 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
                 {config?.features?.maxBends || 10} taivutusta
               </span>
             )}
+            {/* Väri-indikaattori */}
+            {pipeColor !== '#888888' && (
+              <span
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: pipeColor }}
+                title={`Väri: ${pipeColor}`}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -258,6 +268,7 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
             wallThickness={wallThickness}
             startStraight={100}
             bendData={demoBendData}
+            color={pipeColor}
           />
         </div>
       </div>
