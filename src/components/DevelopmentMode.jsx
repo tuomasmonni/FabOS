@@ -66,11 +66,11 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
           </div>
         )}
 
-        {/* Proposed changes with TEST button */}
+        {/* Proposed changes - Tehdäänkö uusi versio? */}
         {hasProposal && (
           <div className={`mt-3 pt-3 border-t ${isFabOS ? 'border-gray-200' : 'border-slate-600'}`}>
             <p className={`text-xs font-medium mb-2 ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`}>
-              Ehdotetut muutokset:
+              Tehdäänkö uusi versio?
             </p>
             <p className={`text-xs mb-3 ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
               {message.proposedChanges.summary}
@@ -82,11 +82,11 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
                 onClick={() => onTest?.(message)}
                 className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${
                   isFabOS
-                    ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                    ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
                     : 'bg-emerald-500 hover:bg-emerald-400 text-white'
                 }`}
               >
-                <span>▶</span> Testaa muutosta
+                Kyllä, tee versio!
               </button>
               <button
                 onClick={() => onReject?.(message)}
@@ -96,7 +96,7 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
                     : 'bg-slate-600 hover:bg-slate-500 text-slate-300'
                 }`}
               >
-                Hylkää
+                Ei kiitos
               </button>
             </div>
           </div>
@@ -456,7 +456,7 @@ export default function DevelopmentMode({
     // Add system message
     setMessages(prev => [...prev, {
       role: 'system',
-      content: `🧪 Testataan muutosta "${message.versionName || 'Nimetön'}"...\n\nKokeile muutosta oikealla olevassa esikatselussa. Kun olet valmis, anna arvio alla.`,
+      content: `🧪 Muutos "${message.versionName || 'Nimetön'}" on nyt aktiivisena!\n\nNäet muutokset oikealla esikatselussa. Voit tallentaa version tai jatkaa kehitystä.`,
       timestamp: new Date().toISOString()
     }]);
   };
