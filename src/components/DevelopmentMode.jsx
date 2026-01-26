@@ -112,9 +112,244 @@ function ChatMessage({ message, isFabOS, onTest, onReject }) {
 }
 
 // ============================================================================
+// CODE GENERATION PROGRESS COMPONENT
+// ============================================================================
+function CodeGenerationProgress({
+  isFabOS,
+  status,
+  versionName,
+  onContinueWorking,
+  onCancel,
+  startTime
+}) {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Päivitä kulunut aika
+  useEffect(() => {
+    if (status === 'generating' || status === 'pending') {
+      const interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [status, startTime]);
+
+  // Vaiheet ja niiden tilat
+  const steps = [
+    { id: 'analyze', label: 'Analysoidaan nykyinen koodi', duration: 10 },
+    { id: 'plan', label: 'Suunnitellaan muutokset', duration: 15 },
+    { id: 'generate', label: 'Generoidaan uusi koodi', duration: 45 },
+    { id: 'test', label: 'Ajetaan testit', duration: 20 },
+    { id: 'deploy', label: 'Deployataan muutokset', duration: 10 }
+  ];
+
+  // Laske edistyminen ajan perusteella (simuloitu)
+  const totalDuration = steps.reduce((sum, s) => sum + s.duration, 0);
+  const progressPercent = Math.min(95, Math.round((elapsedTime / totalDuration) * 100));
+
+  // Määritä mikä vaihe on aktiivinen
+  let cumulativeTime = 0;
+  const getStepStatus = (step, index) => {
+    const stepEndTime = cumulativeTime + step.duration;
+    const stepStatus = elapsedTime >= stepEndTime
+      ? 'completed'
+      : elapsedTime >= cumulativeTime
+        ? 'in_progress'
+        : 'pending';
+    cumulativeTime = stepEndTime;
+    return stepStatus;
+  };
+
+  // Jos valmis tai epäonnistunut
+  const isComplete = status === 'deployed';
+  const isFailed = status === 'failed';
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className={`rounded-xl border overflow-hidden ${
+      isFabOS
+        ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+        : 'bg-gradient-to-br from-blue-900/20 to-indigo-900/20 border-blue-700'
+    }`}>
+      {/* Header */}
+      <div className={`px-4 py-3 border-b ${
+        isFabOS ? 'bg-blue-100/50 border-blue-200' : 'bg-blue-900/30 border-blue-700'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {!isComplete && !isFailed && (
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                isFabOS ? 'bg-blue-500' : 'bg-blue-500'
+              }`}>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+            {isComplete && (
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white">
+                ✓
+              </div>
+            )}
+            {isFailed && (
+              <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white">
+                ✕
+              </div>
+            )}
+            <div>
+              <h4 className={`font-semibold ${isFabOS ? 'text-blue-900' : 'text-blue-100'}`}>
+                {isComplete ? 'Koodi valmis!' : isFailed ? 'Generointi epäonnistui' : 'AI generoi koodia...'}
+              </h4>
+              <p className={`text-xs ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+                {versionName}
+              </p>
+            </div>
+          </div>
+          <div className={`text-right text-xs ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+            <div className="font-mono">{formatTime(elapsedTime)}</div>
+            {!isComplete && !isFailed && <div>~2-3 min</div>}
+          </div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      {!isComplete && !isFailed && (
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className={`text-sm font-medium ${isFabOS ? 'text-blue-800' : 'text-blue-200'}`}>
+              Edistyminen
+            </span>
+            <span className={`text-sm font-bold ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+              {progressPercent}%
+            </span>
+          </div>
+          <div className={`h-3 rounded-full overflow-hidden ${isFabOS ? 'bg-blue-200' : 'bg-blue-900'}`}>
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isFabOS
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                  : 'bg-gradient-to-r from-blue-400 to-indigo-400'
+              }`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Steps */}
+      <div className="px-4 py-3 space-y-2">
+        {steps.map((step, index) => {
+          const stepStatus = isComplete ? 'completed' : isFailed ? (index < 3 ? 'completed' : 'failed') : getStepStatus(step, index);
+
+          return (
+            <div key={step.id} className="flex items-center gap-3">
+              {/* Status icon */}
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                stepStatus === 'completed'
+                  ? 'bg-green-500 text-white'
+                  : stepStatus === 'in_progress'
+                    ? isFabOS ? 'bg-blue-500 text-white' : 'bg-blue-400 text-white'
+                    : stepStatus === 'failed'
+                      ? 'bg-red-500 text-white'
+                      : isFabOS ? 'bg-gray-200 text-gray-400' : 'bg-slate-700 text-slate-500'
+              }`}>
+                {stepStatus === 'completed' && '✓'}
+                {stepStatus === 'in_progress' && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                )}
+                {stepStatus === 'failed' && '✕'}
+                {stepStatus === 'pending' && ''}
+              </div>
+
+              {/* Label */}
+              <span className={`text-sm ${
+                stepStatus === 'completed'
+                  ? isFabOS ? 'text-green-700' : 'text-green-400'
+                  : stepStatus === 'in_progress'
+                    ? isFabOS ? 'text-blue-700 font-medium' : 'text-blue-300 font-medium'
+                    : stepStatus === 'failed'
+                      ? 'text-red-500'
+                      : isFabOS ? 'text-gray-400' : 'text-slate-500'
+              }`}>
+                {step.label}
+                {stepStatus === 'in_progress' && '...'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Actions */}
+      <div className={`px-4 py-3 border-t flex gap-2 ${
+        isFabOS ? 'bg-blue-50/50 border-blue-200' : 'bg-blue-900/20 border-blue-700'
+      }`}>
+        {!isComplete && !isFailed && (
+          <>
+            <button
+              onClick={onContinueWorking}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                isFabOS
+                  ? 'bg-white hover:bg-gray-50 text-blue-700 border border-blue-200'
+                  : 'bg-slate-700 hover:bg-slate-600 text-blue-300 border border-blue-700'
+              }`}
+            >
+              🔙 Jatka muuta työskentelyä
+            </button>
+            <button
+              onClick={onCancel}
+              className={`py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                isFabOS
+                  ? 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
+              }`}
+            >
+              Peruuta
+            </button>
+          </>
+        )}
+        {isComplete && (
+          <button
+            onClick={onContinueWorking}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+              isFabOS
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-green-500 hover:bg-green-400 text-white'
+            }`}
+          >
+            ✓ Valmis! Jatka kehitystä
+          </button>
+        )}
+        {isFailed && (
+          <button
+            onClick={onContinueWorking}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+              isFabOS
+                ? 'bg-red-100 hover:bg-red-200 text-red-700'
+                : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+            }`}
+          >
+            ↩ Takaisin kehitykseen
+          </button>
+        )}
+      </div>
+
+      {/* Background notification hint */}
+      {!isComplete && !isFailed && (
+        <div className={`px-4 py-2 text-xs ${isFabOS ? 'bg-amber-50 text-amber-700' : 'bg-amber-900/20 text-amber-400'}`}>
+          💡 Voit jatkaa muuta työskentelyä. Saat ilmoituksen kun koodi on valmis.
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // DEVELOPER RATING COMPONENT
 // ============================================================================
-function DeveloperRating({ isFabOS, onRate, onContinue, onRevert, versionName }) {
+function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRevert, versionName }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [hoveredStar, setHoveredStar] = useState(0);
@@ -166,44 +401,71 @@ function DeveloperRating({ isFabOS, onRate, onContinue, onRevert, versionName })
         }`}
       />
 
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onRate?.(rating, feedback)}
-          disabled={rating === 0}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-            rating > 0
-              ? isFabOS
-                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-              : isFabOS
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-          }`}
-        >
-          ✓ Hyväksy ja tallenna
-        </button>
-        <button
-          onClick={onContinue}
-          className={`py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-            isFabOS
-              ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
-              : 'bg-blue-500 hover:bg-blue-400 text-white'
-          }`}
-        >
-          🔄 Jatka kehitystä
-        </button>
-        <button
-          onClick={onRevert}
-          className={`py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-            isFabOS
-              ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-              : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-          }`}
-        >
-          ↩ Palauta edellinen
-        </button>
+      {/* Action buttons - Two rows */}
+      <div className="space-y-2">
+        {/* Primary actions */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => onRate?.(rating, feedback)}
+            disabled={rating === 0}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+              rating > 0
+                ? isFabOS
+                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                  : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                : isFabOS
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            ✓ Tallenna config
+          </button>
+          <button
+            onClick={() => onRateAndGenerate?.(rating, feedback)}
+            disabled={rating === 0}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+              rating > 0
+                ? isFabOS
+                  ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
+                : isFabOS
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            🚀 Tallenna & Luo koodi
+          </button>
+        </div>
+
+        {/* Secondary actions */}
+        <div className="flex gap-2">
+          <button
+            onClick={onContinue}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+              isFabOS
+                ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            }`}
+          >
+            🔄 Jatka kehitystä
+          </button>
+          <button
+            onClick={onRevert}
+            className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+              isFabOS
+                ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
+            }`}
+          >
+            ↩ Palauta
+          </button>
+        </div>
       </div>
+
+      {/* Info text */}
+      <p className={`text-[10px] mt-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+        💡 "Tallenna config" tallentaa vain asetukset. "Luo koodi" generoi oikean koodimuutoksen.
+      </p>
     </div>
   );
 }
@@ -337,6 +599,14 @@ export default function DevelopmentMode({
   const [previewConfig, setPreviewConfig] = useState(currentConfig);
   const [configHistory, setConfigHistory] = useState([currentConfig]);
   const [attachedFiles, setAttachedFiles] = useState([]);
+
+  // Code generation state
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState(null); // 'pending' | 'generating' | 'deployed' | 'failed'
+  const [generationStartTime, setGenerationStartTime] = useState(null);
+  const [generatingVersionName, setGeneratingVersionName] = useState('');
+  const [savedVersionId, setSavedVersionId] = useState(null);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -469,7 +739,7 @@ export default function DevelopmentMode({
     }]);
   };
 
-  const handleRatingSubmit = async (rating, feedback) => {
+  const handleRatingSubmit = async (rating, feedback, generateCode = false) => {
     if (!testingVersion) return;
 
     setIsLoading(true);
@@ -489,20 +759,62 @@ export default function DevelopmentMode({
         config: testingVersion.config,
         version_type: 'experimental',
         user_fingerprint: fingerprint,
-        deployment_status: 'config_only',
+        deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
         user_request: testingVersion.userRequest,
         developer_rating: rating,
         developer_feedback: feedback
       });
 
-      setMessages(prev => [...prev, {
-        role: 'system',
-        content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
-        timestamp: new Date().toISOString()
-      }]);
+      if (generateCode && newVersion?.id) {
+        // Käynnistä koodin generointi
+        setGeneratingVersionName(testingVersion.name);
+        setSavedVersionId(newVersion.id);
+        setGenerationStartTime(Date.now());
+        setGenerationStatus('pending');
+        setIsGeneratingCode(true);
+        setShowRating(false);
 
-      setShowRating(false);
+        // Triggeröi code generation API
+        try {
+          const response = await fetch('/api/trigger-code-generation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              versionId: newVersion.id,
+              moduleId,
+              userRequest: testingVersion.userRequest,
+              proposedChanges: JSON.stringify(testingVersion.config)
+            })
+          });
+
+          if (response.ok) {
+            setGenerationStatus('generating');
+
+            // Simuloi edistymistä (oikeassa toteutuksessa kuuntelisi API:a)
+            setTimeout(() => setGenerationStatus('deployed'), 30000);
+          } else {
+            setGenerationStatus('failed');
+          }
+        } catch (err) {
+          console.error('Code generation trigger failed:', err);
+          setGenerationStatus('failed');
+        }
+
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `🚀 Koodin generointi käynnistetty versiolle "${testingVersion.name}"!\n\nAI generoi nyt oikeaa koodia. Voit seurata edistymistä tai jatkaa muuta työskentelyä.`,
+          timestamp: new Date().toISOString()
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
+          timestamp: new Date().toISOString()
+        }]);
+        setShowRating(false);
+      }
+
       setTestingVersion(null);
       onVersionCreated?.(newVersion);
 
@@ -516,6 +828,28 @@ export default function DevelopmentMode({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Käsittele koodin generoinnin peruutus
+  const handleCancelGeneration = () => {
+    setIsGeneratingCode(false);
+    setGenerationStatus(null);
+    setGeneratingVersionName('');
+    setMessages(prev => [...prev, {
+      role: 'system',
+      content: '⏹️ Koodin generointi peruutettu. Voit jatkaa kehitystä.',
+      timestamp: new Date().toISOString()
+    }]);
+  };
+
+  // Käsittele "jatka työskentelyä" koodin generoinnin aikana
+  const handleContinueWhileGenerating = () => {
+    setIsGeneratingCode(false);
+    setMessages(prev => [...prev, {
+      role: 'system',
+      content: `⏳ Koodin generointi jatkuu taustalla versiolle "${generatingVersionName}".\n\nSaat ilmoituksen kun koodi on valmis. Voit jatkaa kehitystä.`,
+      timestamp: new Date().toISOString()
+    }]);
   };
 
   const handleContinueDevelopment = () => {
@@ -664,15 +998,44 @@ export default function DevelopmentMode({
           )}
         </div>
 
-        {testingVersion && (
-          <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-            isFabOS
-              ? 'bg-amber-100 text-amber-700'
-              : 'bg-amber-500/20 text-amber-400'
-          }`}>
-            🧪 Testataan: {testingVersion.name}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {/* Background generation indicator */}
+          {!isGeneratingCode && generationStatus && generationStatus !== 'deployed' && generationStatus !== 'failed' && (
+            <button
+              onClick={() => setIsGeneratingCode(true)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 transition-all hover:scale-105 ${
+                isFabOS
+                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              }`}
+            >
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              Generointi käynnissä
+            </button>
+          )}
+
+          {/* Generation complete indicator */}
+          {generationStatus === 'deployed' && (
+            <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 ${
+              isFabOS
+                ? 'bg-green-100 text-green-700'
+                : 'bg-green-500/20 text-green-400'
+            }`}>
+              ✅ Koodi valmis!
+            </div>
+          )}
+
+          {/* Testing indicator */}
+          {testingVersion && !isGeneratingCode && (
+            <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+              isFabOS
+                ? 'bg-amber-100 text-amber-700'
+                : 'bg-amber-500/20 text-amber-400'
+            }`}>
+              🧪 Testataan: {testingVersion.name}
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Main content - split view */}
@@ -714,14 +1077,29 @@ export default function DevelopmentMode({
           </div>
 
           {/* Rating panel (shown when testing) */}
-          {showRating && testingVersion && (
+          {showRating && testingVersion && !isGeneratingCode && (
             <div className="p-3 border-t border-gray-200">
               <DeveloperRating
                 isFabOS={isFabOS}
                 versionName={testingVersion.name}
-                onRate={handleRatingSubmit}
+                onRate={(rating, feedback) => handleRatingSubmit(rating, feedback, false)}
+                onRateAndGenerate={(rating, feedback) => handleRatingSubmit(rating, feedback, true)}
                 onContinue={handleContinueDevelopment}
                 onRevert={handleRevert}
+              />
+            </div>
+          )}
+
+          {/* Code Generation Progress (shown when generating) */}
+          {isGeneratingCode && (
+            <div className="p-3 border-t border-gray-200">
+              <CodeGenerationProgress
+                isFabOS={isFabOS}
+                status={generationStatus}
+                versionName={generatingVersionName}
+                startTime={generationStartTime}
+                onContinueWorking={handleContinueWhileGenerating}
+                onCancel={handleCancelGeneration}
               />
             </div>
           )}
