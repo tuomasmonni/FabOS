@@ -80,6 +80,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalMode, setLoginModalMode] = useState('password'); // 'password', 'signup', 'magiclink'
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [showProfilePage, setShowProfilePage] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
@@ -415,8 +416,15 @@ export function AuthProvider({ children }) {
   };
 
   // Modaalien ja sivujen hallinta
-  const openLoginModal = () => setShowLoginModal(true);
-  const closeLoginModal = () => setShowLoginModal(false);
+  const openLoginModal = (mode = 'password') => {
+    setLoginModalMode(mode);
+    setShowLoginModal(true);
+  };
+  const openSignupModal = () => openLoginModal('signup');
+  const closeLoginModal = () => {
+    setShowLoginModal(false);
+    setLoginModalMode('password');
+  };
   const openNicknameModal = () => setShowNicknameModal(true);
   const closeNicknameModal = () => setShowNicknameModal(false);
   const openProfilePage = () => setShowProfilePage(true);
@@ -488,10 +496,12 @@ export function AuthProvider({ children }) {
 
     // Modaalit ja sivut
     showLoginModal,
+    loginModalMode,
     showNicknameModal,
     showProfilePage,
     showAdminDashboard,
     openLoginModal,
+    openSignupModal,
     closeLoginModal,
     openNicknameModal,
     closeNicknameModal,

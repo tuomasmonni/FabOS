@@ -8,6 +8,7 @@ import { useTheme, THEMES } from '../../contexts/ThemeContext';
 export default function LoginModal() {
   const {
     showLoginModal,
+    loginModalMode,
     closeLoginModal,
     signInWithMagicLink,
     signInWithPassword,
@@ -18,9 +19,16 @@ export default function LoginModal() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('password'); // 'password', 'magiclink', 'signup'
+  const [mode, setMode] = useState(loginModalMode || 'password'); // 'password', 'magiclink', 'signup'
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Synkronoi mode loginModalMode:n kanssa kun modaali avataan
+  React.useEffect(() => {
+    if (showLoginModal && loginModalMode) {
+      setMode(loginModalMode);
+    }
+  }, [showLoginModal, loginModalMode]);
 
   const isLegacy = theme === THEMES.LEGACY;
 

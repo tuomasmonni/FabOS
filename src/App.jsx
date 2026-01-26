@@ -51,7 +51,7 @@ const InitialLoadingScreen = () => (
 
 // Login page for unauthenticated users
 const LoginPage = () => {
-  const { openLoginModal } = useAuth();
+  const { openLoginModal, openSignupModal } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
@@ -82,7 +82,7 @@ const LoginPage = () => {
 
           {/* Description */}
           <p className="text-lg mb-8 text-slate-400">
-            Kirjaudu sisään käyttääksesi sovellusta. Voit luoda uuden tilin kirjautumissivulla.
+            Kirjaudu sisään tai luo uusi tili käyttääksesi sovellusta.
           </p>
 
           {/* Features box */}
@@ -106,16 +106,25 @@ const LoginPage = () => {
             </ul>
           </div>
 
-          {/* Login button */}
-          <button
-            onClick={openLoginModal}
-            className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
-          >
-            Kirjaudu sisään
-          </button>
+          {/* Login buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={() => openLoginModal('password')}
+              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
+            >
+              Kirjaudu sisään
+            </button>
+
+            <button
+              onClick={openSignupModal}
+              className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+            >
+              Luo uusi tili
+            </button>
+          </div>
 
           <p className="text-sm mt-4 text-slate-500">
-            Ei vielä tiliä? Voit rekisteröityä kirjautumissivulla.
+            Rekisteröityminen on ilmaista ja vie vain hetken.
           </p>
         </div>
       </main>
