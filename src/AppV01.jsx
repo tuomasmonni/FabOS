@@ -866,8 +866,13 @@ const FabOSProto = ({ onBack }) => {
 
     const pos = getMousePosition(e);
 
-    // Polygon tool handling
+    // Polygon tool handling - block if shape already exists
     if (tool === 'polygon') {
+      // Don't allow new polygon if a shape already exists
+      if (shapes.length > 0 && !isDrawingPolygon) {
+        return;
+      }
+
       // Double-click to close polygon
       if (e.detail === 2 && polygonPoints.length >= 3) {
         closePolygon();
@@ -947,6 +952,11 @@ const FabOSProto = ({ onBack }) => {
 
       setSelectedHole({ shapeIndex: selectedShape, holeIndex: newHoleIndex });
       setIsDrawing(false);
+      return;
+    }
+
+    // Block new shape creation if a shape already exists (one geometry per part)
+    if (shapes.length > 0 && (tool === 'rectangle' || tool === 'circle' || tool === 'lshape')) {
       return;
     }
 
@@ -2676,21 +2686,43 @@ const FabOSProto = ({ onBack }) => {
 
           {/* Tools */}
           <div>
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Muodot</h3>
+            <h3 className={isFabOS ? "text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2" : "text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2"}>Päägeometria</h3>
             <div className="grid grid-cols-5 gap-1">
               {[
-                { id: 'select', icon: '↖', label: 'Valitse' },
-                { id: 'rectangle', icon: '▭', label: 'Suorakaide' },
-                { id: 'circle', icon: '○', label: 'Ympyrä' },
-                { id: 'lshape', icon: '⌐', label: 'L-muoto' },
-                { id: 'polygon', icon: '⬡', label: 'Monikulmio' },
-              ].map((t) => (
-                <button key={t.id} onClick={() => { setTool(t.id); if (t.id !== 'polygon') cancelPolygon(); cancelCutout(); }} className={`p-2 rounded-lg text-center transition-all ${tool === t.id ? 'bg-cyan-500/20 border-2 border-cyan-500 text-cyan-400' : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700'}`} title={t.label}>
-                  <div className="text-lg">{t.icon}</div>
-                </button>
-              ))}
+                { id: 'select', icon: '↖', label: 'Valitse', isShapeTool: false },
+                { id: 'rectangle', icon: '▭', label: 'Suorakaide', isShapeTool: true },
+                { id: 'circle', icon: '○', label: 'Ympyrä', isShapeTool: true },
+                { id: 'lshape', icon: '⌐', label: 'L-muoto', isShapeTool: true },
+                { id: 'polygon', icon: '⬡', label: 'Monikulmio', isShapeTool: true },
+              ].map((t) => {
+                const isDisabled = t.isShapeTool && shapes.length > 0;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      if (isDisabled) return;
+                      setTool(t.id);
+                      if (t.id !== 'polygon') cancelPolygon();
+                      cancelCutout();
+                    }}
+                    disabled={isDisabled}
+                    className={`p-2 rounded-lg text-center transition-all ${
+                      isDisabled
+                        ? isFabOS ? 'bg-gray-200 border-2 border-transparent text-gray-400 cursor-not-allowed opacity-50' : 'bg-slate-800 border-2 border-transparent text-slate-600 cursor-not-allowed opacity-50'
+                        : tool === t.id
+                          ? isFabOS ? 'bg-[#FF6B35]/20 border-2 border-[#FF6B35] text-[#FF6B35]' : 'bg-cyan-500/20 border-2 border-cyan-500 text-cyan-400'
+                          : isFabOS ? 'bg-gray-100 border-2 border-transparent hover:bg-gray-200 text-gray-700' : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700'
+                    }`}
+                    title={isDisabled ? 'Poista nykyinen geometria ensin' : t.label}
+                  >
+                    <div className="text-lg">{t.icon}</div>
+                  </button>
+                );
+              })}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Valitse muoto ja lisää aukot sen jälkeen</p>
+            <p className={isFabOS ? "text-xs text-gray-500 mt-1" : "text-xs text-slate-500 mt-1"}>
+              {shapes.length > 0 ? '✓ Geometria piirretty. Lisää aukkoja tai tyhjennä.' : 'Piirrä yksi päägeometria per osa'}
+            </p>
           </div>
 
           {/* Selected Hole */}
@@ -3232,7 +3264,7 @@ const FabOSProto = ({ onBack }) => {
               </div>
             </div>
 
-            <div ref={containerRef} className="relative overflow-hidden" style={{ height: '520px', cursor: isPanning ? 'grabbing' : isDraggingHole ? 'grabbing' : (tool === 'select' ? 'default' : 'crosshair') }}>
+            <div ref={containerRef} className="relative overflow-hidden" style={{ height: '400px', cursor: isPanning ? 'grabbing' : isDraggingHole ? 'grabbing' : (tool === 'select' ? 'default' : 'crosshair') }}>
               <svg ref={svgRef} width="100%" height="100%" style={{ background: isFabOS ? '#1A1A2E' : '#0f172a' }}
                 onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
                 <defs>
