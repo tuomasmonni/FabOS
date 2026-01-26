@@ -84,6 +84,7 @@ export function AuthProvider({ children }) {
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [showProfilePage, setShowProfilePage] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+  const [showMyVersionsPage, setShowMyVersionsPage] = useState(false);
 
   useEffect(() => {
     // Tarkista nykyinen sessio
@@ -437,6 +438,8 @@ export function AuthProvider({ children }) {
   const closeProfilePage = () => setShowProfilePage(false);
   const openAdminDashboard = () => setShowAdminDashboard(true);
   const closeAdminDashboard = () => setShowAdminDashboard(false);
+  const openMyVersionsPage = () => setShowMyVersionsPage(true);
+  const closeMyVersionsPage = () => setShowMyVersionsPage(false);
 
   // ============================================================================
   // ROOLITARKISTUSFUNKTIOT
@@ -506,6 +509,7 @@ export function AuthProvider({ children }) {
     showNicknameModal,
     showProfilePage,
     showAdminDashboard,
+    showMyVersionsPage,
     openLoginModal,
     openSignupModal,
     closeLoginModal,
@@ -515,6 +519,8 @@ export function AuthProvider({ children }) {
     closeProfilePage,
     openAdminDashboard,
     closeAdminDashboard,
+    openMyVersionsPage,
+    closeMyVersionsPage,
 
     // Roolitarkistusfunktiot
     getUserRole,

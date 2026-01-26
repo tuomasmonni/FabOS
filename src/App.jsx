@@ -18,6 +18,7 @@ const FeatureSuggestionPage = lazy(() => import('./FeatureSuggestionPage'));
 const StairConfigurator = lazy(() => import('./StairConfigurator'));
 const GratingConfigurator = lazy(() => import('./GratingConfigurator'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const MyVersionsPage = lazy(() => import('./components/auth/MyVersionsPage'));
 
 // Lazy load FabOS version selector
 const FabOSVersionSelector = lazy(() => import('./FabOSVersionSelector'));
@@ -145,7 +146,7 @@ const LoginPage = () => {
 // Main app content that uses theme
 function AppContent() {
   const { theme, isLoading, selectTheme } = useTheme();
-  const { showProfilePage, closeProfilePage, showAdminDashboard, closeAdminDashboard, isAuthenticated, loading: authLoading } = useAuth();
+  const { showProfilePage, closeProfilePage, showAdminDashboard, closeAdminDashboard, showMyVersionsPage, closeMyVersionsPage, isAuthenticated, loading: authLoading } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [showSelector, setShowSelector] = useState(true);
 
@@ -215,6 +216,8 @@ function AppContent() {
         closeAdminDashboard={closeAdminDashboard}
         showProfilePage={showProfilePage}
         closeProfilePage={closeProfilePage}
+        showMyVersionsPage={showMyVersionsPage}
+        closeMyVersionsPage={closeMyVersionsPage}
         showSelector={showSelector}
         isLegacy={isLegacy}
         LoadingScreen={LoadingScreen}
@@ -232,6 +235,8 @@ function AuthenticatedContent({
   closeAdminDashboard,
   showProfilePage,
   closeProfilePage,
+  showMyVersionsPage,
+  closeMyVersionsPage,
   showSelector,
   isLegacy,
   LoadingScreen,
@@ -244,6 +249,15 @@ function AuthenticatedContent({
     return (
       <Suspense fallback={<LoadingScreen />}>
         <AdminDashboard onClose={closeAdminDashboard} />
+      </Suspense>
+    );
+  }
+
+  // Show My Versions page if requested
+  if (showMyVersionsPage) {
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <MyVersionsPage onClose={closeMyVersionsPage} />
       </Suspense>
     );
   }
