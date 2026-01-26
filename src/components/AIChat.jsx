@@ -687,28 +687,11 @@ export default function AIChat({
           isFabOS ? 'bg-green-50 border-green-200' : 'bg-emerald-900/30 border-emerald-700'
         }`}>
           <p className={`text-sm font-medium mb-2 ${isFabOS ? 'text-green-800' : 'text-emerald-300'}`}>
-            🎉 Versio valmis luotavaksi!
+            Tehdäänkö uusi versio?
           </p>
           <p className={`text-xs mb-3 ${isFabOS ? 'text-green-700' : 'text-emerald-400'}`}>
             <strong>{pendingVersion.name}</strong>: {pendingVersion.description}
           </p>
-
-          {/* Kaksi vaihtoehtoa: config vs koodi */}
-          <div className={`mb-3 p-3 rounded-lg ${isFabOS ? 'bg-white border border-green-200' : 'bg-slate-800 border border-emerald-700'}`}>
-            <p className={`text-xs font-medium mb-2 ${isFabOS ? 'text-gray-700' : 'text-slate-300'}`}>
-              Valitse toteutustapa:
-            </p>
-            <div className="space-y-2">
-              <div className={`text-xs ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
-                <strong className={isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}>🚀 Generoi koodi</strong>
-                <span className="ml-2">AI kirjoittaa oikeat koodimuutokset ja deployaa automaattisesti</span>
-              </div>
-              <div className={`text-xs ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
-                <strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>⚙️ Vain config</strong>
-                <span className="ml-2">Tallennetaan JSON-konfiguraatio (nopea, mutta rajatumpi)</span>
-              </div>
-            </div>
-          </div>
 
           <div className="flex gap-2">
             <button
@@ -720,10 +703,10 @@ export default function AIChat({
                   : 'bg-emerald-500 hover:bg-emerald-400 text-white'
               }`}
             >
-              🚀 Generoi koodi
+              Kyllä, tee versio!
             </button>
             <button
-              onClick={() => handleCreateVersion(false)}
+              onClick={() => setPendingVersion(null)}
               disabled={isLoading}
               className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
                 isFabOS
@@ -731,19 +714,9 @@ export default function AIChat({
                   : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
             >
-              ⚙️ Vain config
+              Ei kiitos
             </button>
           </div>
-          <button
-            onClick={() => setPendingVersion(null)}
-            className={`w-full mt-2 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-              isFabOS
-                ? 'text-gray-500 hover:text-gray-700'
-                : 'text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            Peruuta
-          </button>
         </div>
       )}
 

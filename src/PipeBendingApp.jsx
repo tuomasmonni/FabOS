@@ -199,6 +199,91 @@ function Preview3D({ diameter, wallThickness, startStraight, bendData }) {
 }
 
 // ============================================
+// PREVIEW COMPONENT FOR DEVELOPMENT MODE
+// ============================================
+// Kevyt esikatselu-versio DevelopmentMode:a varten
+export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
+  // Demo-taivutusdata esikatselua varten
+  const demoBendData = [
+    { id: 1, angle: 90, straightAfter: 100, type: 'lesti', radius: 50 },
+    { id: 2, angle: 45, straightAfter: 80, type: 'rullaus', radius: 100 }
+  ];
+
+  const diameter = config?.defaults?.pipeDiameter || 25;
+  const wallThickness = config?.defaults?.wallThickness || 2;
+
+  return (
+    <div className={`h-full flex flex-col ${isFabOS ? 'bg-gray-50' : 'bg-slate-900'}`}>
+      {/* Info bar */}
+      <div className={`px-4 py-3 border-b ${isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800 border-slate-700'}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔧</span>
+            <div>
+              <h3 className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
+                Putkentaivutus
+              </h3>
+              <p className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+                Esikatselu - Ø{diameter}mm
+              </p>
+            </div>
+          </div>
+
+          {/* Feature badges */}
+          <div className="flex gap-2">
+            {config?.features?.['3dVisualization'] && (
+              <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'}`}>
+                3D
+              </span>
+            )}
+            {config?.features?.exportDXF && (
+              <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-blue-400'}`}>
+                DXF
+              </span>
+            )}
+            {config?.features?.multipleBends && (
+              <span className={`text-xs px-2 py-1 rounded ${isFabOS ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-400'}`}>
+                {config?.features?.maxBends || 10} taivutusta
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 3D Preview */}
+      <div className="flex-1 p-4">
+        <div className={`h-full rounded-xl overflow-hidden border ${isFabOS ? 'border-gray-200' : 'border-slate-700'}`}>
+          <Preview3D
+            diameter={diameter}
+            wallThickness={wallThickness}
+            startStraight={100}
+            bendData={demoBendData}
+          />
+        </div>
+      </div>
+
+      {/* Config summary */}
+      <div className={`px-4 py-3 border-t ${isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800 border-slate-700'}`}>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Halkaisija</div>
+            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{diameter} mm</div>
+          </div>
+          <div>
+            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Max taivutukset</div>
+            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{config?.features?.maxBends || 10}</div>
+          </div>
+          <div>
+            <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>Materiaalit</div>
+            <div className={`font-semibold ${isFabOS ? 'text-gray-900' : 'text-white'}`}>{config?.materials?.length || 4}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // 2D PIIRTOPÖYTÄ
 // ============================================
 function Preview2D({ diameter, startStraight, bendData, viewDirection }) {
@@ -1454,8 +1539,8 @@ const PipeBendingApp = ({ onBack }) => {
             isFabOS={isFabOS}
             onVersionCreated={handleVersionCreated}
             onClose={() => setShowDevelopmentMode(false)}
-            AppComponent={null} // TODO: Create a preview-only version of PipeBendingApp
-            appProps={{}}
+            AppComponent={PipeBendingPreview}
+            appProps={{ isFabOS }}
           />
         </div>
       )}
