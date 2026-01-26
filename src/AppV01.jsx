@@ -796,7 +796,8 @@ const FabOSProto = ({ onBack }) => {
       quantity: currentPartQuantity,
       shapes: JSON.parse(JSON.stringify(shapes)),
       material,
-      thickness
+      thickness,
+      aiChatHistory: JSON.parse(JSON.stringify(aiMessages)) // Save AI chat history with part
     };
 
     if (editingPartIndex !== null) {
@@ -825,6 +826,8 @@ const FabOSProto = ({ onBack }) => {
     setHistoryIndex(0);
     setZoom(1);
     setPan({ x: 50, y: 50 });
+    // Reset AI chat for new part
+    setAiMessages([{ role: 'assistant', content: 'Hei! Olen FabOS AI-avustaja.\n\nVoin:\n• Luoda uusia muotoja\n• Muokata valittua muotoa\n• Lisätä reikiä\n• Poistaa muotoja\n\nKerro mitä haluat tehdä!' }]);
   };
 
   const editPart = (index) => {
@@ -839,6 +842,12 @@ const FabOSProto = ({ onBack }) => {
     setSelectedHole(null);
     setHistory([JSON.parse(JSON.stringify(part.shapes))]);
     setHistoryIndex(0);
+    // Load AI chat history if available, otherwise use default
+    if (part.aiChatHistory && part.aiChatHistory.length > 0) {
+      setAiMessages(JSON.parse(JSON.stringify(part.aiChatHistory)));
+    } else {
+      setAiMessages([{ role: 'assistant', content: 'Hei! Olen FabOS AI-avustaja.\n\nVoin:\n• Luoda uusia muotoja\n• Muokata valittua muotoa\n• Lisätä reikiä\n• Poistaa muotoja\n\nKerro mitä haluat tehdä!' }]);
+    }
     setTimeout(() => zoomFit(), 50);
   };
 
@@ -1624,6 +1633,37 @@ const FabOSProto = ({ onBack }) => {
       }
       default: return '';
     }
+  };
+
+  // Get geometry description for parts list (shape type + dimensions)
+  const getPartGeometryDescription = (shapesList) => {
+    if (!shapesList || shapesList.length === 0) return 'Ei geometriaa';
+    const shape = shapesList[0]; // Main shape (we only allow one per part now)
+    const typeName = shape.type === 'rectangle' ? 'Suorakaide'
+      : shape.type === 'circle' ? 'Ympyrä'
+      : shape.type === 'lshape' ? 'L-muoto'
+      : shape.type === 'polygon' ? 'Monikulmio'
+      : 'Muoto';
+
+    let dims = '';
+    switch (shape.type) {
+      case 'rectangle':
+      case 'lshape':
+        dims = `${shape.width.toFixed(0)}×${shape.height.toFixed(0)} mm`;
+        break;
+      case 'circle':
+        dims = `Ø${(shape.radius * 2).toFixed(0)} mm`;
+        break;
+      case 'polygon':
+        const bounds = getPolygonBounds(shape.points);
+        dims = `${bounds.width.toFixed(0)}×${bounds.height.toFixed(0)} mm`;
+        break;
+    }
+
+    const holeCount = shape.holes?.length || 0;
+    const holeText = holeCount > 0 ? ` • ${holeCount} reikää` : '';
+
+    return `${typeName} ${dims}${holeText}`;
   };
 
   const getHoleDescription = (shape, hole) => {
@@ -3200,9 +3240,12 @@ const FabOSProto = ({ onBack }) => {
                             : isFabOS ? 'border-gray-200 bg-gray-50 hover:border-gray-300' : 'border-slate-600 bg-slate-700/30 hover:border-slate-500'
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start mb-2">
                           <div>
                             <div className={`font-semibold ${isFabOS ? 'text-gray-800' : 'text-white'}`}>{part.name}</div>
+                            <div className={`text-xs font-medium ${isFabOS ? 'text-[#FF6B35]' : 'text-cyan-400'}`}>
+                              {getPartGeometryDescription(part.shapes)}
+                            </div>
                             <div className={`text-xs ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
                               {materialName} • {part.thickness} mm • {part.quantity} kpl
                             </div>
