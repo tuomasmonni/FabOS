@@ -1524,7 +1524,7 @@ const FabOSProto = ({ onBack }) => {
     }
   };
 
-  // Handle chat submit with Claude API
+  // Handle chat submit with Claude API (Vercel serverless function)
   const handleAiSubmit = async () => {
     const inputText = aiInput.trim();
     if (!inputText || aiLoading) return;
@@ -1542,7 +1542,8 @@ const FabOSProto = ({ onBack }) => {
         .concat(userMsg)
         .map(m => ({ role: m.role, content: m.content }));
 
-      const response = await fetch('http://localhost:3001/api/claude', {
+      // Use Vercel serverless API endpoint
+      const response = await fetch('/api/laser-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1572,7 +1573,7 @@ const FabOSProto = ({ onBack }) => {
       console.error('AI error:', error);
       setAiMessages(msgs => [...msgs, {
         role: 'assistant',
-        content: '⚠️ Yhteys AI-palvelimeen epäonnistui.\n\nVarmista että:\n1. Backend käynnissä: npm run server\n2. API-avain .env-tiedostossa'
+        content: '⚠️ Yhteys AI-palvelimeen epäonnistui.\n\nYritä hetken kuluttua uudelleen.'
       }]);
     } finally {
       setAiLoading(false);
