@@ -2376,15 +2376,21 @@ const FabOSProto = ({ onBack }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            {!isFabOS && (
-              <button
-                onClick={() => setShowAiChat(!showAiChat)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${showAiChat ? 'bg-purple-500 text-white' : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'}`}
-              >
-                <span className="text-lg">🤖</span>
-                <span className="text-sm">AI-avustaja</span>
-              </button>
-            )}
+            <button
+              onClick={() => setShowAiChat(!showAiChat)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                isFabOS
+                  ? showAiChat
+                    ? 'bg-[#FF6B35] text-white'
+                    : 'bg-[#FF6B35]/20 text-[#FF6B35] hover:bg-[#FF6B35]/30 border border-[#FF6B35]/30'
+                  : showAiChat
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
+              }`}
+            >
+              <span className="text-lg">🤖</span>
+              <span className="text-sm">AI-avustaja</span>
+            </button>
 
             <div className={isFabOS
               ? "flex items-center bg-white/10 rounded-lg overflow-hidden"
@@ -3076,29 +3082,41 @@ const FabOSProto = ({ onBack }) => {
         <main className={`flex-1 p-4 flex gap-4 ${isFabOS ? 'bg-gray-50' : ''}`}>
           {/* AI Chat Panel */}
           {showAiChat && (
-            <div className="w-80 bg-slate-800/90 rounded-xl border border-purple-500/30 flex flex-col shadow-xl">
-              <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between bg-purple-900/20 rounded-t-xl">
+            <div className={`w-80 rounded-xl flex flex-col shadow-xl ${
+              isFabOS
+                ? 'bg-white border border-gray-200'
+                : 'bg-slate-800/90 border border-purple-500/30'
+            }`}>
+              <div className={`px-4 py-3 border-b flex items-center justify-between rounded-t-xl ${
+                isFabOS
+                  ? 'border-gray-200 bg-[#FF6B35]/10'
+                  : 'border-slate-700 bg-purple-900/20'
+              }`}>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🤖</span>
-                  <h3 className="font-semibold text-purple-300">AI-avustaja</h3>
+                  <h3 className={`font-semibold ${isFabOS ? 'text-[#FF6B35]' : 'text-purple-300'}`} style={isFabOS ? { fontFamily: 'Space Grotesk, sans-serif' } : {}}>AI-avustaja</h3>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={clearAiChat} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-300" title="Tyhjennä">
+                  <button onClick={clearAiChat} className={`p-1.5 rounded ${isFabOS ? 'hover:bg-gray-100 text-gray-500 hover:text-gray-700' : 'hover:bg-slate-700 text-slate-400 hover:text-slate-300'}`} title="Tyhjennä">
                     🗑️
                   </button>
-                  <button onClick={() => setShowAiChat(false)} className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-300" title="Sulje">
+                  <button onClick={() => setShowAiChat(false)} className={`p-1.5 rounded ${isFabOS ? 'hover:bg-gray-100 text-gray-500 hover:text-gray-700' : 'hover:bg-slate-700 text-slate-400 hover:text-slate-300'}`} title="Sulje">
                     ✕
                   </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ maxHeight: '450px', minHeight: '300px' }}>
+              <div className={`flex-1 overflow-y-auto p-3 space-y-3 ${isFabOS ? 'bg-gray-50' : ''}`} style={{ maxHeight: '450px', minHeight: '300px' }}>
                 {aiMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[90%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
                       msg.role === 'user'
-                        ? 'bg-cyan-600/30 text-cyan-100 border border-cyan-500/40'
-                        : 'bg-slate-700/70 text-slate-200 border border-slate-600/50'
+                        ? isFabOS
+                          ? 'bg-[#FF6B35]/20 text-[#1A1A2E] border border-[#FF6B35]/40'
+                          : 'bg-cyan-600/30 text-cyan-100 border border-cyan-500/40'
+                        : isFabOS
+                          ? 'bg-white text-gray-700 border border-gray-200 shadow-sm'
+                          : 'bg-slate-700/70 text-slate-200 border border-slate-600/50'
                     }`}>
                       {msg.content}
                     </div>
@@ -3106,7 +3124,11 @@ const FabOSProto = ({ onBack }) => {
                 ))}
                 {aiLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-700/70 text-slate-200 border border-slate-600/50 rounded-lg px-3 py-2 text-sm">
+                    <div className={`rounded-lg px-3 py-2 text-sm ${
+                      isFabOS
+                        ? 'bg-white text-gray-700 border border-gray-200 shadow-sm'
+                        : 'bg-slate-700/70 text-slate-200 border border-slate-600/50'
+                    }`}>
                       <span className="inline-flex gap-1">
                         <span className="animate-bounce">.</span>
                         <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>.</span>
@@ -3118,7 +3140,11 @@ const FabOSProto = ({ onBack }) => {
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="p-3 border-t border-slate-700 bg-slate-800/50 rounded-b-xl">
+              <div className={`p-3 border-t rounded-b-xl ${
+                isFabOS
+                  ? 'border-gray-200 bg-white'
+                  : 'border-slate-700 bg-slate-800/50'
+              }`}>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -3131,12 +3157,20 @@ const FabOSProto = ({ onBack }) => {
                     }}
                     disabled={aiLoading}
                     placeholder={aiLoading ? "Odota..." : "Esim. 'muuta leveys 300mm'"}
-                    className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm placeholder-slate-400 focus:border-purple-500 focus:outline-none disabled:opacity-50"
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm disabled:opacity-50 ${
+                      isFabOS
+                        ? 'bg-gray-50 border border-gray-300 placeholder-gray-400 focus:border-[#FF6B35] focus:outline-none focus:ring-1 focus:ring-[#FF6B35]/30 text-gray-800'
+                        : 'bg-slate-700 border border-slate-600 placeholder-slate-400 focus:border-purple-500 focus:outline-none text-white'
+                    }`}
                   />
                   <button
                     onClick={() => handleAiSubmit()}
                     disabled={aiLoading}
-                    className="px-4 py-2 rounded-lg font-medium bg-purple-500 hover:bg-purple-400 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`px-4 py-2 rounded-lg font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isFabOS
+                        ? 'bg-[#FF6B35] hover:bg-[#e5612f]'
+                        : 'bg-purple-500 hover:bg-purple-400'
+                    }`}
                   >
                     {aiLoading ? '⏳' : '➤'}
                   </button>
@@ -3229,11 +3263,15 @@ const FabOSProto = ({ onBack }) => {
             </div>
           </div>
 
-          <div className="mt-3 bg-slate-800/30 rounded-lg p-3 text-xs text-slate-400 grid grid-cols-4 gap-4">
-            <div><strong className="text-slate-300">Piirtäminen:</strong> Vedä tai monikulmio</div>
-            <div><strong className="text-slate-300">AI-avustaja:</strong> 🤖 nappi yläpalkissa</div>
-            <div><strong className="text-slate-300">Mitat:</strong> D-näppäin tai 👁️-nappi</div>
-            <div><strong className="text-slate-300">Zoom:</strong> Ctrl + rulla</div>
+          <div className={`mt-3 rounded-lg p-3 text-xs grid grid-cols-4 gap-4 ${
+            isFabOS
+              ? 'bg-white/80 text-gray-500 border border-gray-200'
+              : 'bg-slate-800/30 text-slate-400'
+          }`}>
+            <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>Piirtäminen:</strong> Vedä tai monikulmio</div>
+            <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>AI-avustaja:</strong> 🤖 nappi yläpalkissa</div>
+            <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>Mitat:</strong> D-näppäin tai 👁️-nappi</div>
+            <div><strong className={isFabOS ? 'text-gray-700' : 'text-slate-300'}>Zoom:</strong> Ctrl + rulla</div>
           </div>
           </div>
         </main>
