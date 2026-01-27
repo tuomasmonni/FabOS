@@ -812,8 +812,9 @@ export default function DevelopmentMode({
         user_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
-        user_request: testingVersion.userRequest
-        // Note: rating and feedback are used locally but not stored in DB
+        user_request: testingVersion.userRequest,
+        developer_rating: rating,
+        developer_feedback: feedback
       });
 
       if (generateCode && newVersion?.id) {
