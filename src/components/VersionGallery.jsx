@@ -315,8 +315,8 @@ function VersionDetail({ version, isFabOS, onTest, onClose, isUserAdmin, onPromo
               </button>
             )}
 
-            {/* Delete */}
-            {!showDeleteConfirm ? (
+            {/* Delete - only for non-stable versions */}
+            {!isStable && (!showDeleteConfirm ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
@@ -366,7 +366,7 @@ function VersionDetail({ version, isFabOS, onTest, onClose, isUserAdmin, onPromo
                   </button>
                 </div>
               </div>
-            )}
+            ))}
           </div>
         )}
       </div>

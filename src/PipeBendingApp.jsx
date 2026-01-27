@@ -503,23 +503,37 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
           )}
         </div>
 
-        {/* 3D Esikatselu */}
+        {/* Esikatselu - 2D ja 3D */}
         <div className={`rounded-xl p-4 ${isFabOS ? 'bg-white border border-gray-200' : 'bg-slate-800/50'}`}>
           <h4 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isFabOS ? 'text-gray-900' : 'text-white'}`}>
             <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'}`}>3</span>
-            3D Esikatselu
+            Esikatselu
           </h4>
-          <div className="h-64 rounded-lg overflow-hidden">
-            <Preview3D
-              diameter={diameter}
-              wallThickness={wallThickness}
-              startStraight={startStraight}
-              bendData={bends}
-              color={pipeColor}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* 2D Piirtopöytä */}
+            <div className="h-64 rounded-lg overflow-hidden">
+              <Preview2D
+                diameter={diameter}
+                startStraight={startStraight}
+                bendData={bends}
+                viewDirection="top"
+              />
+            </div>
+            {/* 3D Näkymä */}
+            <div className="h-64 rounded-lg overflow-hidden">
+              <Preview3D
+                diameter={diameter}
+                wallThickness={wallThickness}
+                startStraight={startStraight}
+                bendData={bends}
+                color={pipeColor}
+              />
+            </div>
           </div>
-          <div className={`mt-2 text-xs ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
-            🖱️ Pyöritä • 🔍 Zoomaa • ⌨️ Shift+siirrä
+          <div className={`mt-2 text-xs flex items-center gap-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+            <span>3D: 🖱️ Pyöritä • 🔍 Zoomaa • ⌨️ Shift+siirrä</span>
+            <span>|</span>
+            <span>2D: 📐 Mitat ja kulmat</span>
           </div>
         </div>
       </div>

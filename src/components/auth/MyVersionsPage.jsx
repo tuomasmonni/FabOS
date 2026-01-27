@@ -40,7 +40,7 @@ function DeploymentStatusBadge({ status, isLegacy }) {
 // MY VERSIONS PAGE
 // ============================================================================
 export default function MyVersionsPage({ onClose }) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { theme } = useTheme();
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -326,40 +326,42 @@ export default function MyVersionsPage({ onClose }) {
                       <span>👍 {version.votes_up || 0}</span>
                       <span>👎 {version.votes_down || 0}</span>
                     </div>
-                    {/* Delete button */}
-                    {deletingId !== version.id ? (
-                      <button
-                        onClick={() => setDeletingId(version.id)}
-                        className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
-                          isLegacy
-                            ? 'text-red-400 hover:bg-red-500/20'
-                            : 'text-red-500 hover:bg-red-50'
-                        }`}
-                        title="Poista versio"
-                      >
-                        🗑️
-                      </button>
-                    ) : (
-                      <div className={`flex items-center gap-2`}>
-                        <span className={`text-xs ${styles.textMuted}`}>Poista?</span>
+                    {/* Delete button - vain admin, ei pääversioille */}
+                    {isAdmin() && version.version_type !== 'stable' && (
+                      deletingId !== version.id ? (
                         <button
-                          onClick={() => handleDelete(version.id)}
-                          disabled={deleteLoading}
-                          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                          onClick={() => setDeletingId(version.id)}
+                          className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
                             isLegacy
-                              ? 'bg-red-600 hover:bg-red-500 text-white'
-                              : 'bg-red-600 hover:bg-red-700 text-white'
-                          } ${deleteLoading ? 'opacity-50' : ''}`}
+                              ? 'text-red-400 hover:bg-red-500/20'
+                              : 'text-red-500 hover:bg-red-50'
+                          }`}
+                          title="Poista versio"
                         >
-                          {deleteLoading ? '...' : 'Kyllä'}
+                          🗑️
                         </button>
-                        <button
-                          onClick={() => setDeletingId(null)}
-                          className={`text-xs px-3 py-1.5 rounded-lg transition-all ${styles.buttonSecondary}`}
-                        >
-                          Ei
-                        </button>
-                      </div>
+                      ) : (
+                        <div className={`flex items-center gap-2`}>
+                          <span className={`text-xs ${styles.textMuted}`}>Poista?</span>
+                          <button
+                            onClick={() => handleDelete(version.id)}
+                            disabled={deleteLoading}
+                            className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                              isLegacy
+                                ? 'bg-red-600 hover:bg-red-500 text-white'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                            } ${deleteLoading ? 'opacity-50' : ''}`}
+                          >
+                            {deleteLoading ? '...' : 'Kyllä'}
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(null)}
+                            className={`text-xs px-3 py-1.5 rounded-lg transition-all ${styles.buttonSecondary}`}
+                          >
+                            Ei
+                          </button>
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
