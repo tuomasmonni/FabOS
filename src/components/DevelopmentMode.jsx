@@ -727,7 +727,8 @@ export default function DevelopmentMode({
         proposedChanges: parsedResult.proposedChanges,
         type: parsedResult.type,
         versionName: parsedResult.versionName,
-        versionDescription: parsedResult.versionDescription
+        versionDescription: parsedResult.versionDescription,
+        requiresCodeGeneration: parsedResult.requiresCodeGeneration || false
       };
 
       setMessages(prev => [...prev, assistantMessage]);
