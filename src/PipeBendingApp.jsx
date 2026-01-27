@@ -1064,7 +1064,7 @@ function ParametersTab({ params, setParams, selectedSize, setSelectedSize }) {
 // ============================================
 // KÄYTTÖ VÄLILEHTI (ASIAKAS)
 // ============================================
-function UsageTab({ params, selectedSize }) {
+function UsageTab({ params, selectedSize, pipeColor }) {
   const currentParams = params[selectedSize] || DEFAULT_PIPE_PARAMS[25];
   const availableSizes = Object.keys(params).map(Number).sort((a, b) => a - b);
 
@@ -1478,7 +1478,7 @@ function UsageTab({ params, selectedSize }) {
               wallThickness={pipeData.wallThickness}
               startStraight={startStraight}
               bendData={bends}
-              color={moduleConfig?.ui?.pipeColor}
+              color={pipeColor}
             />
           </div>
         </div>
@@ -1759,6 +1759,7 @@ const PipeBendingApp = ({ onBack }) => {
           <UsageTab
             params={params}
             selectedSize={selectedSize}
+            pipeColor={moduleConfig?.ui?.pipeColor}
           />
         )}
       </main>
