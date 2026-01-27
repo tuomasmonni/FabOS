@@ -5,7 +5,7 @@
 // Flow: Pyyntö → AI ehdotus → Testaus → Arvio → Hyväksy/Jatka
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
+import { createVersion, generateNextVersionNumber } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -390,77 +390,26 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
         ? 'bg-blue-50 border-blue-200'
         : 'bg-blue-900/20 border-blue-700'
     }`}>
-      <h4 className={`font-semibold mb-3 flex items-center gap-2 ${
-        isFabOS ? 'text-blue-800' : 'text-blue-300'
-      }`}>
-        <span>📊</span> Kehittäjän arvio
-      </h4>
-
-      <p className={`text-sm mb-3 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
-        Arvioi muutos <strong>"{versionName}"</strong>
-      </p>
-
-      {/* Star rating */}
-      <div className="flex items-center gap-1 mb-3">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            onClick={() => setRating(star)}
-            onMouseEnter={() => setHoveredStar(star)}
-            onMouseLeave={() => setHoveredStar(0)}
-            className="text-2xl transition-transform hover:scale-110"
-          >
-            {star <= (hoveredStar || rating) ? '⭐' : '☆'}
-          </button>
-        ))}
-        <span className={`ml-2 text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
-          {rating > 0 ? `${rating}/5` : 'Valitse'}
-        </span>
-      </div>
-
-      {/* Feedback input */}
-      <textarea
-        value={feedback}
-        onChange={(e) => setFeedback(e.target.value)}
-        placeholder="Vapaaehtoinen palaute muutoksesta..."
-        rows={2}
-        className={`w-full px-3 py-2 rounded-lg text-sm mb-3 resize-none ${
-          isFabOS
-            ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-400'
-            : 'bg-slate-800 border border-blue-700 text-white placeholder-slate-400'
-        }`}
-      />
-
       {/* Action buttons - Two rows */}
       <div className="space-y-2">
         {/* Primary actions */}
         <div className="flex gap-2">
           <button
             onClick={() => onRate?.(rating, feedback)}
-            disabled={rating === 0}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
             }`}
           >
             ✓ Tallenna config
           </button>
           <button
             onClick={() => onRateAndGenerate?.(rating, feedback)}
-            disabled={rating === 0}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
             }`}
           >
             🚀 Tallenna & Luo koodi
@@ -492,8 +441,42 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
         </div>
       </div>
 
+      {/* Optional developer rating */}
+      <div className={`mt-3 pt-3 border-t ${isFabOS ? 'border-blue-200' : 'border-blue-700'}`}>
+        <p className={`text-xs mb-2 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
+          Vapaaehtoinen arvio: <strong>"{versionName}"</strong>
+        </p>
+        <div className="flex items-center gap-1 mb-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHoveredStar(star)}
+              onMouseLeave={() => setHoveredStar(0)}
+              className="text-xl transition-transform hover:scale-110"
+            >
+              {star <= (hoveredStar || rating) ? '⭐' : '☆'}
+            </button>
+          ))}
+          <span className={`ml-2 text-xs ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+            {rating > 0 ? `${rating}/5` : 'Ei arvioitu'}
+          </span>
+        </div>
+        <textarea
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          placeholder="Vapaaehtoinen palaute muutoksesta..."
+          rows={2}
+          className={`w-full px-3 py-2 rounded-lg text-sm resize-none ${
+            isFabOS
+              ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-400'
+              : 'bg-slate-800 border border-blue-700 text-white placeholder-slate-400'
+          }`}
+        />
+      </div>
+
       {/* Info text */}
-      <p className={`text-[10px] mt-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+      <p className={`text-[10px] mt-2 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
         💡 "Tallenna config" tallentaa vain asetukset. "Luo koodi" generoi oikean koodimuutoksen.
       </p>
     </div>
@@ -796,7 +779,6 @@ export default function DevelopmentMode({
     setIsLoading(true);
 
     try {
-      const fingerprint = generateFingerprint();
       const email = user?.email || '';
 
       // Generoi semanttinen versionumero
@@ -809,10 +791,7 @@ export default function DevelopmentMode({
         version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
-        deployment_status: generateCode ? 'pending' : 'config_only',
-        creator_email: email,
-        user_request: testingVersion.userRequest
+        author_name: email || 'Kehittäjä'
         // Note: rating and feedback are used locally but not stored in DB
       });
 
