@@ -65,14 +65,26 @@ jobs:
 
           git push origin $BRANCH_NAME
 
-      - name: Merge to main (auto-deploy)
+      - name: Validate build before merge
         if: steps.generate.outputs.changes_made == 'true'
+        id: validate
+        run: |
+          echo "Running build validation..."
+          if npm run build 2>&1; then
+            echo "build_ok=true" >> $GITHUB_OUTPUT
+            echo "✓ Build validation passed"
+          else
+            echo "build_ok=false" >> $GITHUB_OUTPUT
+            echo "✗ Build validation FAILED - not merging to main"
+          fi
+
+      - name: Merge to main (auto-deploy)
+        if: steps.generate.outputs.changes_made == 'true' && steps.validate.outputs.build_ok == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME="ai-update/${{ github.event.client_payload.version_id }}"
 
-          # Merge suoraan mainiin (ketterä kehitys, ei PR-byrokratiaa)
           git checkout main
           git merge $BRANCH_NAME --no-ff -m "Merge AI update: ${{ github.event.client_payload.version_name }}"
           git push origin main
@@ -86,7 +98,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           VERSION_ID: ${{ github.event.client_payload.version_id }}
-          SUCCESS: ${{ steps.generate.outputs.changes_made }}
+          SUCCESS: ${{ steps.generate.outputs.changes_made == 'true' && steps.validate.outputs.build_ok == 'true' }}
+          BUILD_FAILED: ${{ steps.validate.outputs.build_ok == 'false' }}
         run: node scripts/update-version-status.js
 
       - name: Send email notification
