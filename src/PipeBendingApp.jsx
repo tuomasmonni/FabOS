@@ -1344,11 +1344,11 @@ function UsageTab({ params, selectedSize, pipeColor }) {
         </div>
 
         {/* CSV Format Help */}
-        <div className={`p-3 rounded-lg mb-4 ${isFabOS ? 'bg-blue-50 border border-blue-200' : 'bg-blue-900/30 border border-blue-700'}`}>
-          <p className={`text-sm font-medium mb-2 ${isFabOS ? 'text-blue-800' : 'text-blue-300'}`}>
+        <div className="p-3 rounded-lg mb-4 bg-blue-50 border border-blue-200">
+          <p className="text-sm font-medium mb-2 text-blue-800">
             📊 CSV-muoto (sarakkeet: angle, straight, radius, type)
           </p>
-          <p className={`text-xs ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+          <p className="text-xs text-blue-600">
             Esim: angle,straight,radius,type<br/>
             90,100,50,lesti<br/>
             45,80,60,rullaus
