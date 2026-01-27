@@ -379,7 +379,7 @@ function CodeGenerationProgress({
 // ============================================================================
 // DEVELOPER RATING COMPONENT
 // ============================================================================
-function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRevert, versionName }) {
+function DeveloperRating({ isFabOS, onRate, onContinue, onRevert, versionName, requiresCodeGeneration }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [hoveredStar, setHoveredStar] = useState(0);
@@ -401,31 +401,23 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
         Kokeile muutosta esikatselussa. Tallenna kun olet valmis.
       </p>
 
-      {/* Save buttons - always visible */}
+      {/* Save button - AI decides automatically whether code generation is needed */}
       <div className="space-y-2">
-        {/* Primary actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => onRate?.(rating || null, feedback || null)}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              isFabOS
-                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-            }`}
-          >
-            ✓ Tallenna config
-          </button>
-          <button
-            onClick={() => onRateAndGenerate?.(rating || null, feedback || null)}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              isFabOS
+        {/* Primary action */}
+        <button
+          onClick={() => onRate?.(rating || null, feedback || null)}
+          className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+            requiresCodeGeneration
+              ? isFabOS
                 ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
                 : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
-            }`}
-          >
-            🚀 Tallenna & Luo koodi
-          </button>
-        </div>
+              : isFabOS
+                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+          }`}
+        >
+          {requiresCodeGeneration ? '🚀 Tallenna & Luo koodi' : '✓ Tallenna versio'}
+        </button>
 
         {/* Secondary actions */}
         <div className="flex gap-2">
@@ -454,7 +446,10 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
 
       {/* Info text */}
       <p className={`text-[10px] mt-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
-        💡 "Tallenna config" tallentaa vain asetukset. "Luo koodi" generoi oikean koodimuutoksen.
+        {requiresCodeGeneration
+          ? '🚀 AI on tunnistanut, että tämä muutos vaatii koodin generointia.'
+          : '💡 Tämä muutos tallentuu config-muutoksena. Koodin generointi ei ole tarpeen.'
+        }
       </p>
 
       {/* Optional rating - collapsible */}
@@ -774,7 +769,8 @@ export default function DevelopmentMode({
       name: message.versionName || 'Nimetön versio',
       description: message.versionDescription || message.proposedChanges.summary,
       config: message.proposedChanges.newConfig,
-      userRequest: messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
+      userRequest: messages.filter(m => m.role === 'user').map(m => m.content).join('\n'),
+      requiresCodeGeneration: message.requiresCodeGeneration || false
     });
 
     // Show rating panel
@@ -1156,8 +1152,8 @@ export default function DevelopmentMode({
               <DeveloperRating
                 isFabOS={isFabOS}
                 versionName={testingVersion.name}
-                onRate={(rating, feedback) => handleRatingSubmit(rating, feedback, false)}
-                onRateAndGenerate={(rating, feedback) => handleRatingSubmit(rating, feedback, true)}
+                requiresCodeGeneration={testingVersion.requiresCodeGeneration}
+                onRate={(rating, feedback) => handleRatingSubmit(rating, feedback, testingVersion.requiresCodeGeneration)}
                 onContinue={handleContinueDevelopment}
                 onRevert={handleRevert}
               />

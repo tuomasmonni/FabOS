@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   const githubToken = process.env.GITHUB_PAT;
-  const githubRepo = process.env.GITHUB_REPO || 'tuomoni/levykauppa';
+  const githubRepo = process.env.GITHUB_REPO || 'tuomasmonni/FabOS';
 
   if (!githubToken) {
     console.error('GITHUB_PAT not configured');

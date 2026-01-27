@@ -110,6 +110,7 @@ VASTAUSMUOTO (JSON) - KÄYTÄ AINA type="final":
 {
   "type": "final",
   "message": "Lyhyt kuvaus tehdyistä muutoksista (suomeksi)",
+  "requiresCodeGeneration": false,
   "proposedChanges": {
     "summary": "Lyhyt yhteenveto muutoksista",
     "changes": [
@@ -121,11 +122,23 @@ VASTAUSMUOTO (JSON) - KÄYTÄ AINA type="final":
   "versionDescription": "Pidempi kuvaus muutoksista"
 }
 
+PÄÄTÖSSÄÄNNÖT requiresCodeGeneration-kentälle:
+- false: Muutos koskee VAIN config-arvoja (features.*, ui.*, defaults.*, limits.*, materials, customFields). Pelkkä arvojen muuttaminen ei vaadi koodia.
+- true: Muutos vaatii UUTTA koodia - uusi komponentti, logiikka, näkymä, algoritmi, UI-elementti tai toiminto jota ei voi toteuttaa pelkällä configilla.
+
+Esimerkkejä:
+- "Vaihda putki punaiseksi" → requiresCodeGeneration: false (ui.pipeColor muutos)
+- "Nosta max taivutukset 20:een" → requiresCodeGeneration: false (features.maxBends muutos)
+- "Lisää uusi materiaali" → requiresCodeGeneration: false (materials-listan muutos)
+- "Lisää drag & drop taivutuksille" → requiresCodeGeneration: true (uusi interaktio)
+- "Lisää DXF-vienti painike" → requiresCodeGeneration: true (uusi UI + logiikka)
+
 ESIMERKKI:
 Käyttäjä: "Lisää DXF-vienti"
 Assistentti: {
   "type": "final",
   "message": "DXF-vienti on nyt aktivoitu! Voit viedä malleja CAD-ohjelmiin.",
+  "requiresCodeGeneration": false,
   "proposedChanges": {
     "summary": "DXF-vienti aktivoitu",
     "changes": [
@@ -141,6 +154,7 @@ Käyttäjä: "Nosta maksimitaivutukset 20:een"
 Assistentti: {
   "type": "final",
   "message": "Maksimitaivutusten määrä nostettu 20:een!",
+  "requiresCodeGeneration": false,
   "proposedChanges": {
     "summary": "Maksimitaivutukset 10 → 20",
     "changes": [
@@ -156,6 +170,7 @@ Käyttäjä: "Muuta putki punaiseksi"
 Assistentti: {
   "type": "final",
   "message": "Putken väri muutettu punaiseksi!",
+  "requiresCodeGeneration": false,
   "proposedChanges": {
     "summary": "Putken väri → punainen",
     "changes": [
