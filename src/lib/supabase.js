@@ -398,17 +398,28 @@ export function watchVersionStatus(versionId, callback, intervalMs = 5000) {
 // USER VERSIONS - Käyttäjän omat versiot
 // ============================================================================
 
-// Hae käyttäjän luomat versiot
-export async function getUserVersions(userEmail) {
-  if (!supabaseData || !userEmail) {
+// Hae käyttäjän luomat versiot (email tai fingerprint)
+export async function getUserVersions(userEmail, userFingerprint) {
+  if (!supabaseData || (!userEmail && !userFingerprint)) {
     return [];
   }
 
-  const { data, error } = await supabaseData
+  // Hae emaililla TAI fingerprintillä (or-query)
+  let query = supabaseData
     .from('versions')
     .select('*')
-    .eq('creator_email', userEmail)
     .order('created_at', { ascending: false });
+
+  if (userEmail && userFingerprint) {
+    // Hae molemmat: email tai fingerprint match
+    query = query.or(`creator_email.eq.${userEmail},creator_fingerprint.eq.${userFingerprint}`);
+  } else if (userEmail) {
+    query = query.eq('creator_email', userEmail);
+  } else {
+    query = query.eq('creator_fingerprint', userFingerprint);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching user versions:', error);

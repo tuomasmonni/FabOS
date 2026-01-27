@@ -620,7 +620,7 @@ export default function DevelopmentMode({
   AppComponent, // The app to show in preview (e.g., PipeBendingApp)
   appProps = {} // Props to pass to the app
 }) {
-  const { user, isAuthenticated, openLoginModal } = useAuth();
+  const { user, profile, isAuthenticated, openLoginModal } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -803,25 +803,29 @@ export default function DevelopmentMode({
 
     try {
       const fingerprint = generateFingerprint();
-      const email = user?.email || '';
+      const email = user?.email || profile?.email || '';
+      console.log('[DevelopmentMode] Saving version, user email:', user?.email, 'profile email:', profile?.email, 'resolved:', email);
 
       // Generoi semanttinen versionumero
       const versionNumber = await generateNextVersionNumber(email, moduleId);
 
-      const newVersion = await createVersion({
+      const versionData = {
         module_id: moduleId,
         name: testingVersion.name,
-        description: testingVersion.description,
+        description: testingVersion.description || '',
         version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
         creator_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
-        creator_email: email,
+        creator_email: email || null,
         user_request: testingVersion.userRequest,
         developer_rating: rating || null,
         developer_feedback: feedback || null
-      });
+      };
+      console.log('[DevelopmentMode] Version data:', JSON.stringify(versionData, null, 2));
+
+      const newVersion = await createVersion(versionData);
 
       if (generateCode && newVersion?.id) {
         // Käynnistä koodin generointi
@@ -866,7 +870,7 @@ export default function DevelopmentMode({
       } else {
         setMessages(prev => [...prev, {
           role: 'system',
-          content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
+          content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu!${rating ? ` Arvosana: ${rating}/5.` : ''}${feedback ? ` Palaute: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
           timestamp: new Date().toISOString()
         }]);
         setShowRating(false);

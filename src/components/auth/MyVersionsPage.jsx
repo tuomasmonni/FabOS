@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, THEMES } from '../../contexts/ThemeContext';
-import { getUserVersions, watchVersionStatus } from '../../lib/supabase';
+import { getUserVersions, watchVersionStatus, generateFingerprint } from '../../lib/supabase';
 
 // ============================================================================
 // DEPLOYMENT STATUS BADGE
@@ -48,9 +48,10 @@ export default function MyVersionsPage({ onClose }) {
 
   const isLegacy = theme === THEMES.LEGACY;
   const userEmail = user?.email;
+  const fingerprint = generateFingerprint();
 
   useEffect(() => {
-    if (userEmail) {
+    if (userEmail || fingerprint) {
       loadVersions();
     } else {
       setLoading(false);
@@ -78,7 +79,7 @@ export default function MyVersionsPage({ onClose }) {
 
   const loadVersions = async () => {
     try {
-      const data = await getUserVersions(userEmail);
+      const data = await getUserVersions(userEmail, fingerprint);
       setVersions(data || []);
     } catch (error) {
       console.error('Error loading versions:', error);

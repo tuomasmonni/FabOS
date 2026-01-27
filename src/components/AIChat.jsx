@@ -438,6 +438,7 @@ export default function AIChat({
     try {
       const fingerprint = generateFingerprint();
       const email = user?.email || userEmail || '';
+      console.log('[AIChat] Saving version, user email:', user?.email, 'userEmail prop:', userEmail, 'resolved:', email);
 
       // Generoi semanttinen versionumero
       const versionNumber = await generateNextVersionNumber(email, moduleId);
@@ -445,13 +446,13 @@ export default function AIChat({
       const newVersion = await createVersion({
         module_id: moduleId,
         name: pendingVersion.name,
-        description: pendingVersion.description,
+        description: pendingVersion.description || '',
         version_number: versionNumber,
         config: pendingVersion.config,
         version_type: 'experimental',
         creator_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
-        creator_email: email,
+        creator_email: email || null,
         user_request: pendingVersion.userRequest
       });
 
