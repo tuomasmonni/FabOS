@@ -429,6 +429,67 @@ export async function getUserVersions(userEmail, userFingerprint) {
 }
 
 // ============================================================================
+// VERSION MANAGEMENT - Versioiden hallinta (admin-toiminnot)
+// ============================================================================
+
+// Ylennä testiversio päämalliksi (stable)
+export async function promoteVersion(versionId, userId) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Supabase not configured');
+
+  const response = await fetch(
+    `${url}/rest/v1/versions?id=eq.${versionId}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        version_type: 'stable',
+        promoted_at: new Date().toISOString(),
+        promoted_by: userId
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Promote version failed:', response.status, errorText);
+    throw new Error('Failed to promote version');
+  }
+  return true;
+}
+
+// Poista versio
+export async function deleteVersion(versionId) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Supabase not configured');
+
+  const response = await fetch(
+    `${url}/rest/v1/versions?id=eq.${versionId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Delete version failed:', response.status, errorText);
+    throw new Error('Failed to delete version');
+  }
+  return true;
+}
+
+// ============================================================================
 // VERSION NUMBERING - Semanttinen versionumerointi
 // ============================================================================
 

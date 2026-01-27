@@ -4,7 +4,8 @@
 // Näyttää kaikki moduulin versiot - päämalli ja testiversiot
 
 import React, { useState, useEffect } from 'react';
-import { getVersions, voteVersion, incrementViewCount, generateFingerprint } from '../lib/supabase';
+import { getVersions, voteVersion, incrementViewCount, generateFingerprint, promoteVersion, deleteVersion } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
 // VERSION CARD
@@ -127,7 +128,10 @@ function VersionCard({ version, isFabOS, onSelect, onVote, isSelected }) {
 // ============================================================================
 // VERSION DETAIL PANEL
 // ============================================================================
-function VersionDetail({ version, isFabOS, onTest, onClose }) {
+function VersionDetail({ version, isFabOS, onTest, onClose, isUserAdmin, onPromote, onDelete }) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null); // 'promote' | 'delete' | null
+
   if (!version) return null;
 
   const isStable = version.version_type === 'stable';
@@ -270,10 +274,10 @@ function VersionDetail({ version, isFabOS, onTest, onClose }) {
       )}
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="space-y-3">
         <button
           onClick={onTest}
-          className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+          className={`w-full py-3 px-4 rounded-xl font-semibold transition-all ${
             isFabOS
               ? 'bg-[#FF6B35] hover:bg-[#e5612f] text-white'
               : 'bg-emerald-500 hover:bg-emerald-400 text-white'
@@ -281,6 +285,90 @@ function VersionDetail({ version, isFabOS, onTest, onClose }) {
         >
           🚀 Testaa tätä versiota
         </button>
+
+        {/* Admin actions */}
+        {isUserAdmin && (
+          <div className={`pt-3 border-t space-y-2 ${isFabOS ? 'border-gray-200' : 'border-slate-700'}`}>
+            <p className={`text-xs font-medium mb-2 ${isFabOS ? 'text-gray-500' : 'text-slate-400'}`}>
+              Ylläpitäjän toiminnot
+            </p>
+
+            {/* Promote to stable */}
+            {!isStable && (
+              <button
+                onClick={async () => {
+                  setActionLoading('promote');
+                  try {
+                    await onPromote(version.id);
+                  } finally {
+                    setActionLoading(null);
+                  }
+                }}
+                disabled={actionLoading === 'promote'}
+                className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+                  isFabOS
+                    ? 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200'
+                    : 'bg-green-900/30 hover:bg-green-900/50 text-green-400 border border-green-700'
+                } ${actionLoading === 'promote' ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {actionLoading === 'promote' ? '⏳ Ylennetään...' : '⬆️ Aseta päämalliksi'}
+              </button>
+            )}
+
+            {/* Delete */}
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+                  isFabOS
+                    ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+                    : 'bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-700'
+                }`}
+              >
+                🗑️ Poista versio
+              </button>
+            ) : (
+              <div className={`p-3 rounded-xl border ${
+                isFabOS ? 'bg-red-50 border-red-200' : 'bg-red-900/20 border-red-700'
+              }`}>
+                <p className={`text-sm font-medium mb-3 ${isFabOS ? 'text-red-700' : 'text-red-400'}`}>
+                  Haluatko varmasti poistaa version "{version.name}"?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      setActionLoading('delete');
+                      try {
+                        await onDelete(version.id);
+                      } finally {
+                        setActionLoading(null);
+                        setShowDeleteConfirm(false);
+                      }
+                    }}
+                    disabled={actionLoading === 'delete'}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                      isFabOS
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : 'bg-red-600 hover:bg-red-500 text-white'
+                    } ${actionLoading === 'delete' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {actionLoading === 'delete' ? '⏳ Poistetaan...' : 'Kyllä, poista'}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                      isFabOS
+                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                    }`}
+                  >
+                    Peruuta
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {!isStable && (
@@ -302,6 +390,7 @@ export default function VersionGallery({
   onClose,
   currentVersionId
 }) {
+  const { isAdmin, user } = useAuth();
   const [versions, setVersions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedVersion, setSelectedVersion] = useState(null);
@@ -346,6 +435,30 @@ export default function VersionGallery({
   const handleTest = () => {
     if (selectedVersion) {
       onSelectVersion?.(selectedVersion);
+    }
+  };
+
+  const handlePromote = async (versionId) => {
+    try {
+      await promoteVersion(versionId, user?.id);
+      // Päivitä valittu versio ja lataa lista uudelleen
+      setSelectedVersion(prev => prev ? { ...prev, version_type: 'stable', promoted_at: new Date().toISOString() } : null);
+      loadVersions();
+    } catch (error) {
+      console.error('Promote error:', error);
+      alert('Ylennys epäonnistui: ' + error.message);
+    }
+  };
+
+  const handleDelete = async (versionId) => {
+    try {
+      await deleteVersion(versionId);
+      // Sulje detail-paneeli ja päivitä lista
+      setSelectedVersion(null);
+      loadVersions();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Poisto epäonnistui: ' + error.message);
     }
   };
 
@@ -470,7 +583,7 @@ export default function VersionGallery({
 
         {/* Detail panel */}
         {selectedVersion && (
-          <div className={`w-1/2 p-6 border-l ${
+          <div className={`w-1/2 p-6 border-l overflow-y-auto ${
             isFabOS ? 'bg-gray-100 border-gray-200' : 'bg-slate-800/50 border-slate-700'
           }`}>
             <VersionDetail
@@ -478,6 +591,9 @@ export default function VersionGallery({
               isFabOS={isFabOS}
               onTest={handleTest}
               onClose={() => setSelectedVersion(null)}
+              isUserAdmin={isAdmin()}
+              onPromote={handlePromote}
+              onDelete={handleDelete}
             />
           </div>
         )}
