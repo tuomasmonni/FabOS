@@ -777,10 +777,15 @@ export default function DevelopmentMode({
     // Show rating panel
     setShowRating(true);
 
-    // Add system message
+    // Add system message - different for config vs code changes
+    const isCodeChange = message.requiresCodeGeneration || false;
+    const systemContent = isCodeChange
+      ? `🚀 Muutos "${message.versionName || 'Nimetön'}" odottaa koodin generointia.\n\nTämä muutos vaatii uuden koodin luontia eikä näy vielä esikatselussa. Tallenna versio aloittaaksesi koodin generoinnin.`
+      : `🧪 Muutos "${message.versionName || 'Nimetön'}" on nyt aktiivisena!\n\nNäet muutokset oikealla esikatselussa. Voit tallentaa version tai jatkaa kehitystä.`;
+
     setMessages(prev => [...prev, {
       role: 'system',
-      content: `🧪 Muutos "${message.versionName || 'Nimetön'}" on nyt aktiivisena!\n\nNäet muutokset oikealla esikatselussa. Voit tallentaa version tai jatkaa kehitystä.`,
+      content: systemContent,
       timestamp: new Date().toISOString()
     }]);
   };
@@ -1123,7 +1128,7 @@ export default function DevelopmentMode({
                 ? 'bg-amber-100 text-amber-700'
                 : 'bg-amber-500/20 text-amber-400'
             }`}>
-              🧪 Testataan: {testingVersion.name}
+              {testingVersion.requiresCodeGeneration ? '🚀' : '🧪'} {testingVersion.requiresCodeGeneration ? 'Odottaa generointia:' : 'Testataan:'} {testingVersion.name}
             </div>
           )}
         </div>
@@ -1305,9 +1310,11 @@ export default function DevelopmentMode({
             </span>
             {testingVersion && (
               <span className={`text-xs px-2 py-1 rounded ${
-                isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
+                testingVersion.requiresCodeGeneration
+                  ? (isFabOS ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400')
+                  : (isFabOS ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400')
               }`}>
-                Muutokset aktiivisena
+                {testingVersion.requiresCodeGeneration ? 'Odottaa koodin generointia' : 'Muutokset aktiivisena'}
               </span>
             )}
           </div>
@@ -1428,14 +1435,21 @@ export default function DevelopmentMode({
                   {/* Change indicator */}
                   {testingVersion && (
                     <div className={`mt-4 p-3 rounded-lg border ${
-                      isFabOS
-                        ? 'bg-green-50 border-green-200 text-green-700'
-                        : 'bg-green-500/10 border-green-500/30 text-green-400'
+                      testingVersion.requiresCodeGeneration
+                        ? (isFabOS
+                          ? 'bg-amber-50 border-amber-200 text-amber-700'
+                          : 'bg-amber-500/10 border-amber-500/30 text-amber-400')
+                        : (isFabOS
+                          ? 'bg-green-50 border-green-200 text-green-700'
+                          : 'bg-green-500/10 border-green-500/30 text-green-400')
                     }`}>
                       <div className="flex items-center gap-2">
-                        <span>✨</span>
+                        <span>{testingVersion.requiresCodeGeneration ? '🚀' : '✨'}</span>
                         <span className="text-sm font-medium">
-                          Muutokset aktiivisena: {testingVersion.name}
+                          {testingVersion.requiresCodeGeneration
+                            ? `Odottaa generointia: ${testingVersion.name}`
+                            : `Muutokset aktiivisena: ${testingVersion.name}`
+                          }
                         </span>
                       </div>
                     </div>

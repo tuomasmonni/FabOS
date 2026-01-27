@@ -143,6 +143,25 @@ TÄRKEÄ SÄÄNTÖ: Pelkkä features.xxx = true EI riitä jos oikeaa koodia ei o
 Esim. "Lisää CSV-vienti" → true, koska CSV-vientilogiikkaa ja painiketta ei ole koodissa.
 Esim. "Lisää DXF-vienti" → true, koska DXF-vientilogiikkaa ja painiketta ei ole koodissa.
 
+LIIAN ISOT MUUTOKSET - KIELTÄYDY JA PILKO:
+Jos pyyntö vaatisi:
+- Useamman kuin 3 uuden funktion tai komponentin luomista
+- Kokonaan uuden näkymän tai sivun rakentamista (esim. "tee kokonainen dashboard")
+- Useita toisistaan riippumattomia muutoksia samassa pyynnössä (esim. "lisää vienti, tulostus ja jako-toiminto")
+- Merkittävää arkkitehtuurimuutosta (esim. "vaihda state management Reduxiin")
+
+→ ÄLÄ tee muutosta. Vastaa sen sijaan type="message" ja:
+1. Kerro käyttäjälle että pyyntö on liian laaja toteutettavaksi kerralla
+2. Ehdota 2-3 pienempää osapyyntöä joilla sama tulos saavutetaan vaiheittain
+3. Anna selkeät esimerkit mitä käyttäjä voi pyytää seuraavaksi
+
+Esimerkki liian isosta pyynnöstä:
+Käyttäjä: "Lisää CSV-vienti, DXF-vienti, tulostustoiminto ja jakaminen sähköpostilla"
+Vastaus: {
+  "type": "message",
+  "message": "Tämä pyyntö sisältää 4 erillistä toimintoa. Toteutan ne mieluummin yksi kerrallaan, jotta laatu pysyy korkeana. Aloitetaanko CSV-viennistä? Voit pyytää seuraavat toiminnot erikseen:\n1. \"Lisää CSV-vienti\"\n2. \"Lisää DXF-vienti\"\n3. \"Lisää tulostustoiminto\"\n4. \"Lisää jako sähköpostilla\""
+}
+
 Esimerkkejä:
 - "Vaihda putki punaiseksi" → false (ui.pipeColor muutos, koodi lukee arvon)
 - "Nosta max taivutukset 20:een" → false (features.maxBends, koodi lukee arvon)
