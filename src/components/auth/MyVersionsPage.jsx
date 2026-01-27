@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, THEMES } from '../../contexts/ThemeContext';
-import { getUserVersions, watchVersionStatus, generateFingerprint } from '../../lib/supabase';
+import { getUserVersions, watchVersionStatus, generateFingerprint, deleteVersion } from '../../lib/supabase';
 
 // ============================================================================
 // DEPLOYMENT STATUS BADGE
@@ -45,6 +45,8 @@ export default function MyVersionsPage({ onClose }) {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedTab, setExpandedTab] = useState('all');
+  const [deletingId, setDeletingId] = useState(null); // version id being confirmed for delete
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const isLegacy = theme === THEMES.LEGACY;
   const userEmail = user?.email;
@@ -85,6 +87,20 @@ export default function MyVersionsPage({ onClose }) {
       console.error('Error loading versions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (versionId) => {
+    setDeleteLoading(true);
+    try {
+      await deleteVersion(versionId);
+      setVersions(prev => prev.filter(v => v.id !== versionId));
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Poisto epäonnistui: ' + error.message);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -310,6 +326,41 @@ export default function MyVersionsPage({ onClose }) {
                       <span>👍 {version.votes_up || 0}</span>
                       <span>👎 {version.votes_down || 0}</span>
                     </div>
+                    {/* Delete button */}
+                    {deletingId !== version.id ? (
+                      <button
+                        onClick={() => setDeletingId(version.id)}
+                        className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
+                          isLegacy
+                            ? 'text-red-400 hover:bg-red-500/20'
+                            : 'text-red-500 hover:bg-red-50'
+                        }`}
+                        title="Poista versio"
+                      >
+                        🗑️
+                      </button>
+                    ) : (
+                      <div className={`flex items-center gap-2`}>
+                        <span className={`text-xs ${styles.textMuted}`}>Poista?</span>
+                        <button
+                          onClick={() => handleDelete(version.id)}
+                          disabled={deleteLoading}
+                          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                            isLegacy
+                              ? 'bg-red-600 hover:bg-red-500 text-white'
+                              : 'bg-red-600 hover:bg-red-700 text-white'
+                          } ${deleteLoading ? 'opacity-50' : ''}`}
+                        >
+                          {deleteLoading ? '...' : 'Kyllä'}
+                        </button>
+                        <button
+                          onClick={() => setDeletingId(null)}
+                          className={`text-xs px-3 py-1.5 rounded-lg transition-all ${styles.buttonSecondary}`}
+                        >
+                          Ei
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
