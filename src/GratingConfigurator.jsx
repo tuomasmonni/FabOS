@@ -1,7 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useTheme, THEMES } from './contexts/ThemeContext';
-import ThemeSwitcher from './components/ThemeSwitcher';
-import { ProfileDropdown } from './components/auth';
 import {
   MATERIALS,
   SURFACE_TREATMENTS,
@@ -2323,27 +2321,14 @@ export default function GratingConfigurator({ onBack }) {
               </div>
             )}
           </div>
-
-          <div className="flex items-center gap-4">
-            {/* Ostoskori */}
-            {cart.length > 0 && (
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isFabOS ? 'bg-white/10' : 'bg-slate-800'}`}>
-                <span className={`text-sm ${isFabOS ? 'text-gray-300' : 'text-slate-400'}`}>
-                  {cart.length} tuotetta
-                </span>
-                <span className={`font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                  {totalPrice.toFixed(2)} €
-                </span>
-              </div>
-            )}
-            <ThemeSwitcher variant="dark" />
-            <ProfileDropdown />
-          </div>
         </div>
+      </header>
 
-        {/* Tabs */}
-        <div className="max-w-7xl mx-auto px-4 pb-2">
-          <div className="flex gap-1">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Tabs + Cart bar */}
+        <div className={`flex items-center justify-between mb-6 ${isFabOS ? '' : ''}`}>
+          <div className={`flex gap-1 ${isFabOS ? 'bg-gray-100 rounded-lg p-1' : 'bg-slate-800 rounded-lg p-1'}`}>
             {[
               { id: 'standard', label: 'Vakio ritilät', icon: '#' },
               { id: 'treads', label: 'Askelmat', icon: '▬' },
@@ -2353,14 +2338,14 @@ export default function GratingConfigurator({ onBack }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? isFabOS
-                      ? 'bg-[#F7F7F7] text-gray-900'
-                      : 'bg-slate-800 text-white'
+                      ? 'bg-[#FF6B35] text-white'
+                      : 'bg-emerald-500 text-white'
                     : isFabOS
-                      ? 'text-gray-400 hover:text-gray-200'
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? 'text-gray-500 hover:text-gray-700'
+                      : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <span>{tab.icon}</span>
@@ -2368,11 +2353,18 @@ export default function GratingConfigurator({ onBack }) {
               </button>
             ))}
           </div>
+          {cart.length > 0 && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isFabOS ? 'bg-gray-100 border border-gray-200' : 'bg-slate-800'}`}>
+              <span className={`text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+                {cart.length} tuotetta
+              </span>
+              <span className={`font-bold ${isFabOS ? 'text-[#FF6B35]' : 'text-emerald-400'}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                {totalPrice.toFixed(2)} €
+              </span>
+            </div>
+          )}
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'standard' && (
           <StandardGratingsTab isFabOS={isFabOS} cart={cart} setCart={setCart} />
         )}

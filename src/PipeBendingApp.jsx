@@ -3,8 +3,6 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Grid } from '@react-three/drei';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
-import ThemeSwitcher from './components/ThemeSwitcher';
-import { ProfileDropdown } from './components/auth';
 import AIChat from './components/AIChat';
 import DevelopmentMode from './components/DevelopmentMode';
 import VersionGallery from './components/VersionGallery';
@@ -1404,7 +1402,6 @@ const PipeBendingApp = ({ onBack }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* AI Platform Buttons */}
             {/* Current version indicator */}
             <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
               isFabOS
@@ -1444,43 +1441,39 @@ const PipeBendingApp = ({ onBack }) => {
                 <span className="hidden sm:inline">Tee uusi kehitysversio</span>
               </button>
             </div>
-
-            <div className={isFabOS ? "h-6 w-px bg-gray-600" : "h-6 w-px bg-slate-700"} />
-
-            {/* Tabs */}
-            <div className={isFabOS
-              ? "flex bg-white/10 rounded-lg p-1"
-              : "flex bg-slate-800 rounded-lg p-1"
-            }>
-              <button
-                onClick={() => setActiveTab('usage')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  activeTab === 'usage'
-                    ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'
-                    : isFabOS ? 'text-gray-300 hover:text-white' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Käyttö
-              </button>
-              <button
-                onClick={() => setActiveTab('params')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  activeTab === 'params'
-                    ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'
-                    : isFabOS ? 'text-gray-300 hover:text-white' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Parametrit
-              </button>
-            </div>
-            <ThemeSwitcher variant="dark" />
-            <ProfileDropdown />
           </div>
         </div>
       </header>
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Tabs */}
+        <div className={isFabOS
+          ? "flex bg-gray-100 rounded-lg p-1 mb-6"
+          : "flex bg-slate-800 rounded-lg p-1 mb-6"
+        }>
+          <button
+            onClick={() => setActiveTab('usage')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'usage'
+                ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'
+                : isFabOS ? 'text-gray-500 hover:text-gray-700' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Käyttö
+          </button>
+          <button
+            onClick={() => setActiveTab('params')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'params'
+                ? isFabOS ? 'bg-[#FF6B35] text-white' : 'bg-emerald-500 text-white'
+                : isFabOS ? 'text-gray-500 hover:text-gray-700' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Parametrit
+          </button>
+        </div>
+
         {activeTab === 'params' ? (
           <ParametersTab
             params={params}

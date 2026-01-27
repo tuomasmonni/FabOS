@@ -19,9 +19,9 @@ Legacy theme is hidden and should NOT be modified. If user requests changes to a
 ### Module Files
 When modifying modules, always check `isFabOS` conditional styling:
 - Laser cutting: `src/AppV01.jsx`
-- Pipe bending: `src/components/PipeBendingApp.jsx`
-- Grating: `src/components/GratingConfigurator.jsx`
-- Stair: `src/components/StairConfigurator.jsx`
+- Pipe bending: `src/PipeBendingApp.jsx`
+- Grating: `src/GratingConfigurator.jsx`
+- Stair: `src/StairConfigurator.jsx`
 
 ### Color Palette (FabOS)
 - Primary: `#FF6B35` (orange)
@@ -34,6 +34,36 @@ When modifying modules, always check `isFabOS` conditional styling:
 - Modify Legacy theme styling
 - Add `!isFabOS` conditionals
 - Use Legacy color palette (slate, cyan, emerald for dark theme)
+
+### Module Header (Yläbanneri) Rule
+
+Every module has a **sticky top header** (`<header>`) that stays fixed at the top. The header MUST contain ONLY these elements:
+
+1. **Takaisin-button** — navigates back to main view
+2. **FabOS logo** — "Fab" white + "OS" orange branding
+3. **Module version badge** — e.g. `V0.3` in colored pill
+4. **Module name** — e.g. "Putkentaivutus"
+5. **Current version info** — shows active version name + number (if version system is enabled)
+6. **Versiot-button** — opens version gallery (if version system is enabled)
+7. **Tee uusi kehitysversio -button** — opens AI development mode (if version system is enabled)
+
+**DO NOT place in the header:**
+- ThemeSwitcher
+- ProfileDropdown
+- Tabs (Käyttö/Parametrit, Vakio ritilät/Askelmat etc.)
+- Shopping cart / order total
+- AI-avustaja button
+- Undo/Redo buttons
+- Order/Submit buttons
+- Any other module-specific controls
+
+**Where do removed controls go?**
+- Tabs → content area (`<main>`) as first element
+- Shopping cart, order total, order buttons → toolbar bar below header or content area
+- AI-avustaja, Undo/Redo → toolbar bar below header
+- ThemeSwitcher, ProfileDropdown → NOT needed in modules (available via main navigation)
+
+This rule ensures a **consistent, clean header** across all modules and applies to all new modules as well.
 
 ### API Endpoints
 - `/api/laser-ai` - Laser cutting AI assistant

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
-import ThemeSwitcher from './components/ThemeSwitcher';
-import { ProfileDropdown } from './components/auth';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // IFC-GENEROINTI
@@ -1025,13 +1023,6 @@ export default function StairConfigurator({ onBack }) {
             )}
           </div>
           <div className="flex items-center gap-3">
-            {!isFabOS && (
-              <div className="bg-gradient-to-r from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-full px-3 py-1">
-                <span className="text-indigo-300 text-xs font-semibold">BETA</span>
-              </div>
-            )}
-            <ThemeSwitcher variant="dark" />
-            <ProfileDropdown />
           </div>
         </div>
       </header>

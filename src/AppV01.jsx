@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { EpicIntro, BattleBanner, HumorBanner, FeedbackModal, AchievementToast, FloatingActions, InvestorBanner } from './EpicComponents';
 import { useTheme, THEMES } from './contexts/ThemeContext';
-import ThemeSwitcher from './components/ThemeSwitcher';
+
 
 const GRID_SIZE = 10;
 const MAX_HISTORY = 50;
@@ -2401,8 +2401,7 @@ const FabOSProto = ({ onBack }) => {
         ? "bg-[#1A1A2E] border-b border-gray-700 px-6 py-3"
         : "bg-slate-800/80 backdrop-blur border-b border-slate-700 px-6 py-3"
       }>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
             {/* Back to version selector */}
             {onBack && (
               <button
@@ -2441,58 +2440,62 @@ const FabOSProto = ({ onBack }) => {
                 <span className="text-white font-medium" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Laserleikkeet</span>
               </div>
             )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowAiChat(!showAiChat)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                isFabOS
-                  ? showAiChat
-                    ? 'bg-[#FF6B35] text-white'
-                    : 'bg-[#FF6B35]/20 text-[#FF6B35] hover:bg-[#FF6B35]/30 border border-[#FF6B35]/30'
-                  : showAiChat
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
-              }`}
-            >
-              <span className="text-lg">🤖</span>
-              <span className="text-sm">AI-avustaja</span>
-            </button>
-
-            <div className={isFabOS
-              ? "flex items-center bg-white/10 rounded-lg overflow-hidden"
-              : "flex items-center bg-slate-700/50 rounded-lg overflow-hidden"
-            }>
-              <button onClick={undo} disabled={!canUndo} className={`px-3 py-2 flex items-center gap-1 ${canUndo ? 'hover:bg-white/10' : 'text-gray-500 cursor-not-allowed'}`} title="Kumoa (Ctrl+Z)">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-              </button>
-              <div className={isFabOS ? "w-px h-5 bg-white/20" : "w-px h-5 bg-slate-600"} />
-              <button onClick={redo} disabled={!canRedo} className={`px-3 py-2 flex items-center gap-1 ${canRedo ? 'hover:bg-white/10' : 'text-gray-500 cursor-not-allowed'}`} title="Toista (Ctrl+Y)">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
-              </button>
-            </div>
-
-            <div className="text-right">
-              <div className={isFabOS ? "text-xs text-gray-400" : "text-xs text-slate-400"}>Tilaus yhteensä</div>
-              <div className={isFabOS
-                ? "text-2xl font-bold text-[#FF6B35]"
-                : "text-2xl font-bold text-emerald-400"
-              } style={isFabOS ? { fontFamily: 'JetBrains Mono, monospace' } : {}}>
-                {totalOrderPrice.toFixed(2)} €
-              </div>
-            </div>
-            <button className={isFabOS
-              ? "bg-gradient-to-r from-[#FF6B35] to-orange-500 hover:shadow-lg hover:shadow-[#FF6B35]/30 px-6 py-2.5 rounded-xl font-semibold text-white"
-              : "bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 px-6 py-2.5 rounded-lg font-semibold shadow-lg shadow-emerald-500/20"
-            }>
-              Tilaa ({parts.length + (shapes.length > 0 && editingPartIndex === null ? 1 : 0)})
-            </button>
-
-            <ThemeSwitcher variant="dark" />
-          </div>
         </div>
       </header>
+
+      {/* Toolbar */}
+      <div className={`flex items-center justify-between px-4 py-2 border-b ${
+        isFabOS ? 'bg-white border-gray-200' : 'bg-slate-800/50 border-slate-700'
+      }`}>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAiChat(!showAiChat)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              isFabOS
+                ? showAiChat
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'bg-[#FF6B35]/10 text-[#FF6B35] hover:bg-[#FF6B35]/20 border border-[#FF6B35]/30'
+                : showAiChat
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
+            }`}
+          >
+            <span className="text-lg">🤖</span>
+            <span className="text-sm">AI-avustaja</span>
+          </button>
+
+          <div className={isFabOS
+            ? "flex items-center bg-gray-100 rounded-lg overflow-hidden"
+            : "flex items-center bg-slate-700/50 rounded-lg overflow-hidden"
+          }>
+            <button onClick={undo} disabled={!canUndo} className={`px-3 py-2 flex items-center gap-1 ${canUndo ? (isFabOS ? 'hover:bg-gray-200 text-gray-700' : 'hover:bg-white/10') : 'text-gray-400 cursor-not-allowed'}`} title="Kumoa (Ctrl+Z)">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+            </button>
+            <div className={isFabOS ? "w-px h-5 bg-gray-300" : "w-px h-5 bg-slate-600"} />
+            <button onClick={redo} disabled={!canRedo} className={`px-3 py-2 flex items-center gap-1 ${canRedo ? (isFabOS ? 'hover:bg-gray-200 text-gray-700' : 'hover:bg-white/10') : 'text-gray-400 cursor-not-allowed'}`} title="Toista (Ctrl+Y)">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className={isFabOS ? "text-xs text-gray-500" : "text-xs text-slate-400"}>Tilaus yhteensä</div>
+            <div className={isFabOS
+              ? "text-xl font-bold text-[#FF6B35]"
+              : "text-xl font-bold text-emerald-400"
+            } style={isFabOS ? { fontFamily: 'JetBrains Mono, monospace' } : {}}>
+              {totalOrderPrice.toFixed(2)} €
+            </div>
+          </div>
+          <button className={isFabOS
+            ? "bg-gradient-to-r from-[#FF6B35] to-orange-500 hover:shadow-lg hover:shadow-[#FF6B35]/30 px-6 py-2.5 rounded-xl font-semibold text-white"
+            : "bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 px-6 py-2.5 rounded-lg font-semibold shadow-lg shadow-emerald-500/20"
+          }>
+            Tilaa ({parts.length + (shapes.length > 0 && editingPartIndex === null ? 1 : 0)})
+          </button>
+        </div>
+      </div>
 
       <div className="flex">
         {/* Sidebar */}
