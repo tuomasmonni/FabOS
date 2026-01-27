@@ -173,13 +173,23 @@ Tee tarvittavat koodimuutokset toteuttaaksesi käyttäjän pyynnön.
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 16384,
+      max_tokens: 64000,
       system: getCodeGenSystemPrompt(moduleId, files),
       messages: [{ role: 'user', content: prompt }]
     });
 
     // 3. Parsii vastaus
     console.log('\n3. Parsing response...');
+    console.log(`   Stop reason: ${response.stop_reason}`);
+    console.log(`   Output tokens: ${response.usage.output_tokens}`);
+
+    if (response.stop_reason === 'max_tokens') {
+      console.error('ERROR: Response was truncated (hit max_tokens limit)');
+      console.error('The source file may be too large for single-pass generation.');
+      setOutput('changes_made', 'false');
+      process.exit(1);
+    }
+
     const content = response.content[0].text;
 
     let result;
