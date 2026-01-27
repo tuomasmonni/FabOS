@@ -5,7 +5,7 @@
 // Flow: Pyyntö → AI ehdotus → Testaus → Arvio → Hyväksy/Jatka
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
+import { createVersion, generateNextVersionNumber } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -379,7 +379,7 @@ function CodeGenerationProgress({
 // ============================================================================
 // DEVELOPER RATING COMPONENT
 // ============================================================================
-function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRevert, versionName }) {
+function DeveloperRating({ isFabOS, onRate, onSkip, onContinue, versionName }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [hoveredStar, setHoveredStar] = useState(0);
@@ -387,17 +387,17 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
   return (
     <div className={`p-4 rounded-xl border ${
       isFabOS
-        ? 'bg-blue-50 border-blue-200'
-        : 'bg-blue-900/20 border-blue-700'
+        ? 'bg-green-50 border-green-200'
+        : 'bg-green-900/20 border-green-700'
     }`}>
-      <h4 className={`font-semibold mb-3 flex items-center gap-2 ${
-        isFabOS ? 'text-blue-800' : 'text-blue-300'
+      <h4 className={`font-semibold mb-2 flex items-center gap-2 ${
+        isFabOS ? 'text-green-800' : 'text-green-300'
       }`}>
-        <span>📊</span> Kehittäjän arvio
+        <span>✅</span> Tallennettu! Arvioi muutos (vapaaehtoinen)
       </h4>
 
-      <p className={`text-sm mb-3 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
-        Arvioi muutos <strong>"{versionName}"</strong>
+      <p className={`text-sm mb-3 ${isFabOS ? 'text-green-700' : 'text-green-400'}`}>
+        Miten muutos <strong>"{versionName}"</strong> onnistui?
       </p>
 
       {/* Star rating */}
@@ -426,76 +426,49 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
         rows={2}
         className={`w-full px-3 py-2 rounded-lg text-sm mb-3 resize-none ${
           isFabOS
-            ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-400'
-            : 'bg-slate-800 border border-blue-700 text-white placeholder-slate-400'
+            ? 'bg-white border border-green-200 text-gray-900 placeholder-gray-400'
+            : 'bg-slate-800 border border-green-700 text-white placeholder-slate-400'
         }`}
       />
 
-      {/* Action buttons - Two rows */}
-      <div className="space-y-2">
-        {/* Primary actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => onRate?.(rating, feedback)}
-            disabled={rating === 0}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-            }`}
-          >
-            ✓ Tallenna config
-          </button>
-          <button
-            onClick={() => onRateAndGenerate?.(rating, feedback)}
-            disabled={rating === 0}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-            }`}
-          >
-            🚀 Tallenna & Luo koodi
-          </button>
-        </div>
-
-        {/* Secondary actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={onContinue}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              isFabOS
-                ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
-                : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-            }`}
-          >
-            🔄 Jatka kehitystä
-          </button>
-          <button
-            onClick={onRevert}
-            className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              isFabOS
-                ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200'
-                : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
-            }`}
-          >
-            ↩ Palauta
-          </button>
-        </div>
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => onRate?.(rating, feedback)}
+          disabled={rating === 0}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+            rating > 0
+              ? isFabOS
+                ? 'bg-[#FF6B35] hover:bg-[#e55a2b] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+              : isFabOS
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+          }`}
+        >
+          ⭐ Lähetä arvio
+        </button>
+        <button
+          onClick={onSkip}
+          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+            isFabOS
+              ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200'
+              : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
+          }`}
+        >
+          Ohita
+        </button>
+        <button
+          onClick={() => { onSkip?.(); onContinue?.(); }}
+          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+            isFabOS
+              ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+              : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+          }`}
+        >
+          🔄 Jatka kehitystä
+        </button>
       </div>
-
-      {/* Info text */}
-      <p className={`text-[10px] mt-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
-        💡 "Tallenna config" tallentaa vain asetukset. "Luo koodi" generoi oikean koodimuutoksen.
-      </p>
     </div>
   );
 }
@@ -618,7 +591,7 @@ export default function DevelopmentMode({
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Tervetuloa kehitystilaan! 🛠️\n\nKerro mitä haluaisit muuttaa tai parantaa. Voit testata muutoksia suoraan oikealla näkyvässä esikatselussa.\n\nFlow: Pyyntö → Ehdotus → Testaa → Arvio → Tallenna',
+      content: 'Tervetuloa kehitystilaan! 🛠️\n\nKerro mitä haluaisit muuttaa tai parantaa. Voit testata muutoksia suoraan oikealla näkyvässä esikatselussa.\n\nFlow: Pyyntö → Ehdotus → Testaa → Tallenna → Arvio (vapaaehtoinen)',
       timestamp: new Date().toISOString()
     }
   ]);
@@ -771,13 +744,13 @@ export default function DevelopmentMode({
       userRequest: messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
     });
 
-    // Show rating panel
-    setShowRating(true);
+    // EI näytetä arviointia vielä - käyttäjä testaa ensin vapaasti
+    setShowRating(false);
 
     // Add system message
     setMessages(prev => [...prev, {
       role: 'system',
-      content: `🧪 Muutos "${message.versionName || 'Nimetön'}" on nyt aktiivisena!\n\nNäet muutokset oikealla esikatselussa. Voit tallentaa version tai jatkaa kehitystä.`,
+      content: `🧪 Muutos "${message.versionName || 'Nimetön'}" on nyt aktiivisena!\n\nTestaa muutosta esikatselussa. Kun olet valmis, voit tallentaa tai jatkaa kehitystä.`,
       timestamp: new Date().toISOString()
     }]);
   };
@@ -790,13 +763,15 @@ export default function DevelopmentMode({
     }]);
   };
 
-  const handleRatingSubmit = async (rating, feedback, generateCode = false) => {
+  // =============================================
+  // TALLENNA VERSIO (ilman arviointia)
+  // =============================================
+  const handleSave = async (generateCode = false) => {
     if (!testingVersion) return;
 
     setIsLoading(true);
 
     try {
-      const fingerprint = generateFingerprint();
       const email = user?.email || '';
 
       // Generoi semanttinen versionumero
@@ -809,12 +784,9 @@ export default function DevelopmentMode({
         version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
-        user_request: testingVersion.userRequest,
-        developer_rating: rating,
-        developer_feedback: feedback
+        user_request: testingVersion.userRequest
       });
 
       if (generateCode && newVersion?.id) {
@@ -824,7 +796,6 @@ export default function DevelopmentMode({
         setGenerationStartTime(Date.now());
         setGenerationStatus('pending');
         setIsGeneratingCode(true);
-        setShowRating(false);
 
         // Triggeröi code generation API
         try {
@@ -841,8 +812,6 @@ export default function DevelopmentMode({
 
           if (response.ok) {
             setGenerationStatus('generating');
-
-            // Simuloi edistymistä (oikeassa toteutuksessa kuuntelisi API:a)
             setTimeout(() => setGenerationStatus('deployed'), 30000);
           } else {
             setGenerationStatus('failed');
@@ -858,12 +827,16 @@ export default function DevelopmentMode({
           timestamp: new Date().toISOString()
         }]);
       } else {
+        // Tallennettiin vain config - näytä arviointi-mahdollisuus
+        setSavedVersionId(newVersion?.id);
+        setGeneratingVersionName(testingVersion.name);
+        setShowRating(true);
+
         setMessages(prev => [...prev, {
           role: 'system',
-          content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu arvosanalla ${rating}/5!\n\n${feedback ? `Palautteesi: "${feedback}"` : ''}\n\nVoit jatkaa kehitystä tai sulkea kehitystilan.`,
+          content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu!\n\nVoit nyt arvioida muutoksen tai jatkaa kehitystä.`,
           timestamp: new Date().toISOString()
         }]);
-        setShowRating(false);
       }
 
       setTestingVersion(null);
@@ -879,6 +852,49 @@ export default function DevelopmentMode({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // =============================================
+  // ARVIOINTI (vapaaehtoinen, tallennuksen jälkeen)
+  // =============================================
+  const handleRatingSubmit = async (rating, feedback) => {
+    if (!savedVersionId) {
+      setShowRating(false);
+      return;
+    }
+
+    try {
+      // Päivitä jo tallennettu versio arviolla
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (supabaseUrl && supabaseAnonKey) {
+        await fetch(`${supabaseUrl}/rest/v1/versions?id=eq.${savedVersionId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            developer_rating: rating,
+            developer_feedback: feedback
+          })
+        });
+      }
+
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `⭐ Arvio tallennettu: ${rating}/5${feedback ? ` - "${feedback}"` : ''}\n\nKiitos palautteesta! Voit jatkaa kehitystä.`,
+        timestamp: new Date().toISOString()
+      }]);
+    } catch (error) {
+      console.error('Rating update error:', error);
+    }
+
+    setShowRating(false);
+    setSavedVersionId(null);
   };
 
   // Käsittele koodin generoinnin peruutus
@@ -1127,16 +1143,76 @@ export default function DevelopmentMode({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Rating panel (shown when testing) */}
-          {showRating && testingVersion && !isGeneratingCode && (
+          {/* TESTING TOOLBAR - Tallennusnapit testauksen aikana (ei arviointia vielä) */}
+          {testingVersion && !showRating && !isGeneratingCode && (
+            <div className={`p-3 border-t ${isFabOS ? 'border-gray-200 bg-amber-50' : 'border-slate-700 bg-amber-900/20'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm">🧪</span>
+                <span className={`text-sm font-medium ${isFabOS ? 'text-amber-800' : 'text-amber-300'}`}>
+                  Testataan: {testingVersion.name}
+                </span>
+              </div>
+              <div className="flex gap-2 mb-1.5">
+                <button
+                  onClick={() => handleSave(false)}
+                  disabled={isLoading}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                    isFabOS
+                      ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  ✓ Tallenna config
+                </button>
+                <button
+                  onClick={() => handleSave(true)}
+                  disabled={isLoading}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                    isFabOS
+                      ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  🚀 Tallenna & Luo koodi
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleContinueDevelopment}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                    isFabOS
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+                      : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                  }`}
+                >
+                  🔄 Jatka kehitystä
+                </button>
+                <button
+                  onClick={handleRevert}
+                  className={`py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                    isFabOS
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200'
+                      : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
+                  }`}
+                >
+                  ↩ Palauta
+                </button>
+              </div>
+              <p className={`text-[10px] mt-2 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
+                💡 "Tallenna config" = vain asetukset. "Luo koodi" = generoi oikea koodimuutos.
+              </p>
+            </div>
+          )}
+
+          {/* POST-SAVE RATING - Vapaaehtoinen arviointi tallennuksen jälkeen */}
+          {showRating && !testingVersion && !isGeneratingCode && (
             <div className="p-3 border-t border-gray-200">
               <DeveloperRating
                 isFabOS={isFabOS}
-                versionName={testingVersion.name}
-                onRate={(rating, feedback) => handleRatingSubmit(rating, feedback, false)}
-                onRateAndGenerate={(rating, feedback) => handleRatingSubmit(rating, feedback, true)}
+                versionName={generatingVersionName || 'Tallennettu versio'}
+                onRate={(rating, feedback) => handleRatingSubmit(rating, feedback)}
+                onSkip={() => { setShowRating(false); setSavedVersionId(null); }}
                 onContinue={handleContinueDevelopment}
-                onRevert={handleRevert}
               />
             </div>
           )}
