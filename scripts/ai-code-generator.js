@@ -15,6 +15,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 15 * 60 * 1000, // 15 min timeout for large code generation
 });
 
 // Moduulien tiedostopolut
@@ -121,16 +122,25 @@ VASTAUSMUOTO (JSON):
     {
       "file": "src/PipeBendingApp.jsx",
       "description": "Mitä muutetaan",
-      "fullContent": "KOKO tiedoston sisältö muutosten jälkeen"
+      "edits": [
+        {
+          "search": "tarkka koodi joka korvataan (riittävästi kontekstia uniikkiuden varmistamiseksi)",
+          "replace": "uusi koodi joka korvaa search-osion"
+        }
+      ]
     }
   ],
   "summary": "Lyhyt yhteenveto tehdyistä muutoksista"
 }
 
 TÄRKEÄÄ:
-- "fullContent" sisältää KOKO tiedoston, ei vain muutettua osaa
-- Älä käytä placeholder-tekstejä kuten "// ... rest of code"
-- Palauta aina koko tiedoston sisältö
+- Käytä search/replace -muotoa. ÄLÄ palauta koko tiedostoa!
+- "search" sisältää TARKAN tekstin nykyisestä koodista joka korvataan
+- "replace" sisältää uuden koodin joka korvaa search-osion
+- Varmista että "search"-teksti on tarpeeksi pitkä ollakseen uniikki tiedostossa
+- Yksi change voi sisältää useita edits-muutoksia samaan tiedostoon
+- Uuden koodin lisääminen: search = kohta jonka JÄLKEEN lisätään, replace = sama kohta + uusi koodi perässä
+- Importtien lisäys: search = nykyinen import-rivi, replace = nykyinen + uusi import
 `;
 
 // Pääfunktio
@@ -173,7 +183,7 @@ Tee tarvittavat koodimuutokset toteuttaaksesi käyttäjän pyynnön.
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 64000,
+      max_tokens: 16384,
       system: getCodeGenSystemPrompt(moduleId, files),
       messages: [{ role: 'user', content: prompt }]
     });
@@ -207,23 +217,66 @@ Tee tarvittavat koodimuutokset toteuttaaksesi käyttäjän pyynnön.
       process.exit(1);
     }
 
-    // 4. Kirjoita muutokset
-    console.log('\n4. Writing changes...');
+    // 4. Kirjoita muutokset (search/replace)
+    console.log('\n4. Applying changes...');
     console.log('   Analysis:', result.analysis);
 
     let changesWritten = 0;
     const changeSummary = [];
 
     for (const change of result.changes || []) {
-      console.log(`   Writing: ${change.file}`);
+      console.log(`   File: ${change.file}`);
       console.log(`   Description: ${change.description}`);
 
-      if (change.fullContent && change.file) {
-        const success = await writeFile(change.file, change.fullContent);
+      if (!change.file || !change.edits || change.edits.length === 0) {
+        // Fallback: support old fullContent format
+        if (change.fullContent && change.file) {
+          const success = await writeFile(change.file, change.fullContent);
+          if (success) {
+            changesWritten++;
+            changeSummary.push(`- ${change.file}: ${change.description}`);
+          }
+        }
+        continue;
+      }
+
+      // Read current file content
+      const currentContent = await readFile(change.file);
+      if (!currentContent) {
+        console.error(`   ERROR: Could not read ${change.file}`);
+        continue;
+      }
+
+      let updatedContent = currentContent;
+      let editsApplied = 0;
+
+      for (const edit of change.edits) {
+        if (!edit.search || edit.replace === undefined) {
+          console.error(`   ERROR: Invalid edit - missing search or replace`);
+          continue;
+        }
+
+        // Normalize line endings for matching
+        const normalizedSearch = edit.search.replace(/\r\n/g, '\n');
+        const normalizedContent = updatedContent.replace(/\r\n/g, '\n');
+
+        if (normalizedContent.includes(normalizedSearch)) {
+          updatedContent = normalizedContent.replace(normalizedSearch, edit.replace.replace(/\r\n/g, '\n'));
+          editsApplied++;
+          console.log(`   ✓ Edit ${editsApplied}: replaced ${normalizedSearch.length} chars`);
+        } else {
+          console.error(`   ✗ Edit failed: search text not found (first 80 chars: "${edit.search.substring(0, 80)}...")`);
+        }
+      }
+
+      if (editsApplied > 0) {
+        const success = await writeFile(change.file, updatedContent);
         if (success) {
           changesWritten++;
-          changeSummary.push(`- ${change.file}: ${change.description}`);
+          changeSummary.push(`- ${change.file}: ${change.description} (${editsApplied} edits)`);
         }
+      } else {
+        console.error(`   ERROR: No edits could be applied to ${change.file}`);
       }
     }
 
