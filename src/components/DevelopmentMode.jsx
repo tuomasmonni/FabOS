@@ -5,7 +5,7 @@
 // Flow: Pyyntö → AI ehdotus → Testaus → Arvio → Hyväksy/Jatka
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
+import { createVersion, generateNextVersionNumber } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -397,7 +397,7 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
       </h4>
 
       <p className={`text-sm mb-3 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
-        Arvioi muutos <strong>"{versionName}"</strong>
+        Tallenna muutos <strong>"{versionName}"</strong> — arvio on vapaaehtoinen
       </p>
 
       {/* Star rating */}
@@ -437,30 +437,20 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
         <div className="flex gap-2">
           <button
             onClick={() => onRate?.(rating, feedback)}
-            disabled={rating === 0}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
             }`}
           >
             ✓ Tallenna config
           </button>
           <button
             onClick={() => onRateAndGenerate?.(rating, feedback)}
-            disabled={rating === 0}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
             }`}
           >
             🚀 Tallenna & Luo koodi
@@ -796,7 +786,6 @@ export default function DevelopmentMode({
     setIsLoading(true);
 
     try {
-      const fingerprint = generateFingerprint();
       const email = user?.email || '';
 
       // Generoi semanttinen versionumero
@@ -809,7 +798,6 @@ export default function DevelopmentMode({
         version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
         user_request: testingVersion.userRequest

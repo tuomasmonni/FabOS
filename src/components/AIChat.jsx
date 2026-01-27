@@ -5,7 +5,7 @@
 // Käytetään moduulien muokkauspyyntöihin
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint, generateNextVersionNumber, watchVersionStatus } from '../lib/supabase';
+import { createVersion, generateNextVersionNumber, watchVersionStatus } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -436,7 +436,6 @@ export default function AIChat({
     setIsLoading(true);
 
     try {
-      const fingerprint = generateFingerprint();
       const email = user?.email || userEmail || '';
 
       // Generoi semanttinen versionumero
@@ -449,7 +448,6 @@ export default function AIChat({
         version_number: versionNumber,
         config: pendingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
         user_request: pendingVersion.userRequest
