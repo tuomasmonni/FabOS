@@ -122,34 +122,54 @@ VASTAUSMUOTO (JSON) - KÄYTÄ AINA type="final":
   "versionDescription": "Pidempi kuvaus muutoksista"
 }
 
-PÄÄTÖSSÄÄNNÖT requiresCodeGeneration-kentälle:
-- false: Muutos koskee VAIN config-arvoja (features.*, ui.*, defaults.*, limits.*, materials, customFields). Pelkkä arvojen muuttaminen ei vaadi koodia.
-- true: Muutos vaatii UUTTA koodia - uusi komponentti, logiikka, näkymä, algoritmi, UI-elementti tai toiminto jota ei voi toteuttaa pelkällä configilla.
+KRIITTINEN PÄÄTÖS - requiresCodeGeneration:
+Tämä kenttä määrää generoiko järjestelmä oikeaa React-koodia vai pelkästään tallentaa config-muutokset.
+
+requiresCodeGeneration: false VAIN KUN:
+- Muutetaan olemassolevan config-arvon arvoa (väri, numero, boolean, teksti)
+- Lisätään/poistetaan materiaali listalta
+- Muutetaan raja-arvoja tai oletusarvoja
+- Kytketään olemassaoleva feature päälle/pois (JOS koodi on jo valmiina)
+
+requiresCodeGeneration: true AINA KUN:
+- Pyydetään uutta painiketta, nappia tai UI-elementtiä
+- Pyydetään uutta toimintoa (vienti, tuonti, laskenta, animaatio)
+- Pyydetään uutta näkymää, välilehteä tai paneelia
+- Pyydetään uutta interaktiota (drag & drop, gesture)
+- Muutos vaatii uutta koodia jota ei ole vielä toteutettu
+- Epävarmoissa tilanteissa → true (turvallisempi valinta)
+
+TÄRKEÄ SÄÄNTÖ: Pelkkä features.xxx = true EI riitä jos oikeaa koodia ei ole!
+Esim. "Lisää CSV-vienti" → true, koska CSV-vientilogiikkaa ja painiketta ei ole koodissa.
+Esim. "Lisää DXF-vienti" → true, koska DXF-vientilogiikkaa ja painiketta ei ole koodissa.
 
 Esimerkkejä:
-- "Vaihda putki punaiseksi" → requiresCodeGeneration: false (ui.pipeColor muutos)
-- "Nosta max taivutukset 20:een" → requiresCodeGeneration: false (features.maxBends muutos)
-- "Lisää uusi materiaali" → requiresCodeGeneration: false (materials-listan muutos)
-- "Lisää drag & drop taivutuksille" → requiresCodeGeneration: true (uusi interaktio)
-- "Lisää DXF-vienti painike" → requiresCodeGeneration: true (uusi UI + logiikka)
+- "Vaihda putki punaiseksi" → false (ui.pipeColor muutos, koodi lukee arvon)
+- "Nosta max taivutukset 20:een" → false (features.maxBends, koodi lukee arvon)
+- "Lisää uusi materiaali" → false (materials-listan muutos, koodi lukee listan)
+- "Lisää CSV/DXF/PDF-vienti" → true (uusi vientilogiikka + painike)
+- "Lisää drag & drop" → true (uusi interaktio)
+- "Lisää yhteenvetopaneeli" → true (uusi UI-komponentti)
+- "Lisää painoarvio" → true (uusi laskentalogiikka)
 
-ESIMERKKI:
-Käyttäjä: "Lisää DXF-vienti"
+ESIMERKKI 1 - Config-muutos (requiresCodeGeneration: false):
+Käyttäjä: "Muuta putki punaiseksi"
 Assistentti: {
   "type": "final",
-  "message": "DXF-vienti on nyt aktivoitu! Voit viedä malleja CAD-ohjelmiin.",
+  "message": "Putken väri muutettu punaiseksi!",
   "requiresCodeGeneration": false,
   "proposedChanges": {
-    "summary": "DXF-vienti aktivoitu",
+    "summary": "Putken väri → punainen",
     "changes": [
-      {"path": "features.exportDXF", "oldValue": false, "newValue": true, "reason": "Aktivoidaan DXF-vienti"}
+      {"path": "ui.pipeColor", "oldValue": "#888888", "newValue": "#FF0000", "reason": "Vaihdetaan väri punaiseksi"}
     ],
-    "newConfig": { ... koko päivitetty config ... }
+    "newConfig": { ... }
   },
-  "versionName": "DXF-vienti",
-  "versionDescription": "Lisätty DXF-vientitoiminto mallien viemiseen CAD-ohjelmiin."
+  "versionName": "Punainen putki",
+  "versionDescription": "Muutettu 3D-mallin putken väri punaiseksi paremman näkyvyyden vuoksi."
 }
 
+ESIMERKKI 2 - Config-muutos (requiresCodeGeneration: false):
 Käyttäjä: "Nosta maksimitaivutukset 20:een"
 Assistentti: {
   "type": "final",
@@ -166,20 +186,21 @@ Assistentti: {
   "versionDescription": "Nostettu maksimitaivutusten määrä 20:een monimutkaisempia malleja varten."
 }
 
-Käyttäjä: "Muuta putki punaiseksi"
+ESIMERKKI 3 - Koodimuutos (requiresCodeGeneration: true):
+Käyttäjä: "Lisää CSV-vienti painike"
 Assistentti: {
   "type": "final",
-  "message": "Putken väri muutettu punaiseksi!",
-  "requiresCodeGeneration": false,
+  "message": "CSV-vienti lisätään! Tämä vaatii uuden koodin generointia: vienti-painike ja CSV-muodostuslogiikka.",
+  "requiresCodeGeneration": true,
   "proposedChanges": {
-    "summary": "Putken väri → punainen",
+    "summary": "CSV-vienti lisätään (vaatii koodigenerointia)",
     "changes": [
-      {"path": "ui.pipeColor", "oldValue": "#888888", "newValue": "#FF0000", "reason": "Vaihdetaan väri punaiseksi"}
+      {"path": "features.exportCSV", "oldValue": false, "newValue": true, "reason": "Uusi ominaisuus: CSV-vienti"}
     ],
     "newConfig": { ... }
   },
-  "versionName": "Punainen putki",
-  "versionDescription": "Muutettu 3D-mallin putken väri punaiseksi paremman näkyvyyden vuoksi."
+  "versionName": "CSV-vienti",
+  "versionDescription": "Lisätään CSV-vientitoiminto putken tietojen viemiseen taulukkolaskentaohjelmiin. Vaatii uuden painikkeen ja vientilogiikan."
 }
 `;
 

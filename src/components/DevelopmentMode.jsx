@@ -5,7 +5,7 @@
 // Flow: Pyyntö → AI ehdotus → Testaus → Tallenna → Arvio
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
+import { createVersion, generateFingerprint, generateNextVersionNumber, watchVersionStatus } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ============================================================================
@@ -847,7 +847,27 @@ export default function DevelopmentMode({
 
           if (response.ok) {
             setGenerationStatus('generating');
-            setTimeout(() => setGenerationStatus('deployed'), 30000);
+
+            // Oikea status-pollaus Supabasesta
+            const stopWatching = watchVersionStatus(newVersion.id, (statusData) => {
+              const deployStatus = statusData?.deployment_status;
+              if (deployStatus === 'deployed') {
+                setGenerationStatus('deployed');
+                setMessages(prev => [...prev, {
+                  role: 'system',
+                  content: `✅ Koodi generoitu ja deployattu versiolle "${testingVersion.name}"!\n\nMuutokset ovat nyt tuotannossa. Lataa sivu uudelleen nähdäksesi muutokset.`,
+                  timestamp: new Date().toISOString()
+                }]);
+              } else if (deployStatus === 'failed') {
+                setGenerationStatus('failed');
+                setIsGeneratingCode(false);
+                setMessages(prev => [...prev, {
+                  role: 'system',
+                  content: `❌ Koodin generointi epäonnistui versiolle "${testingVersion.name}". Yritä yksinkertaisempaa pyyntöä.`,
+                  timestamp: new Date().toISOString()
+                }]);
+              }
+            }, 10000);
 
             setMessages(prev => [...prev, {
               role: 'system',
