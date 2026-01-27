@@ -1478,6 +1478,7 @@ function UsageTab({ params, selectedSize }) {
               wallThickness={pipeData.wallThickness}
               startStraight={startStraight}
               bendData={bends}
+              color={moduleConfig?.ui?.pipeColor}
             />
           </div>
         </div>
