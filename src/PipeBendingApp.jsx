@@ -254,9 +254,7 @@ export function PipeBendingPreview({ config, isPreview, isFabOS = true }) {
           {config?.features?.exportDXF && (
             <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">DXF ✓</span>
           )}
-          {config?.features?.exportCSV && (
-            <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">CSV ✓</span>
-          )}
+
           <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">
             Max {maxBends} taivutusta
           </span>
@@ -816,8 +814,7 @@ function UsageTab({ params, selectedSize, pipeColor, isPreview = false }) {
     { id: 1, angle: 90, straightAfter: 100, type: 'lesti', radius: selectedSize * 2 }
   ]);
   
-  // Messages state for CSV import feedback
-  const [messages, setMessages] = useState([]);
+
 
   // Päivitä kun koko vaihtuu
   useEffect(() => {
@@ -844,62 +841,7 @@ function UsageTab({ params, selectedSize, pipeColor, isPreview = false }) {
     }]);
   };
 
-  const handleCSVImport = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const csv = e.target.result;
-        const lines = csv.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-        
-        // Etsitään sarakkeet
-        const angleIndex = headers.findIndex(h => h.includes('angle') || h.includes('kulma'));
-        const straightIndex = headers.findIndex(h => h.includes('straight') || h.includes('suora'));
-        const radiusIndex = headers.findIndex(h => h.includes('radius') || h.includes('säde'));
-        const typeIndex = headers.findIndex(h => h.includes('type') || h.includes('tyyppi'));
-        
-        const newBends = [];
-        
-        // Käsitellään data-rivit
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',').map(v => v.trim());
-          if (values.length < 2) continue;
-          
-          const angle = angleIndex >= 0 ? parseFloat(values[angleIndex]) || 90 : 90;
-          const straightAfter = straightIndex >= 0 ? parseFloat(values[straightIndex]) || currentParams.minStraight : currentParams.minStraight + 20;
-          const radius = radiusIndex >= 0 ? parseFloat(values[radiusIndex]) || pipeData.diameter * 2 : pipeData.diameter * 2;
-          const type = typeIndex >= 0 && values[typeIndex].toLowerCase().includes('rullaus') ? 'rullaus' : 'lesti';
-          
-          newBends.push({
-            id: Date.now() + i,
-            angle: Math.max(-180, Math.min(180, angle)),
-            straightAfter: Math.max(0, straightAfter),
-            type,
-            radius: Math.max(getMinRadius(type, pipeData.diameter), radius)
-          });
-        }
-        
-        if (newBends.length > 0) {
-          setBends(newBends.slice(0, currentParams.maxBends || 10));
-          setMessages(prev => [...prev, {
-            role: 'system',
-            content: `✅ Tuotu ${newBends.length} taivutusta CSV-tiedostosta`,
-            timestamp: new Date().toISOString()
-          }]);
-        }
-        
-      } catch (error) {
-        console.error('CSV import error:', error);
-        alert('Virhe CSV-tiedoston lukemisessa. Tarkista tiedoston muoto.');
-      }
-    };
-    
-    reader.readAsText(file);
-    event.target.value = ''; // Nollaa input
-  };
 
   const updateBendType = (id, newType) => {
     setBends(bends.map(b => {
@@ -1028,18 +970,6 @@ function UsageTab({ params, selectedSize, pipeColor, isPreview = false }) {
             Taivutukset
           </h3>
           <div className="flex gap-2">
-            {/* CSV Import Button */}
-            <label className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
-              <span>📊</span>
-              <span>CSV</span>
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleCSVImport}
-                className="hidden"
-                title="Tuo taivutukset CSV-tiedostosta"
-              />
-            </label>
             <button
               onClick={addBend}
               className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors"
@@ -1049,17 +979,7 @@ function UsageTab({ params, selectedSize, pipeColor, isPreview = false }) {
           </div>
         </div>
 
-        {/* CSV Format Help */}
-        <div className="p-3 rounded-lg mb-4 bg-blue-50 border border-blue-200">
-          <p className="text-sm font-medium mb-2 text-blue-800">
-            📊 CSV-muoto (sarakkeet: angle, straight, radius, type)
-          </p>
-          <p className="text-xs text-blue-600">
-            Esim: angle,straight,radius,type<br/>
-            90,100,50,lesti<br/>
-            45,80,60,rullaus
-          </p>
-        </div>
+
 
         <div className="space-y-3">
           {/* Alkusuora */}
