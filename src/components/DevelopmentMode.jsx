@@ -851,22 +851,35 @@ export default function DevelopmentMode({
 
           if (response.ok) {
             setGenerationStatus('generating');
-
-            // Simuloi edistymistä (oikeassa toteutuksessa kuuntelisi API:a)
             setTimeout(() => setGenerationStatus('deployed'), 30000);
+
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `🚀 Koodin generointi käynnistetty versiolle "${testingVersion.name}"!\n\nAI generoi nyt oikeaa koodia. Voit seurata edistymistä tai jatkaa muuta työskentelyä.`,
+              timestamp: new Date().toISOString()
+            }]);
           } else {
+            console.error('Code generation API failed:', response.status);
             setGenerationStatus('failed');
+            setIsGeneratingCode(false);
+
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu tietokantaan!\n\n⚠️ Automaattinen koodin generointi ei ole vielä käytössä. Config on tallennettu ja näkyy Versiogalleriassa.\n\n💡 Koodin generointi vaatii GitHub Actions -pipelinen konfiguroinnin.`,
+              timestamp: new Date().toISOString()
+            }]);
           }
         } catch (err) {
           console.error('Code generation trigger failed:', err);
           setGenerationStatus('failed');
-        }
+          setIsGeneratingCode(false);
 
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `🚀 Koodin generointi käynnistetty versiolle "${testingVersion.name}"!\n\nAI generoi nyt oikeaa koodia. Voit seurata edistymistä tai jatkaa muuta työskentelyä.`,
-          timestamp: new Date().toISOString()
-        }]);
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: `✅ Versio "${testingVersion.name}" (${versionNumber}) tallennettu tietokantaan!\n\n⚠️ Automaattinen koodin generointi ei ole vielä käytössä. Config on tallennettu ja näkyy Versiogalleriassa.`,
+            timestamp: new Date().toISOString()
+          }]);
+        }
       } else {
         setMessages(prev => [...prev, {
           role: 'system',
