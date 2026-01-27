@@ -475,8 +475,10 @@ export async function deleteVersion(versionId) {
     {
       method: 'DELETE',
       headers: {
+        'Content-Type': 'application/json',
         'apikey': key,
-        'Authorization': `Bearer ${key}`
+        'Authorization': `Bearer ${key}`,
+        'Prefer': 'return=representation'
       }
     }
   );
@@ -486,6 +488,15 @@ export async function deleteVersion(versionId) {
     console.error('Delete version failed:', response.status, errorText);
     throw new Error('Failed to delete version');
   }
+
+  // Tarkista että rivi oikeasti poistettiin
+  const deleted = await response.json();
+  if (!deleted || deleted.length === 0) {
+    console.error('Delete returned empty result - version may not have been deleted');
+    throw new Error('Version ei poistunut. Tarkista oikeudet.');
+  }
+
+  console.log('Version deleted successfully:', deleted[0]?.name);
   return true;
 }
 
