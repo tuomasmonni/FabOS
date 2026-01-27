@@ -449,7 +449,7 @@ export default function AIChat({
         version_number: versionNumber,
         config: pendingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
+        creator_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
         user_request: pendingVersion.userRequest

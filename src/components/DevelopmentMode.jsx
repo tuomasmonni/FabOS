@@ -383,6 +383,7 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [hoveredStar, setHoveredStar] = useState(0);
+  const [showRatingForm, setShowRatingForm] = useState(false);
 
   return (
     <div className={`p-4 rounded-xl border ${
@@ -393,74 +394,33 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
       <h4 className={`font-semibold mb-3 flex items-center gap-2 ${
         isFabOS ? 'text-blue-800' : 'text-blue-300'
       }`}>
-        <span>📊</span> Kehittäjän arvio
+        <span>🧪</span> Testaa muutosta: "{versionName}"
       </h4>
 
       <p className={`text-sm mb-3 ${isFabOS ? 'text-blue-700' : 'text-blue-400'}`}>
-        Arvioi muutos <strong>"{versionName}"</strong>
+        Kokeile muutosta esikatselussa. Tallenna kun olet valmis.
       </p>
 
-      {/* Star rating */}
-      <div className="flex items-center gap-1 mb-3">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            onClick={() => setRating(star)}
-            onMouseEnter={() => setHoveredStar(star)}
-            onMouseLeave={() => setHoveredStar(0)}
-            className="text-2xl transition-transform hover:scale-110"
-          >
-            {star <= (hoveredStar || rating) ? '⭐' : '☆'}
-          </button>
-        ))}
-        <span className={`ml-2 text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
-          {rating > 0 ? `${rating}/5` : 'Valitse'}
-        </span>
-      </div>
-
-      {/* Feedback input */}
-      <textarea
-        value={feedback}
-        onChange={(e) => setFeedback(e.target.value)}
-        placeholder="Vapaaehtoinen palaute muutoksesta..."
-        rows={2}
-        className={`w-full px-3 py-2 rounded-lg text-sm mb-3 resize-none ${
-          isFabOS
-            ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-400'
-            : 'bg-slate-800 border border-blue-700 text-white placeholder-slate-400'
-        }`}
-      />
-
-      {/* Action buttons - Two rows */}
+      {/* Save buttons - always visible */}
       <div className="space-y-2">
         {/* Primary actions */}
         <div className="flex gap-2">
           <button
-            onClick={() => onRate?.(rating, feedback)}
-            disabled={rating === 0}
+            onClick={() => onRate?.(rating || null, feedback || null)}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-[#10B981] hover:bg-[#059669] text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-[#10B981] hover:bg-[#059669] text-white'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-white'
             }`}
           >
             ✓ Tallenna config
           </button>
           <button
-            onClick={() => onRateAndGenerate?.(rating, feedback)}
-            disabled={rating === 0}
+            onClick={() => onRateAndGenerate?.(rating || null, feedback || null)}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-              rating > 0
-                ? isFabOS
-                  ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
-                : isFabOS
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              isFabOS
+                ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 hover:opacity-90 text-white'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white'
             }`}
           >
             🚀 Tallenna & Luo koodi
@@ -496,6 +456,52 @@ function DeveloperRating({ isFabOS, onRate, onRateAndGenerate, onContinue, onRev
       <p className={`text-[10px] mt-3 ${isFabOS ? 'text-gray-400' : 'text-slate-500'}`}>
         💡 "Tallenna config" tallentaa vain asetukset. "Luo koodi" generoi oikean koodimuutoksen.
       </p>
+
+      {/* Optional rating - collapsible */}
+      {!showRatingForm ? (
+        <button
+          onClick={() => setShowRatingForm(true)}
+          className={`text-xs mt-2 ${isFabOS ? 'text-blue-600 hover:text-blue-800' : 'text-blue-400 hover:text-blue-300'}`}
+        >
+          📊 Anna arvio (vapaaehtoinen) →
+        </button>
+      ) : (
+        <div className={`pt-3 mt-2 border-t ${isFabOS ? 'border-blue-200' : 'border-blue-700'}`}>
+          <p className={`text-xs mb-2 ${isFabOS ? 'text-blue-600' : 'text-blue-400'}`}>
+            Vapaaehtoinen arvio:
+          </p>
+          {/* Star rating */}
+          <div className="flex items-center gap-1 mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHoveredStar(star)}
+                onMouseLeave={() => setHoveredStar(0)}
+                className="text-2xl transition-transform hover:scale-110"
+              >
+                {star <= (hoveredStar || rating) ? '⭐' : '☆'}
+              </button>
+            ))}
+            <span className={`ml-2 text-sm ${isFabOS ? 'text-gray-600' : 'text-slate-400'}`}>
+              {rating > 0 ? `${rating}/5` : 'Valitse'}
+            </span>
+          </div>
+
+          {/* Feedback input */}
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Vapaaehtoinen palaute muutoksesta..."
+            rows={2}
+            className={`w-full px-3 py-2 rounded-lg text-sm resize-none ${
+              isFabOS
+                ? 'bg-white border border-blue-200 text-gray-900 placeholder-gray-400'
+                : 'bg-slate-800 border border-blue-700 text-white placeholder-slate-400'
+            }`}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -809,11 +815,12 @@ export default function DevelopmentMode({
         version_number: versionNumber,
         config: testingVersion.config,
         version_type: 'experimental',
-        user_fingerprint: fingerprint,
+        creator_fingerprint: fingerprint,
         deployment_status: generateCode ? 'pending' : 'config_only',
         creator_email: email,
-        user_request: testingVersion.userRequest
-        // Note: rating and feedback are used locally but not stored in DB
+        user_request: testingVersion.userRequest,
+        developer_rating: rating || null,
+        developer_feedback: feedback || null
       });
 
       if (generateCode && newVersion?.id) {

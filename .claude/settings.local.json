@@ -29,7 +29,13 @@
       "Bash(git remote:*)",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "Bash(npx supabase --version)"
+      "Bash(npx supabase --version)",
+      "Bash(echo:*)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql",
+      "Bash(git rebase:*)",
+      "Bash(GIT_EDITOR=true git rebase:*)"
     ]
   }
 }
