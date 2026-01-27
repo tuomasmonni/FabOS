@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useTheme, THEMES } from './contexts/ThemeContext';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import { ProfileDropdown } from './components/auth';
 import {
   MATERIALS,
   SURFACE_TREATMENTS,
@@ -2336,6 +2337,7 @@ export default function GratingConfigurator({ onBack }) {
               </div>
             )}
             <ThemeSwitcher variant="dark" />
+            <ProfileDropdown />
           </div>
         </div>
 

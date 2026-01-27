@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import { ProfileDropdown } from './components/auth';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // IFC-GENEROINTI
@@ -1030,6 +1031,7 @@ export default function StairConfigurator({ onBack }) {
               </div>
             )}
             <ThemeSwitcher variant="dark" />
+            <ProfileDropdown />
           </div>
         </div>
       </header>

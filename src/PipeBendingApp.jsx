@@ -4,6 +4,7 @@ import { OrbitControls, PerspectiveCamera, Grid } from '@react-three/drei';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import { ProfileDropdown } from './components/auth';
 import AIChat from './components/AIChat';
 import DevelopmentMode from './components/DevelopmentMode';
 import VersionGallery from './components/VersionGallery';
@@ -1275,6 +1276,7 @@ const PipeBendingApp = ({ onBack }) => {
   const [showVersionGallery, setShowVersionGallery] = useState(false);
   const [currentVersionId, setCurrentVersionId] = useState(null);
   const [currentVersionName, setCurrentVersionName] = useState('Perusversio');
+  const [currentVersionNumber, setCurrentVersionNumber] = useState(null);
 
   // Module configuration from selected version
   const [moduleConfig, setModuleConfig] = useState({
@@ -1319,6 +1321,7 @@ const PipeBendingApp = ({ onBack }) => {
   const handleVersionSelect = (version) => {
     setCurrentVersionId(version.id);
     setCurrentVersionName(version.name);
+    setCurrentVersionNumber(version.version_number || null);
 
     // Apply version config if available
     if (version.config) {
@@ -1410,6 +1413,9 @@ const PipeBendingApp = ({ onBack }) => {
             }`}>
               <span className="opacity-60">Versio:</span>{' '}
               <span className="font-semibold">{currentVersionName}</span>
+              {currentVersionNumber && (
+                <span className="ml-1 opacity-60 font-mono">{currentVersionNumber}</span>
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -1468,6 +1474,7 @@ const PipeBendingApp = ({ onBack }) => {
               </button>
             </div>
             <ThemeSwitcher variant="dark" />
+            <ProfileDropdown />
           </div>
         </div>
       </header>

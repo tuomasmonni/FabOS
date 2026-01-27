@@ -500,6 +500,36 @@ export async function deleteVersion(versionId) {
   return true;
 }
 
+// Päivitä version nimi
+export async function updateVersionName(versionId, newName) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Supabase not configured');
+
+  const response = await fetch(
+    `${url}/rest/v1/versions?id=eq.${versionId}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ name: newName.trim() })
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Update version name failed:', response.status, errorText);
+    throw new Error('Failed to update version name');
+  }
+
+  const updated = await response.json();
+  return updated[0];
+}
+
 // ============================================================================
 // VERSION NUMBERING - Semanttinen versionumerointi
 // ============================================================================
