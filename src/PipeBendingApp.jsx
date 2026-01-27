@@ -1709,7 +1709,7 @@ const PipeBendingApp = ({ onBack }) => {
                 title="Avaa AI-kehitystila esikatselulla"
               >
                 <span>🤖</span>
-                <span className="hidden sm:inline">Pyydä muutosta</span>
+                <span className="hidden sm:inline">Tee uusi kehitysversio</span>
               </button>
             </div>
 

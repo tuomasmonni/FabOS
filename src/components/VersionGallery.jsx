@@ -3,9 +3,9 @@
 // ============================================================================
 // Näyttää kaikki moduulin versiot - päämalli ja testiversiot
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getVersions, voteVersion, incrementViewCount, generateFingerprint, promoteVersion, deleteVersion } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+import AuthContext from '../contexts/AuthContext';
 
 // ============================================================================
 // VERSION CARD
@@ -390,7 +390,10 @@ export default function VersionGallery({
   onClose,
   currentVersionId
 }) {
-  const { isAdmin, user } = useAuth();
+  // Käytetään useContext suoraan - ei kaadu jos AuthProvider puuttuu
+  const authContext = useContext(AuthContext);
+  const isAdmin = authContext?.isAdmin || (() => false);
+  const user = authContext?.user || null;
   const [versions, setVersions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedVersion, setSelectedVersion] = useState(null);

@@ -2,7 +2,7 @@
 // DEVELOPMENT MODE - Parannettu AI-kehitystila
 // ============================================================================
 // Split-näkymä: AI-chat vasemmalla, sovelluksen esikatselu oikealla
-// Flow: Pyyntö → AI ehdotus → Testaus → Arvio → Hyväksy/Jatka
+// Flow: Pyyntö → AI ehdotus → Testaus → Tallenna → Arvio
 
 import React, { useState, useRef, useEffect } from 'react';
 import { createVersion, generateFingerprint, generateNextVersionNumber } from '../lib/supabase';
@@ -624,7 +624,7 @@ export default function DevelopmentMode({
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Tervetuloa kehitystilaan! 🛠️\n\nKerro mitä haluaisit muuttaa tai parantaa. Voit testata muutoksia suoraan oikealla näkyvässä esikatselussa.\n\nFlow: Pyyntö → Ehdotus → Testaa → Arvio → Tallenna',
+      content: 'Tervetuloa kehitystilaan! 🛠️\n\nKerro mitä haluaisit muuttaa tai parantaa. Voit testata muutoksia suoraan oikealla näkyvässä esikatselussa.\n\nFlow: Pyyntö → Ehdotus → Testaa → Tallenna → Arvio',
       timestamp: new Date().toISOString()
     }
   ]);
