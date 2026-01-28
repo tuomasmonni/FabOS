@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme, THEMES } from '../contexts/ThemeContext';
+import { ProfileDropdown } from './auth';
 
 /**
  * ModuleShell — shared wrapper for all FabOS modules.
@@ -80,46 +81,49 @@ export default function ModuleShell({
             )}
           </div>
 
-          {/* Right side: Version system (optional) */}
-          {versionSystem && (
-            <div className="flex items-center gap-4">
-              <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                isFabOS ? 'bg-slate-700/50 text-slate-300' : 'bg-slate-800/50 text-slate-400'
-              }`}>
-                <span className="opacity-60">Versio:</span>{' '}
-                <span className="font-semibold">{versionSystem.currentVersionName}</span>
-                {versionSystem.currentVersionNumber && (
-                  <span className="ml-1 opacity-60 font-mono">{versionSystem.currentVersionNumber}</span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={versionSystem.onOpenVersionGallery}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                    isFabOS
-                      ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
-                      : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
-                  }`}
-                  title="Selaa kaikkia versioita"
-                >
-                  <span>📚</span>
-                  <span className="hidden sm:inline">Versiot</span>
-                </button>
-                <button
-                  onClick={versionSystem.onOpenDevelopmentMode}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                    isFabOS
-                      ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 text-white hover:opacity-90'
-                      : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:opacity-90'
-                  }`}
-                  title="Avaa AI-kehitystila esikatselulla"
-                >
-                  <span>🤖</span>
-                  <span className="hidden sm:inline">Tee uusi kehitysversio</span>
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Right side: Version system (optional) + ProfileDropdown */}
+          <div className="flex items-center gap-4">
+            {versionSystem && (
+              <>
+                <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+                  isFabOS ? 'bg-slate-700/50 text-slate-300' : 'bg-slate-800/50 text-slate-400'
+                }`}>
+                  <span className="opacity-60">Versio:</span>{' '}
+                  <span className="font-semibold">{versionSystem.currentVersionName}</span>
+                  {versionSystem.currentVersionNumber && (
+                    <span className="ml-1 opacity-60 font-mono">{versionSystem.currentVersionNumber}</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={versionSystem.onOpenVersionGallery}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                      isFabOS
+                        ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
+                        : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
+                    }`}
+                    title="Selaa kaikkia versioita"
+                  >
+                    <span>📚</span>
+                    <span className="hidden sm:inline">Versiot</span>
+                  </button>
+                  <button
+                    onClick={versionSystem.onOpenDevelopmentMode}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                      isFabOS
+                        ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 text-white hover:opacity-90'
+                        : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:opacity-90'
+                    }`}
+                    title="Avaa AI-kehitystila esikatselulla"
+                  >
+                    <span>🤖</span>
+                    <span className="hidden sm:inline">Tee uusi kehitysversio</span>
+                  </button>
+                </div>
+              </>
+            )}
+            <ProfileDropdown />
+          </div>
         </div>
       </header>
 
