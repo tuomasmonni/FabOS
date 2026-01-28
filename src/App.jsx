@@ -17,6 +17,7 @@ const CustomerVotingPage = lazy(() => import('./CustomerVotingPage'));
 const FeatureSuggestionPage = lazy(() => import('./FeatureSuggestionPage'));
 const StairConfigurator = lazy(() => import('./StairConfigurator'));
 const GratingConfigurator = lazy(() => import('./GratingConfigurator'));
+const ProjectManagement = lazy(() => import('./ProjectManagement'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const MyVersionsPage = lazy(() => import('./components/auth/MyVersionsPage'));
 
@@ -161,7 +162,7 @@ function AppContent() {
 
     // Check URL for direct version access
     const urlVersion = urlParams.get('version');
-    if (urlVersion && ['v01', 'v02', 'v03', 'v035', 'v04', 'v06', 'v07', 'vote-owner', 'vote-staff', 'vote-customer'].includes(urlVersion)) {
+    if (urlVersion && ['v01', 'v02', 'v03', 'v035', 'v04', 'v06', 'v07', 'v08', 'vote-owner', 'vote-staff', 'vote-customer'].includes(urlVersion)) {
       setSelectedVersion(urlVersion);
       setShowSelector(false);
     }
@@ -292,6 +293,7 @@ function AuthenticatedContent({
       {selectedVersion === 'v04' && <GratingConfigurator onBack={handleBackToSelector} />}
       {selectedVersion === 'v06' && <StairConfigurator onBack={handleBackToSelector} />}
       {selectedVersion === 'v07' && <FeatureSuggestionPage onBack={handleBackToSelector} />}
+      {selectedVersion === 'v08' && <ProjectManagement onBack={handleBackToSelector} />}
     </Suspense>
   );
 }

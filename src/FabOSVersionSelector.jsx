@@ -80,6 +80,15 @@ const publicVersions = [
     color: 'purple',
     icon: '💡',
     featureSuggestion: true
+  },
+  {
+    id: 'v08',
+    name: 'V0.8',
+    subtitle: 'Projektinhallinta',
+    description: 'Monday.com-tyylinen projektinhallinta tuotannon tehtäville',
+    color: 'violet',
+    icon: '📋',
+    beta: true
   }
 ];
 
