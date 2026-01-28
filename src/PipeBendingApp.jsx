@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Grid } from '@react-three/drei';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
+import ModuleShell from './components/ModuleShell';
 import AIChat from './components/AIChat';
 import DevelopmentMode from './components/DevelopmentMode';
 import VersionGallery from './components/VersionGallery';
@@ -1359,91 +1360,20 @@ const PipeBendingApp = ({ onBack }) => {
   };
 
   return (
-    <div className={isFabOS
-      ? "min-h-screen bg-[#F7F7F7] text-gray-900"
-      : "min-h-screen bg-[#0a0a0f] text-white"
-    }>
-      {/* Header */}
-      <header className={isFabOS
-        ? "border-b border-gray-200 px-6 py-4 bg-[#1A1A2E]"
-        : "border-b border-emerald-500/30 px-6 py-4 bg-gradient-to-r from-emerald-500/5 to-transparent"
-      }>
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className={isFabOS
-                ? "flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                : "flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-              }
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Takaisin</span>
-            </button>
-            <div className={isFabOS ? "h-6 w-px bg-gray-600" : "h-6 w-px bg-slate-800"} />
-            {isFabOS ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center">
-                  <span className="text-xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
-                  <span className="text-xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
-                </div>
-                <span className="px-2 py-1 bg-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold rounded">V0.3</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Putkentaivutus</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🔧</span>
-                <h1 className="text-xl font-bold text-emerald-400">Putkentaivutus</h1>
-                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full">BETA</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Current version indicator */}
-            <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-              isFabOS
-                ? 'bg-slate-700/50 text-slate-300'
-                : 'bg-slate-800/50 text-slate-400'
-            }`}>
-              <span className="opacity-60">Versio:</span>{' '}
-              <span className="font-semibold">{currentVersionName}</span>
-              {currentVersionNumber && (
-                <span className="ml-1 opacity-60 font-mono">{currentVersionNumber}</span>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowVersionGallery(true)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                  isFabOS
-                    ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
-                    : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
-                }`}
-                title="Selaa kaikkia versioita"
-              >
-                <span>📚</span>
-                <span className="hidden sm:inline">Versiot</span>
-              </button>
-              <button
-                onClick={() => setShowDevelopmentMode(true)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                  isFabOS
-                    ? 'bg-gradient-to-r from-[#FF6B35] to-amber-500 text-white hover:opacity-90'
-                    : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:opacity-90'
-                }`}
-                title="Avaa AI-kehitystila esikatselulla"
-              >
-                <span>🤖</span>
-                <span className="hidden sm:inline">Tee uusi kehitysversio</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <ModuleShell
+      onBack={onBack}
+      moduleName="Putkentaivutus"
+      badgeVersion="V0.3"
+      badgeColor="#3B82F6"
+      sticky={false}
+      versionSystem={{
+        currentVersionName,
+        currentVersionNumber,
+        onOpenVersionGallery: () => setShowVersionGallery(true),
+        onOpenDevelopmentMode: () => setShowDevelopmentMode(true),
+      }}
+      legacyIcon={<span className="text-2xl">🔧</span>}
+    >
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
@@ -1568,7 +1498,7 @@ const PipeBendingApp = ({ onBack }) => {
           </div>
         </div>
       )}
-    </div>
+    </ModuleShell>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme, THEMES } from './contexts/ThemeContext';
+import ModuleShell from './components/ModuleShell';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // IFC-GENEROINTI
@@ -977,55 +978,19 @@ export default function StairConfigurator({ onBack }) {
   };
 
   return (
-    <div className={isFabOS
-      ? "flex flex-col h-screen bg-[#F7F7F7] text-gray-900"
-      : "flex flex-col h-screen bg-slate-900 text-white"
-    }>
-      {/* Header */}
-      <header className={isFabOS
-        ? "bg-[#1A1A2E] border-b border-gray-700 sticky top-0 z-50"
-        : "bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 sticky top-0 z-50"
-      }>
-        <div className="max-w-full px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className={isFabOS
-                ? "flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                : "flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-              }
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Takaisin</span>
-            </button>
-            <div className={isFabOS ? "w-px h-6 bg-gray-600" : "w-px h-6 bg-slate-700"}></div>
-            {isFabOS ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center">
-                  <span className="text-xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
-                  <span className="text-xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
-                </div>
-                <span className="px-2 py-1 bg-[#10B981]/20 text-[#10B981] text-xs font-bold rounded">V0.6</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Porras Konfiguraattori</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-indigo-500/30">
-                  🪜
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">V0.6 Porras Konfiguraattori</h1>
-                  <p className="text-sm text-slate-400">Suora teräsporras • RHS-sivupalkit • IFC-vienti</p>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-          </div>
+    <ModuleShell
+      onBack={onBack}
+      moduleName="Porras Konfiguraattori"
+      badgeVersion="V0.6"
+      badgeColor="#10B981"
+      layout="fill"
+      legacyIcon={
+        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-indigo-500/30">
+          🪜
         </div>
-      </header>
+      }
+      legacySubtitle="Suora teräsporras • RHS-sivupalkit • IFC-vienti"
+    >
 
       <div className="flex flex-1 overflow-hidden">
         {/* 3D Näkymä */}
@@ -1267,7 +1232,7 @@ export default function StairConfigurator({ onBack }) {
           </div>
         </div>
       </div>
-    </div>
+    </ModuleShell>
   );
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { EpicIntro, BattleBanner, HumorBanner, FeedbackModal, AchievementToast, FloatingActions, InvestorBanner } from './EpicComponents';
 import { useTheme, THEMES } from './contexts/ThemeContext';
+import ModuleShell from './components/ModuleShell';
 
 
 const GRID_SIZE = 10;
@@ -2337,17 +2338,22 @@ const FabOSProto = ({ onBack }) => {
   const totalGeometryCount = shapes.reduce((count, shape) => count + 1 + (shape.holes?.length || 0), 0);
 
   return (
-    <div className={isFabOS
-      ? "min-h-screen bg-[#F7F7F7] text-gray-900 font-sans"
-      : "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white font-sans"
-    }>
-      {/* Epic Intro - only show in legacy theme */}
+    <ModuleShell
+      onBack={onBack}
+      moduleName="Laserleikkeet"
+      badgeVersion="V0.1"
+      badgeColor="#FF6B35"
+      sticky={false}
+      legacyIcon={
+        <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" /></svg>
+        </div>
+      }
+      legacySubtitle="V0.1 - Nykyinen versio"
+    >
+      {/* Legacy-only banners */}
       {!isFabOS && showIntro && <EpicIntro onComplete={() => setShowIntro(false)} />}
-
-      {/* Humor Banner - only show in legacy theme */}
       {!isFabOS && <HumorBanner />}
-
-      {/* Battle Banner - only show in legacy theme */}
       {!isFabOS && battle && (
         <BattleBanner
           battle={battle}
@@ -2361,21 +2367,12 @@ const FabOSProto = ({ onBack }) => {
           }}
         />
       )}
-
-      {/* Achievement Toast - only show in legacy theme */}
       {!isFabOS && achievement && (
-        <AchievementToast
-          achievement={achievement}
-          onClose={() => setAchievement(null)}
-        />
+        <AchievementToast achievement={achievement} onClose={() => setAchievement(null)} />
       )}
-
-      {/* Feedback Modal - only show in legacy theme */}
       {!isFabOS && showFeedback && (
         <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
-
-      {/* Floating Actions - only show in legacy theme */}
       {!isFabOS && (
         <FloatingActions
           onFeedback={() => setShowFeedback(true)}
@@ -2386,8 +2383,6 @@ const FabOSProto = ({ onBack }) => {
           })}
         />
       )}
-
-      {/* Investor Banner - only show in legacy theme */}
       {!isFabOS && (
         <InvestorBanner
           onContact={() => {
@@ -2395,53 +2390,6 @@ const FabOSProto = ({ onBack }) => {
           }}
         />
       )}
-
-      {/* Header */}
-      <header className={isFabOS
-        ? "bg-[#1A1A2E] border-b border-gray-700 px-6 py-3"
-        : "bg-slate-800/80 backdrop-blur border-b border-slate-700 px-6 py-3"
-      }>
-        <div className="flex items-center gap-3">
-            {/* Back to version selector */}
-            {onBack && (
-              <button
-                onClick={onBack}
-                className={isFabOS
-                  ? "flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                  : "flex items-center gap-1 bg-slate-700/50 hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors text-sm"
-                }
-                title="Vaihda versiota"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="hidden sm:inline">{isFabOS ? 'Takaisin' : 'Versiot'}</span>
-              </button>
-            )}
-            {isFabOS ? (
-              <div className="flex items-center">
-                <span className="text-xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
-                <span className="text-xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
-              </div>
-            ) : (
-              <>
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" /></svg>
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold cinzel gradient-text">FabOS</h1>
-                  <p className="text-xs text-slate-400">V0.1 - Nykyinen versio</p>
-                </div>
-              </>
-            )}
-            {isFabOS && (
-              <div className="hidden md:flex items-center gap-2 ml-4">
-                <span className="px-2 py-1 bg-[#FF6B35]/20 text-[#FF6B35] text-xs font-bold rounded">V0.1</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Laserleikkeet</span>
-              </div>
-            )}
-        </div>
-      </header>
 
       {/* Toolbar */}
       <div className={`flex items-center justify-between px-4 py-2 border-b ${
@@ -3516,7 +3464,7 @@ const FabOSProto = ({ onBack }) => {
           </div>
         </main>
       </div>
-    </div>
+    </ModuleShell>
   );
 };
 

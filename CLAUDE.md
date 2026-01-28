@@ -13,6 +13,7 @@ Legacy theme is hidden and should NOT be modified. If user requests changes to a
 ### Key Files
 - `src/App.jsx` - Main app, theme selection (FabOS is default, Legacy hidden)
 - `src/AppV01.jsx` - Laser cutting module (supports both themes, develop FabOS side)
+- `src/components/ModuleShell.jsx` - **Shared module header wrapper** (all modules use this)
 - `src/components/ThemeSwitcher.jsx` - Theme switcher (hidden from users)
 - `src/contexts/ThemeContext.jsx` - Theme state management
 
@@ -37,8 +38,9 @@ When modifying modules, always check `isFabOS` conditional styling:
 
 ### Module Header (Yläbanneri) Rule
 
-Every module has a **sticky top header** (`<header>`) that stays fixed at the top. The header MUST contain ONLY these elements:
+All modules MUST use **`<ModuleShell>`** (`src/components/ModuleShell.jsx`) as their outer wrapper. This component renders a consistent header across all modules. **DO NOT write header code directly in module files.**
 
+**ModuleShell renders these elements in the header:**
 1. **Takaisin-button** — navigates back to main view
 2. **FabOS logo** — "Fab" white + "OS" orange branding
 3. **Module version badge** — e.g. `V0.3` in colored pill
@@ -46,6 +48,21 @@ Every module has a **sticky top header** (`<header>`) that stays fixed at the to
 5. **Current version info** — shows active version name + number (if version system is enabled)
 6. **Versiot-button** — opens version gallery (if version system is enabled)
 7. **Tee uusi kehitysversio -button** — opens AI development mode (if version system is enabled)
+
+**Usage:**
+```jsx
+<ModuleShell
+  onBack={onBack}
+  moduleName="Moduulin nimi"
+  badgeVersion="V0.X"
+  badgeColor="#HEX"
+  versionSystem={null}  // or { currentVersionName, currentVersionNumber, onOpenVersionGallery, onOpenDevelopmentMode }
+  layout="scroll"       // 'scroll' (default) or 'fill' (h-screen, for viewport-filling modules like StairConfigurator)
+  sticky={true}         // default true
+>
+  {/* Module content (toolbar, tabs, canvas, etc.) goes here */}
+</ModuleShell>
+```
 
 **DO NOT place in the header:**
 - ThemeSwitcher

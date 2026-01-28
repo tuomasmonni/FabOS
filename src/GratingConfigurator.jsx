@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useTheme, THEMES } from './contexts/ThemeContext';
+import ModuleShell from './components/ModuleShell';
 import {
   MATERIALS,
   SURFACE_TREATMENTS,
@@ -2276,53 +2277,18 @@ export default function GratingConfigurator({ onBack }) {
   };
 
   return (
-    <div className={isFabOS
-      ? "min-h-screen bg-[#F7F7F7] text-gray-900"
-      : "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white"
-    }>
-      {/* Header */}
-      <header className={isFabOS
-        ? "bg-[#1A1A2E] border-b border-gray-700 sticky top-0 z-50"
-        : "bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 sticky top-0 z-50"
-      }>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className={isFabOS
-                ? "flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                : "flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-              }
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Takaisin</span>
-            </button>
-            <div className={isFabOS ? "w-px h-6 bg-gray-600" : "w-px h-6 bg-slate-700"}></div>
-            {isFabOS ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center">
-                  <span className="text-xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Fab</span>
-                  <span className="text-xl font-bold text-[#FF6B35]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>OS</span>
-                </div>
-                <span className="px-2 py-1 bg-[#EF4444]/20 text-[#EF4444] text-xs font-bold rounded">V0.4</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Ritiläkonfiguraattori</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-red-500/30">
-                  #
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">V0.4 Ritiläkonfiguraattori</h1>
-                  <p className="text-sm text-slate-400">Puristehitsatut ritilät ja askelmat</p>
-                </div>
-              </div>
-            )}
-          </div>
+    <ModuleShell
+      onBack={onBack}
+      moduleName="Ritiläkonfiguraattori"
+      badgeVersion="V0.4"
+      badgeColor="#EF4444"
+      legacyIcon={
+        <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-red-500/30">
+          #
         </div>
-      </header>
+      }
+      legacySubtitle="Puristehitsatut ritilät ja askelmat"
+    >
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -2442,6 +2408,6 @@ export default function GratingConfigurator({ onBack }) {
           </div>
         </div>
       )}
-    </div>
+    </ModuleShell>
   );
 }
