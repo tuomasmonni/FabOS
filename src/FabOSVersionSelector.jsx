@@ -301,6 +301,34 @@ const FabOSVersionSelector = ({ onSelect }) => {
           </p>
         </div>
 
+        {/* Feature suggestion CTA */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200 p-8 mb-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg">
+                💡
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-[#1A1A2E]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                  Ehdota uutta ominaisuutta
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  Kerro mitä tarvitset - rakennamme sen yhdessä
+                </p>
+              </div>
+            </div>
+            <a
+              href="mailto:tuomas.monni@lkporras.fi?subject=FabOS%20ominaisuusehdotus"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Lähetä sähköpostia
+            </a>
+          </div>
+        </div>
+
         {/* Footer info */}
         <div className="text-center text-gray-400 text-sm">
           <p>Valinta tallennetaan selaimeesi. Voit vaihtaa moduulia milloin tahansa.</p>
