@@ -68,21 +68,21 @@ npm install
 ```
 
 ### 2. Ympäristömuuttujat
-Luo `.env` tiedosto:
+Luo `.env` tiedosto (kopioi avaimet Supabase Dashboardista):
 ```env
-# Supabase (pakollinen tuotannossa)
-VITE_SUPABASE_URL=https://xxx.supabase.co
-VITE_SUPABASE_ANON_KEY=xxx
+# Supabase
+VITE_SUPABASE_URL=https://oggswmbgzhuwziceynej.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxx  # Supabase → Settings → API
 
 # Anthropic API (pakollinen AI-toiminnoille)
-ANTHROPIC_API_KEY=sk-ant-xxx
+ANTHROPIC_API_KEY=sk-ant-xxx  # console.anthropic.com → API Keys
 
 # GitHub (koodigenerointiin)
-GITHUB_PAT=ghp_xxx
+GITHUB_PAT=ghp_xxx  # github.com/settings/tokens
 GITHUB_REPO=tuomasmonni/FabOS
 
 # Supabase admin (serverless funktioille)
-SUPABASE_SERVICE_KEY=xxx
+SUPABASE_SERVICE_KEY=sb_secret_xxx  # Supabase → Settings → API
 ```
 
 ### 3. Käynnistys
@@ -276,24 +276,24 @@ Löytyy tiedostosta `api/ai-assistant.js` → `getSystemPrompt()`
 
 ## Puuttuvat tiedot (täydennettävä)
 
-### Ympäristömuuttujat (kysy omistajalta):
-- [ ] `VITE_SUPABASE_URL` - Supabase projektin URL
-- [ ] `VITE_SUPABASE_ANON_KEY` - Supabase julkinen avain
-- [ ] `ANTHROPIC_API_KEY` - Claude API avain
-- [ ] `SUPABASE_SERVICE_KEY` - Supabase admin avain
-- [ ] `GITHUB_PAT` - GitHub Personal Access Token
-- [ ] `RESEND_API_KEY` - Sähköposti-ilmoituksiin
+### Ympäristömuuttujat:
+- [x] `VITE_SUPABASE_URL` - `https://oggswmbgzhuwziceynej.supabase.co`
+- [x] `VITE_SUPABASE_ANON_KEY` - Löytyy Supabase Dashboard → Settings → API
+- [x] `SUPABASE_SERVICE_KEY` - Löytyy Supabase Dashboard → Settings → API
+- [ ] `ANTHROPIC_API_KEY` - Haettava: https://console.anthropic.com/ → API Keys
+- [ ] `GITHUB_PAT` - Haettava: https://github.com/settings/tokens
+- [ ] `RESEND_API_KEY` - Sähköposti-ilmoituksiin (valinnainen)
 
 ### Vercel-projekti:
-- [ ] Vercel projektin nimi ja linkki
-- [ ] Tuotanto-URL
+- [x] Tuotanto-URL: `https://levykauppa.vercel.app`
+- [x] Preview-URL: `levykauppa-hcfbvxr1k-tuomas-projects-8799e491.vercel.app`
 
 ### Supabase-projekti:
-- [ ] Supabase Dashboard linkki
-- [ ] Projektin nimi
+- [x] Supabase URL: `https://oggswmbgzhuwziceynej.supabase.co`
+- [x] Dashboard: https://supabase.com/dashboard/project/oggswmbgzhuwziceynej
 
 ### GitHub:
-- [ ] Repository: `tuomasmonni/FabOS` (vahvista)
+- [x] Repository: `tuomasmonni/FabOS`
 - [ ] Branch protection säännöt?
 - [ ] Required reviewers?
 
