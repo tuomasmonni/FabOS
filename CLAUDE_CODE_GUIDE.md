@@ -278,10 +278,10 @@ Löytyy tiedostosta `api/ai-assistant.js` → `getSystemPrompt()`
 
 ### Ympäristömuuttujat:
 - [x] `VITE_SUPABASE_URL` - `https://oggswmbgzhuwziceynej.supabase.co`
-- [x] `VITE_SUPABASE_ANON_KEY` - Löytyy Supabase Dashboard → Settings → API
-- [x] `SUPABASE_SERVICE_KEY` - Löytyy Supabase Dashboard → Settings → API
-- [ ] `ANTHROPIC_API_KEY` - Haettava: https://console.anthropic.com/ → API Keys
-- [ ] `GITHUB_PAT` - Haettava: https://github.com/settings/tokens
+- [x] `VITE_SUPABASE_ANON_KEY` - ✅ Saatavilla
+- [x] `SUPABASE_SERVICE_KEY` - ✅ Saatavilla
+- [x] `ANTHROPIC_API_KEY` - ✅ Saatavilla (sk-ant-api03-xxx)
+- [x] `GITHUB_PAT` - ✅ Saatavilla (github_pat_xxx)
 - [ ] `RESEND_API_KEY` - Sähköposti-ilmoituksiin (valinnainen)
 
 ### Vercel-projekti:
