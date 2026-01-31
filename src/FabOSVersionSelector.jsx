@@ -85,17 +85,8 @@ const publicVersions = [
     id: 'v08',
     name: 'V0.8',
     subtitle: 'Projektinhallinta',
-    description: 'Monday.com-tyylinen projektinhallinta tuotannon tehtäville',
+    description: 'Monday.com-tyylinen projektinhallinta - luo boardeja, ryhmiä ja tehtäviä',
     color: 'violet',
-    icon: '📋',
-    beta: true
-  },
-  {
-    id: 'mastermind',
-    name: 'MasterMind',
-    subtitle: 'Board-hallinta',
-    description: 'Luo omia boardeja, ryhmiä ja tehtäviä - täysin erillinen järjestelmä',
-    color: 'purple',
     icon: '🧠',
     beta: true
   }

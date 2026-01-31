@@ -295,7 +295,7 @@ function AuthenticatedContent({
       {selectedVersion === 'v04' && <GratingConfigurator onBack={handleBackToSelector} />}
       {selectedVersion === 'v06' && <StairConfigurator onBack={handleBackToSelector} />}
       {selectedVersion === 'v07' && <FeatureSuggestionPage onBack={handleBackToSelector} />}
-      {selectedVersion === 'v08' && <ProjectManagement onBack={handleBackToSelector} />}
+      {selectedVersion === 'v08' && <MasterMindApp onBack={handleBackToSelector} />}
       {selectedVersion === 'mastermind' && <MasterMindApp onBack={handleBackToSelector} />}
     </Suspense>
   );
