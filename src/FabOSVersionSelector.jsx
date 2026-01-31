@@ -89,6 +89,15 @@ const publicVersions = [
     color: 'violet',
     icon: '📋',
     beta: true
+  },
+  {
+    id: 'mastermind',
+    name: 'MasterMind',
+    subtitle: 'Board-hallinta',
+    description: 'Luo omia boardeja, ryhmiä ja tehtäviä - täysin erillinen järjestelmä',
+    color: 'purple',
+    icon: '🧠',
+    beta: true
   }
 ];
 

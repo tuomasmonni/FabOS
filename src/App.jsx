@@ -5,6 +5,7 @@ import { LoginModal, NicknameSetup, ProfilePage, RequireAuth } from './component
 import VersionBadge from './components/VersionBadge';
 import ThemeSelectorPage from './ThemeSelector';
 import VersionSelector from './VersionSelector';
+import LKPChatWidget from './components/LKPChatWidget';
 import './index.css';
 
 // Lazy load version components
@@ -20,6 +21,7 @@ const GratingConfigurator = lazy(() => import('./GratingConfigurator'));
 const ProjectManagement = lazy(() => import('./ProjectManagement'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const MyVersionsPage = lazy(() => import('./components/auth/MyVersionsPage'));
+const MasterMindApp = lazy(() => import('./MasterMindApp'));
 
 // Lazy load FabOS version selector
 const FabOSVersionSelector = lazy(() => import('./FabOSVersionSelector'));
@@ -162,7 +164,7 @@ function AppContent() {
 
     // Check URL for direct version access
     const urlVersion = urlParams.get('version');
-    if (urlVersion && ['v01', 'v02', 'v03', 'v035', 'v04', 'v06', 'v07', 'v08', 'vote-owner', 'vote-staff', 'vote-customer'].includes(urlVersion)) {
+    if (urlVersion && ['v01', 'v02', 'v03', 'v035', 'v04', 'v06', 'v07', 'v08', 'mastermind', 'vote-owner', 'vote-staff', 'vote-customer'].includes(urlVersion)) {
       setSelectedVersion(urlVersion);
       setShowSelector(false);
     }
@@ -294,6 +296,7 @@ function AuthenticatedContent({
       {selectedVersion === 'v06' && <StairConfigurator onBack={handleBackToSelector} />}
       {selectedVersion === 'v07' && <FeatureSuggestionPage onBack={handleBackToSelector} />}
       {selectedVersion === 'v08' && <ProjectManagement onBack={handleBackToSelector} />}
+      {selectedVersion === 'mastermind' && <MasterMindApp onBack={handleBackToSelector} />}
     </Suspense>
   );
 }
@@ -308,6 +311,8 @@ const App = () => {
         <NicknameSetup />
         {/* Versionumero näkyy aina vasemmassa alakulmassa */}
         <VersionBadge position="bottom-left" />
+        {/* LK Porras asiakaspalvelu chatbot */}
+        <LKPChatWidget />
       </AuthProvider>
     </ThemeProvider>
   );
